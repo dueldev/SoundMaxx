@@ -6,7 +6,28 @@ import React from "react";
 import { createPortal } from "react-dom";
 import { MenuIcon, XIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { DEFAULT_TOOL_HREF, TOOL_CONFIGS } from "@/lib/tool-config";
+import { TOOL_CONFIGS } from "@/lib/tool-config";
+
+function Chevron({ open }: { open: boolean }) {
+  return (
+    <svg
+      viewBox="0 0 10 6"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="size-2.5"
+      style={{
+        transition: "transform 220ms ease",
+        transform: open ? "rotate(180deg)" : "rotate(0deg)",
+      }}
+      aria-hidden="true"
+    >
+      <path d="M1 1l4 4 4-4" />
+    </svg>
+  );
+}
 
 function NavLink({ href, label, active }: { href: string; label: string; active: boolean }) {
   return (
@@ -62,16 +83,19 @@ function ToolsDropdown({ pathname }: { pathname: string }) {
 
   return (
     <div ref={ref} className="relative">
+      {/* Trigger — styled to match NavLink */}
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
+        aria-haspopup="true"
         className={cn(
-          "relative pb-0.5 font-mono text-xs font-semibold uppercase tracking-[0.14em] transition-colors duration-150",
-          isToolActive ? "text-foreground" : "text-muted-foreground hover:text-foreground",
+          "relative flex items-center gap-1.5 pb-0.5 font-mono text-xs font-semibold uppercase tracking-[0.14em] transition-colors duration-150",
+          isToolActive || open ? "text-foreground" : "text-muted-foreground hover:text-foreground",
         )}
       >
-        Tools ▾
+        Tools
+        <Chevron open={open} />
         {isToolActive && (
           <span
             className="absolute inset-x-0 -bottom-0.5 h-[2px]"
@@ -80,36 +104,59 @@ function ToolsDropdown({ pathname }: { pathname: string }) {
         )}
       </button>
 
-      {open && (
-        <div
-          className="absolute left-0 top-full z-50 mt-2 w-64 border"
-          style={{
-            background: "var(--card)",
-            borderColor: "var(--foreground)",
-            boxShadow: "4px 4px 0 var(--foreground)",
-          }}
-        >
-          {TOOL_CONFIGS.map((tool) => (
+      {/* Dropdown panel — always mounted, animated via CSS */}
+      <div
+        className="absolute right-0 top-full z-50 mt-3 w-72 border"
+        style={{
+          background: "var(--card)",
+          borderColor: "var(--foreground)",
+          boxShadow: "4px 4px 0 var(--foreground)",
+          opacity: open ? 1 : 0,
+          transform: open ? "translateY(0)" : "translateY(-10px)",
+          visibility: open ? "visible" : "hidden",
+          transition: "opacity 200ms ease, transform 200ms ease",
+          pointerEvents: open ? "auto" : "none",
+        }}
+        role="menu"
+      >
+        {TOOL_CONFIGS.map((tool) => {
+          const isActive = pathname === tool.href;
+          return (
             <Link
               key={tool.slug}
               href={tool.href}
               onClick={() => setOpen(false)}
+              role="menuitem"
               className={cn(
-                "block border-b px-4 py-3 text-left transition-colors duration-100 last:border-b-0",
-                pathname === tool.href
-                  ? "bg-[var(--accent)] text-white"
-                  : "hover:bg-[var(--muted)]",
+                "flex items-start gap-3 border-b px-4 py-3.5 transition-colors duration-100 last:border-b-0",
+                isActive ? "bg-[var(--accent)]" : "hover:bg-[var(--muted)]",
               )}
               style={{ borderColor: "var(--muted)" }}
             >
-              <p className="font-mono text-xs font-bold uppercase tracking-[0.12em]">{tool.navLabel}</p>
-              <p className="mt-0.5 text-xs" style={{ color: pathname === tool.href ? "rgba(255,255,255,0.8)" : "var(--muted-foreground)" }}>
-                {tool.description}
-              </p>
+              <span
+                className="mt-0.5 font-mono text-[11px] font-bold leading-none"
+                style={{ color: isActive ? "rgba(255,255,255,0.5)" : "var(--accent)" }}
+              >
+                {String(TOOL_CONFIGS.indexOf(tool) + 1).padStart(2, "0")}
+              </span>
+              <span>
+                <p
+                  className="font-mono text-xs font-bold uppercase tracking-[0.12em]"
+                  style={{ color: isActive ? "#fff" : "var(--foreground)" }}
+                >
+                  {tool.navLabel}
+                </p>
+                <p
+                  className="mt-0.5 text-xs leading-snug"
+                  style={{ color: isActive ? "rgba(255,255,255,0.75)" : "var(--muted-foreground)" }}
+                >
+                  {tool.description}
+                </p>
+              </span>
             </Link>
-          ))}
-        </div>
-      )}
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -122,55 +169,44 @@ function MobileMenu({ open, pathname, onClose }: { open: boolean; pathname: stri
       className="fixed inset-0 z-40 flex flex-col overflow-y-auto md:hidden"
       style={{ background: "var(--background)", borderTop: "1.5px solid var(--foreground)" }}
     >
-      <div className="smx-shell flex flex-1 flex-col gap-1 py-8">
-        {[
-          { href: "/", label: "Home" },
-          { href: "/ops", label: "Ops" },
-        ].map(({ href, label }) => (
-          <Link
-            key={href}
-            href={href}
-            onClick={onClose}
-            className={cn(
-              "border-b py-4 font-bold",
-              "text-2xl tracking-[-0.01em] transition-colors",
-              pathname === href ? "text-[var(--accent)]" : "hover:text-[var(--accent)]",
-            )}
-            style={{ borderColor: "var(--muted)" }}
-          >
-            {label}
-          </Link>
-        ))}
+      <div className="smx-shell flex flex-1 flex-col py-8">
+        {/* Home */}
+        <Link
+          href="/"
+          onClick={onClose}
+          className={cn(
+            "border-b py-5 text-2xl font-bold tracking-[-0.01em] transition-colors",
+            pathname === "/" ? "text-[var(--accent)]" : "hover:text-[var(--accent)]",
+          )}
+          style={{ borderColor: "var(--muted)" }}
+        >
+          Home
+        </Link>
 
+        {/* Tools */}
         <p
-          className="mt-4 mb-2 font-mono text-xs font-semibold uppercase tracking-[0.16em]"
+          className="mt-7 mb-3 font-mono text-[11px] font-bold uppercase tracking-[0.18em]"
           style={{ color: "var(--muted-foreground)" }}
         >
           Tools
         </p>
-        {TOOL_CONFIGS.map((tool) => (
+        {TOOL_CONFIGS.map((tool, i) => (
           <Link
             key={tool.slug}
             href={tool.href}
             onClick={onClose}
             className={cn(
-              "border-b py-3 font-semibold text-lg transition-colors",
+              "flex items-baseline gap-3 border-b py-4 transition-colors",
               pathname === tool.href ? "text-[var(--accent)]" : "hover:text-[var(--accent)]",
             )}
             style={{ borderColor: "var(--muted)" }}
           >
-            {tool.navLabel}
+            <span className="font-mono text-xs font-bold" style={{ color: "var(--accent)", opacity: 0.5 }}>
+              {String(i + 1).padStart(2, "0")}
+            </span>
+            <span className="text-lg font-semibold">{tool.navLabel}</span>
           </Link>
         ))}
-
-        <Link
-          href={DEFAULT_TOOL_HREF}
-          onClick={onClose}
-          className="brutal-button-primary mt-8 justify-center text-sm"
-          style={{ display: "flex" }}
-        >
-          Open Studio →
-        </Link>
       </div>
     </div>,
     document.body,
@@ -198,30 +234,22 @@ export function Header() {
         className="sticky top-0 z-50 bg-[var(--background)]"
         style={{ borderBottom: "1.5px solid var(--foreground)" }}
       >
-        <div className="smx-shell flex h-16 items-center justify-between gap-4">
+        <div className="smx-shell flex h-16 items-center justify-between">
           {/* Wordmark */}
           <Link
             href="/"
-            className="font-bold tracking-[-0.02em] transition-colors hover:text-[var(--accent)]"
-            style={{ fontSize: "1.1rem", letterSpacing: "-0.01em" }}
+            className="font-bold transition-colors hover:text-[var(--accent)]"
+            style={{ fontSize: "1.05rem", letterSpacing: "-0.01em" }}
             aria-label="SoundMaxx home"
           >
             SOUNDMAXX
           </Link>
 
-          {/* Desktop nav */}
+          {/* Desktop nav — right side */}
           <nav className="hidden items-center gap-8 md:flex" aria-label="Main navigation">
             <NavLink href="/" label="Home" active={pathname === "/"} />
-            <NavLink href="/ops" label="Ops" active={pathname === "/ops"} />
             <ToolsDropdown pathname={pathname} />
           </nav>
-
-          {/* Desktop CTA */}
-          <div className="hidden items-center md:flex">
-            <Link href={DEFAULT_TOOL_HREF} className="brutal-button-primary px-5 text-xs">
-              Open Studio →
-            </Link>
-          </div>
 
           {/* Mobile hamburger */}
           <button
