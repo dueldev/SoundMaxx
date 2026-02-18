@@ -9,16 +9,27 @@ export type RequestContext = {
   isNewSession: boolean;
 };
 
-export async function resolveRequestContext(request: NextRequest): Promise<RequestContext | NextResponse> {
-  const session = getSessionFromRequest(request);
-  const ipLimit = await enforceIpRateLimit(session.ipHash);
+type ResolveRequestContextOptions = {
+  enforceRateLimit?: boolean;
+};
 
-  if (!ipLimit.success) {
-    return jsonError(429, "Too many requests", {
-      limit: ipLimit.limit,
-      remaining: ipLimit.remaining,
-      resetAt: new Date(ipLimit.reset).toISOString(),
-    });
+export async function resolveRequestContext(
+  request: NextRequest,
+  options?: ResolveRequestContextOptions,
+): Promise<RequestContext | NextResponse> {
+  const session = getSessionFromRequest(request);
+  const shouldEnforceRateLimit = options?.enforceRateLimit ?? request.method !== "GET";
+
+  if (shouldEnforceRateLimit) {
+    const ipLimit = await enforceIpRateLimit(session.ipHash);
+
+    if (!ipLimit.success) {
+      return jsonError(429, "Too many requests", {
+        limit: ipLimit.limit,
+        remaining: ipLimit.remaining,
+        resetAt: new Date(ipLimit.reset).toISOString(),
+      });
+    }
   }
 
   await store.createOrTouchSession({
