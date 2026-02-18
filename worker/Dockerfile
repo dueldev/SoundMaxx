@@ -13,6 +13,8 @@ WORKDIR /app
 
 COPY requirements.txt /app/requirements.txt
 RUN pip install --no-cache-dir --upgrade pip setuptools wheel \
+  && pip install --no-cache-dir --index-url https://download.pytorch.org/whl/cpu \
+    torch==2.3.1 torchvision==0.18.1 \
   && pip install --no-cache-dir -r /app/requirements.txt
 
 COPY . /app/worker
