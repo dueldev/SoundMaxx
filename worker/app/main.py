@@ -47,7 +47,7 @@ def output_url(job_id: str, filename: str) -> str:
 
 
 def post_callback(job: JobRequest, payload: dict[str, Any]) -> None:
-    raw = json.dumps(payload)
+    raw = json.dumps(payload, default=str)
     signature = sign_payload(job.callback.webhookSecret, raw)
 
     requests.post(
@@ -122,7 +122,7 @@ async def execute_job(job: JobRequest, external_job_id: str) -> None:
             "externalJobId": external_job_id,
             "status": "succeeded",
             "progressPct": 100,
-            "artifacts": [artifact.model_dump() for artifact in artifacts],
+            "artifacts": [artifact.model_dump(mode="json") for artifact in artifacts],
         }
         await asyncio.to_thread(post_callback, job, payload)
     except Exception as exc:
