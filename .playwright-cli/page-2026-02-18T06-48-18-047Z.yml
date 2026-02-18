@@ -1,0 +1,227 @@
+- generic [ref=e1]:
+  - banner [ref=e2]:
+    - navigation [ref=e3]:
+      - link "SoundMaxx" [ref=e4] [cursor=pointer]:
+        - /url: /
+        - img [ref=e6]
+        - text: SoundMaxx
+      - navigation "Main" [ref=e11]:
+        - list [ref=e13]:
+          - listitem [ref=e14]:
+            - link "Home" [ref=e15] [cursor=pointer]:
+              - /url: /
+              - img [ref=e16]
+              - text: Home
+          - listitem [ref=e19]:
+            - button "Tools" [expanded] [active] [ref=e20]:
+              - img [ref=e21]
+              - text: Tools
+              - img [ref=e23]
+            - generic "Tools" [ref=e326]:
+              - list [ref=e327]:
+                - listitem [ref=e328]:
+                  - link "Stem Isolation Separate vocals, drums, bass, and music into clean stems." [ref=e329] [cursor=pointer]:
+                    - /url: /tools/stem-isolation
+                    - generic [ref=e330]:
+                      - img [ref=e331]
+                      - text: Stem Isolation
+                    - generic [ref=e333]: Separate vocals, drums, bass, and music into clean stems.
+                - listitem [ref=e334]:
+                  - link "Mastering Shape loudness, tone, and energy for release-ready mixes." [ref=e335] [cursor=pointer]:
+                    - /url: /tools/mastering
+                    - generic [ref=e336]:
+                      - img [ref=e337]
+                      - text: Mastering
+                    - generic [ref=e339]: Shape loudness, tone, and energy for release-ready mixes.
+                - listitem [ref=e340]:
+                  - link "Key + BPM Identify musical key and tempo for faster production workflows." [ref=e341] [cursor=pointer]:
+                    - /url: /tools/key-bpm
+                    - generic [ref=e342]:
+                      - img [ref=e343]
+                      - text: Key + BPM
+                    - generic [ref=e345]: Identify musical key and tempo for faster production workflows.
+                - listitem [ref=e346]:
+                  - link "Loudness Report Measure loudness, true peak, and dynamic range before release." [ref=e347] [cursor=pointer]:
+                    - /url: /tools/loudness-report
+                    - generic [ref=e348]:
+                      - img [ref=e349]
+                      - text: Loudness Report
+                    - generic [ref=e351]: Measure loudness, true peak, and dynamic range before release.
+                - listitem [ref=e352]:
+                  - link "MIDI Extraction Convert melodic material into editable MIDI for your DAW." [ref=e353] [cursor=pointer]:
+                    - /url: /tools/midi-extract
+                    - generic [ref=e354]:
+                      - img [ref=e355]
+                      - text: MIDI Extraction
+                    - generic [ref=e357]: Convert melodic material into editable MIDI for your DAW.
+  - main [ref=e25]:
+    - generic [ref=e27]:
+      - generic [ref=e30]:
+        - paragraph [ref=e31]: Halide Core
+        - heading "SILVER SULPHIDE" [level=1] [ref=e32]:
+          - text: SILVER
+          - text: SULPHIDE
+        - paragraph [ref=e33]: Surface tension and topographical light. A cinematic control plane for high-resolution audio tooling.
+        - generic [ref=e34]:
+          - link "Explore Depth" [ref=e35] [cursor=pointer]:
+            - /url: /tools/stem-isolation
+          - generic [ref=e36]: Archive 2026
+        - generic [ref=e37]:
+          - generic [ref=e38]: Realtime Status
+          - generic [ref=e39]: Single Upload Workflow
+      - generic [ref=e42]:
+        - generic [ref=e43]:
+          - generic [ref=e44]:
+            - paragraph [ref=e45]: Platform Signal
+            - heading "One upload. Five outcomes. Transparent status." [level=2] [ref=e46]
+          - link "Start now" [ref=e47] [cursor=pointer]:
+            - /url: /tools/stem-isolation
+            - text: Start now
+            - img [ref=e48]
+        - generic [ref=e51]:
+          - article [ref=e52]:
+            - paragraph [ref=e53]:
+              - img [ref=e54]
+              - text: Tool Routes
+            - paragraph [ref=e58]: "5"
+          - article [ref=e59]:
+            - paragraph [ref=e60]:
+              - img [ref=e61]
+              - text: Avg Queue Start
+            - paragraph [ref=e64]: < 12s
+          - article [ref=e65]:
+            - paragraph [ref=e66]:
+              - img [ref=e67]
+              - text: State Visibility
+            - paragraph [ref=e69]: 100%
+      - generic [ref=e70]:
+        - generic [ref=e71]:
+          - generic [ref=e72]:
+            - paragraph [ref=e73]: Tool Surfaces
+            - heading "Choose a workflow and jump in." [level=2] [ref=e74]
+          - link "Open Studio" [ref=e75] [cursor=pointer]:
+            - /url: /tools/stem-isolation
+            - text: Open Studio
+            - img [ref=e76]
+        - generic [ref=e79]:
+          - article [ref=e80]:
+            - generic [ref=e81]:
+              - paragraph [ref=e82]:
+                - img [ref=e83]
+                - text: Stem Isolation
+              - link "Open" [ref=e85] [cursor=pointer]:
+                - /url: /tools/stem-isolation
+                - text: Open
+                - img [ref=e86]
+            - paragraph [ref=e89]: Separate vocals, drums, bass, and music into clean stems.
+            - generic [ref=e91]:
+              - generic [ref=e92]:
+                - generic [ref=e93]: Pipeline readiness
+                - generic [ref=e94]: 94%
+              - progressbar [ref=e95]
+          - article [ref=e114]:
+            - generic [ref=e115]:
+              - paragraph [ref=e116]:
+                - img [ref=e117]
+                - text: Mastering
+              - link "Open" [ref=e119] [cursor=pointer]:
+                - /url: /tools/mastering
+                - text: Open
+                - img [ref=e120]
+            - paragraph [ref=e123]: Shape loudness, tone, and energy for release-ready mixes.
+            - generic [ref=e125]:
+              - generic [ref=e126]:
+                - generic [ref=e127]: Pipeline readiness
+                - generic [ref=e128]: 88%
+              - progressbar [ref=e129]
+          - article [ref=e148]:
+            - generic [ref=e149]:
+              - paragraph [ref=e150]:
+                - img [ref=e151]
+                - text: Key + BPM
+              - link "Open" [ref=e153] [cursor=pointer]:
+                - /url: /tools/key-bpm
+                - text: Open
+                - img [ref=e154]
+            - paragraph [ref=e157]: Identify musical key and tempo for faster production workflows.
+            - generic [ref=e159]:
+              - generic [ref=e160]:
+                - generic [ref=e161]: Pipeline readiness
+                - generic [ref=e162]: 91%
+              - progressbar [ref=e163]
+          - article [ref=e182]:
+            - generic [ref=e183]:
+              - paragraph [ref=e184]:
+                - img [ref=e185]
+                - text: Loudness Report
+              - link "Open" [ref=e187] [cursor=pointer]:
+                - /url: /tools/loudness-report
+                - text: Open
+                - img [ref=e188]
+            - paragraph [ref=e191]: Measure loudness, true peak, and dynamic range before release.
+            - generic [ref=e193]:
+              - generic [ref=e194]:
+                - generic [ref=e195]: Pipeline readiness
+                - generic [ref=e196]: 86%
+              - progressbar [ref=e197]
+          - article [ref=e216]:
+            - generic [ref=e217]:
+              - paragraph [ref=e218]:
+                - img [ref=e219]
+                - text: MIDI Extraction
+              - link "Open" [ref=e221] [cursor=pointer]:
+                - /url: /tools/midi-extract
+                - text: Open
+                - img [ref=e222]
+            - paragraph [ref=e225]: Convert melodic material into editable MIDI for your DAW.
+            - generic [ref=e227]:
+              - generic [ref=e228]:
+                - generic [ref=e229]: Pipeline readiness
+                - generic [ref=e230]: 83%
+              - progressbar [ref=e231]
+      - generic [ref=e250]:
+        - generic [ref=e251]:
+          - paragraph [ref=e252]:
+            - img [ref=e253]
+            - text: Live Processing State
+          - heading "Operational feedback that stays legible under pressure." [level=3] [ref=e258]
+          - paragraph [ref=e259]: Upload, queue, process, and export are intentionally explicit. No hidden transitions, no uncertainty about status.
+          - generic [ref=e260]:
+            - generic [ref=e261]:
+              - img [ref=e263]
+              - img [ref=e267]
+              - img [ref=e361]
+              - img [ref=e365]
+              - img [ref=e369]
+              - img [ref=e373]
+            - generic [ref=e270]: Fetching...
+          - generic [ref=e271]:
+            - paragraph [ref=e272]: Upload state is always visible.
+            - paragraph [ref=e274]: Processing progress includes percent + status text.
+            - paragraph [ref=e276]: Results panel keeps export actions one click away.
+        - generic [ref=e279]:
+          - generic:
+            - generic: "01"
+          - generic [ref=e280]:
+            - generic [ref=e282]: Testimonials
+            - generic [ref=e285]:
+              - generic [ref=e287]: Linear
+              - blockquote [ref=e290]:
+                - generic [ref=e318]: Transformed
+                - generic [ref=e319]: our
+                - generic [ref=e320]: entire
+                - generic [ref=e321]: creative
+                - generic [ref=e322]: process
+                - generic [ref=e323]: overnight.
+              - generic [ref=e291]:
+                - generic [ref=e293]:
+                  - paragraph [ref=e294]: Sarah Chen
+                  - paragraph [ref=e295]: Design Director
+                - generic [ref=e296]:
+                  - button "Previous testimonial" [ref=e297]:
+                    - img [ref=e298]
+                  - button "Next testimonial" [ref=e300]:
+                    - img [ref=e301]
+  - button "Open Next.js Dev Tools" [ref=e308] [cursor=pointer]:
+    - img [ref=e309]
+  - alert [ref=e313]

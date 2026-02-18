@@ -1,0 +1,140 @@
+- generic [active] [ref=e1]:
+  - link "Skip to main content" [ref=e2] [cursor=pointer]:
+    - /url: "#main-content"
+  - generic [ref=e5]:
+    - link "SoundMaxx home" [ref=e6] [cursor=pointer]:
+      - /url: /
+      - generic [ref=e7]: SM
+      - generic [ref=e8]:
+        - generic [ref=e9]: SoundMaxx
+        - generic [ref=e10]: Audio Command Deck
+    - navigation "Primary" [ref=e11]:
+      - link "Home" [ref=e12] [cursor=pointer]:
+        - /url: /
+      - button "Tools menu" [ref=e14]: Tools
+    - generic [ref=e15]:
+      - button "Switch to light theme" [ref=e16]:
+        - img [ref=e17]
+        - generic [ref=e27]: Light
+      - button "Utility menu" [ref=e29]: Utility
+      - link "Open Tool" [ref=e30] [cursor=pointer]:
+        - /url: /tools/stem-isolation
+        - img [ref=e31]
+        - text: Open Tool
+  - main [ref=e33]:
+    - generic [ref=e35]:
+      - generic [ref=e37]:
+        - generic [ref=e38]:
+          - paragraph [ref=e39]:
+            - img [ref=e40]
+            - text: SoundMaxx Tool Page
+          - heading "Stem Isolation" [level=1] [ref=e45]
+          - paragraph [ref=e46]: Separate vocals, drums, bass, and music into clean stems.
+        - complementary [ref=e47]:
+          - paragraph [ref=e48]:
+            - img [ref=e49]
+            - text: Workflow Rail
+          - paragraph [ref=e54]: Stem Isolation
+          - paragraph [ref=e55]: Pull apart full mixes into stems for remixing, practice, and arrangement edits.
+          - list [ref=e56]:
+            - listitem [ref=e57]:
+              - generic [ref=e58]: "1"
+              - generic [ref=e59]: Upload source audio
+            - listitem [ref=e60]:
+              - generic [ref=e61]: "2"
+              - generic [ref=e62]: Tune this tool's settings
+            - listitem [ref=e63]:
+              - generic [ref=e64]: "3"
+              - generic [ref=e65]: Run job and track progress
+            - listitem [ref=e66]:
+              - generic [ref=e67]: "4"
+              - generic [ref=e68]: Preview and export results
+      - generic [ref=e69]:
+        - generic [ref=e70]:
+          - generic [ref=e71]:
+            - generic [ref=e72]:
+              - heading "1. Upload" [level=2] [ref=e73]
+              - paragraph [ref=e74]: Audio ingest, rights validation, and consent controls.
+            - generic [ref=e75]: Uploaded
+          - generic [ref=e76] [cursor=pointer]:
+            - button "Choose File" [ref=e77]
+            - paragraph [ref=e78]:
+              - img [ref=e79]
+              - text: Drag and drop audio or click to browse
+            - paragraph [ref=e83]: WAV, MP3, FLAC, AAC, OGG, M4A. Max 100MB and 15 minutes.
+            - paragraph [ref=e155]:
+              - img [ref=e156]
+              - text: soundmaxx-test.wav · 86.2 KB
+          - generic [ref=e162]:
+            - generic "Waveform preview" [ref=e163]
+            - button "Play Preview" [ref=e167]:
+              - img [ref=e168]
+              - text: Play Preview
+          - generic [ref=e84]:
+            - generic [ref=e85]:
+              - checkbox "Rights confirmation I own rights or have permission to process this audio." [checked] [ref=e86]
+              - generic [ref=e87]:
+                - generic [ref=e88]:
+                  - img [ref=e89]
+                  - text: Rights confirmation
+                - generic [ref=e92]: I own rights or have permission to process this audio.
+            - generic [ref=e93]:
+              - checkbox "Optional dataset consent Allow this track and outputs in a consented dataset for future model tuning." [ref=e94]
+              - generic [ref=e95]:
+                - generic [ref=e96]:
+                  - img [ref=e97]
+                  - text: Optional dataset consent
+                - generic [ref=e99]: Allow this track and outputs in a consented dataset for future model tuning.
+          - generic [ref=e100]:
+            - button "Upload Audio" [ref=e101]:
+              - generic [ref=e102]: Upload Audio
+            - generic [ref=e171]: Expires 19/02/2026, 00:48:20
+        - generic [ref=e103]:
+          - generic [ref=e104]:
+            - generic [ref=e105]:
+              - heading "2. Process" [level=2] [ref=e106]
+              - paragraph [ref=e107]: Tool parameters, queueing, and live execution telemetry.
+            - generic [ref=e108]:
+              - img [ref=e109]
+              - text: QUEUED
+          - generic [ref=e111]:
+            - generic [ref=e112]:
+              - paragraph [ref=e113]: Selected Tool
+              - paragraph [ref=e114]:
+                - img [ref=e115]
+                - text: Stem Isolation
+              - paragraph [ref=e117]: Separate vocals, drums, bass, and music into clean stems.
+            - generic [ref=e118]:
+              - text: Stem count
+              - combobox "Stem count" [ref=e119]:
+                - option "2 stems (faster)"
+                - option "4 stems (full split)" [selected]
+            - button "Processing..." [disabled] [ref=e172]:
+              - generic [ref=e121]:
+                - img [ref=e122]
+                - text: Processing...
+            - generic [ref=e124]:
+              - generic [ref=e125]:
+                - generic [ref=e126]:
+                  - img [ref=e127]
+                  - text: Pipeline status
+                - generic [ref=e130]: queued
+              - paragraph [ref=e132]: Queued and waiting for worker allocation.
+      - generic [ref=e133]:
+        - heading "3. Results and A/B Compare" [level=3] [ref=e134]
+        - paragraph [ref=e135]: Review outputs, compare before/after audio, and export before retention expiry.
+        - generic [ref=e136]:
+          - generic [ref=e137]:
+            - paragraph [ref=e138]:
+              - img [ref=e139]
+              - text: A/B Playback
+            - generic [ref=e142]:
+              - paragraph [ref=e144]: Original
+              - paragraph [ref=e147]: Processed
+          - generic [ref=e149]:
+            - paragraph [ref=e150]:
+              - img [ref=e151]
+              - text: Artifacts
+            - paragraph [ref=e153]: No artifacts yet. Run a tool to generate outputs.
+      - generic [ref=e154]: "Job ID: I5RM1-updclbMJkC4B"
+  - alert [ref=e170]

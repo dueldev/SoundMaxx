@@ -1,0 +1,14 @@
+### Result
+- [Screenshot of viewport](.playwright-cli/page-2026-02-18T07-29-53-390Z.png)
+### Ran Playwright code
+```js
+// Screenshot viewport and save it as .playwright-cli/page-2026-02-18T07-29-53-390Z.png
+await page.screenshot({
+path: '.playwright-cli/page-2026-02-18T07-29-53-390Z.png',
+  scale: 'css',
+  type: 'png'
+});
+```
+### Page
+- Page URL: http://localhost:3000/ops
+- Page Title: SoundMaxx | Audio Tool Studio

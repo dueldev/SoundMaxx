@@ -1,0 +1,169 @@
+- generic [active] [ref=e1]:
+  - link "Skip to main content" [ref=e2] [cursor=pointer]:
+    - /url: "#main-content"
+  - generic [ref=e5]:
+    - link "SoundMaxx home" [ref=e6] [cursor=pointer]:
+      - /url: /
+      - generic [ref=e7]: SM
+      - generic [ref=e8]:
+        - generic [ref=e9]: SoundMaxx
+        - generic [ref=e10]: AI-powered audio processing
+    - navigation "Primary" [ref=e11]:
+      - link "Home" [ref=e12] [cursor=pointer]:
+        - /url: /
+      - button "Tools menu" [ref=e14]: Tools
+    - generic [ref=e15]:
+      - button "Switch to light theme" [ref=e16]:
+        - img [ref=e17]
+        - generic [ref=e27]: Light
+      - button "Utility menu" [ref=e29]: Utility
+      - link "Open Tool" [ref=e30] [cursor=pointer]:
+        - /url: /tools/stem-isolation
+  - main [ref=e31]:
+    - generic [ref=e33]:
+      - generic [ref=e35]:
+        - generic [ref=e36]:
+          - paragraph [ref=e37]:
+            - img [ref=e38]
+            - text: SoundMaxx Home
+          - heading "Smarter audio tools for creators who want fast, polished results." [level=1] [ref=e40]
+          - paragraph [ref=e41]: Move from upload to export in one focused workflow per tool. Get clear status, transparent controls, and clean outputs without clutter.
+          - generic [ref=e42]:
+            - link "Start with Stem Isolation" [ref=e43] [cursor=pointer]:
+              - /url: /tools/stem-isolation
+              - img [ref=e44]
+              - text: Start with Stem Isolation
+            - link "Go to Mastering" [ref=e46] [cursor=pointer]:
+              - /url: /tools/mastering
+              - img [ref=e47]
+              - text: Go to Mastering
+        - generic [ref=e52]:
+          - article [ref=e53]:
+            - generic [ref=e54]:
+              - img [ref=e56]
+              - generic [ref=e60]:
+                - paragraph [ref=e61]: Tool-first workflow
+                - heading "One destination per outcome" [level=3] [ref=e62]
+                - paragraph [ref=e63]: Each tool has a dedicated page with scoped settings, status, and export controls.
+          - article [ref=e64]:
+            - generic [ref=e65]:
+              - img [ref=e67]
+              - generic [ref=e71]:
+                - paragraph [ref=e72]: Fast context
+                - heading "Explicit run state and ETA" [level=3] [ref=e73]
+                - paragraph [ref=e74]: Track queueing, progress, and output availability without jumping across screens.
+          - article [ref=e75]:
+            - generic [ref=e76]:
+              - img [ref=e78]
+              - generic [ref=e85]:
+                - paragraph [ref=e86]: Data control
+                - heading "Rights and retention built in" [level=3] [ref=e87]
+                - paragraph [ref=e88]: Rights confirmation, consent controls, and 24-hour retention are surfaced before processing.
+      - generic [ref=e89]:
+        - generic [ref=e90]:
+          - heading "Featured Tools" [level=2] [ref=e91]
+          - paragraph [ref=e92]: Start quickly with the two most-used SoundMaxx workflows.
+        - generic [ref=e93]:
+          - article [ref=e96]:
+            - generic [ref=e98]:
+              - img [ref=e99]
+              - text: Stem Isolation
+            - heading "Stem Isolation" [level=3] [ref=e101]
+            - paragraph [ref=e102]: Pull apart full mixes into stems for remixing, practice, and arrangement edits.
+            - generic [ref=e103]:
+              - link "Process Audio" [ref=e104] [cursor=pointer]:
+                - /url: /tools/stem-isolation
+              - link "Learn More" [ref=e105] [cursor=pointer]:
+                - /url: /tools/stem-isolation
+                - text: Learn More
+                - img [ref=e106]
+          - article [ref=e112]:
+            - generic [ref=e114]:
+              - img [ref=e115]
+              - text: Mastering
+            - heading "Mastering" [level=3] [ref=e125]
+            - paragraph [ref=e126]: Give your track a polished finish that translates better across speakers and platforms.
+            - generic [ref=e127]:
+              - link "Process Audio" [ref=e128] [cursor=pointer]:
+                - /url: /tools/mastering
+              - link "Learn More" [ref=e129] [cursor=pointer]:
+                - /url: /tools/mastering
+                - text: Learn More
+                - img [ref=e130]
+      - generic [ref=e134]:
+        - generic [ref=e135]:
+          - heading "All Tools" [level=2] [ref=e136]
+          - paragraph [ref=e137]: Dedicated workflows for isolation, mastering, analysis, and extraction.
+        - generic [ref=e138]:
+          - article [ref=e140]:
+            - generic [ref=e142]:
+              - img [ref=e143]
+              - text: Stem Isolation
+            - heading "Stem Isolation" [level=3] [ref=e145]
+            - paragraph [ref=e146]: Pull apart full mixes into stems for remixing, practice, and arrangement edits.
+            - generic [ref=e147]:
+              - link "Process Audio" [ref=e148] [cursor=pointer]:
+                - /url: /tools/stem-isolation
+              - link "Learn More" [ref=e149] [cursor=pointer]:
+                - /url: /tools/stem-isolation
+                - text: Learn More
+                - img [ref=e150]
+          - article [ref=e155]:
+            - generic [ref=e157]:
+              - img [ref=e158]
+              - text: Mastering
+            - heading "Mastering" [level=3] [ref=e168]
+            - paragraph [ref=e169]: Give your track a polished finish that translates better across speakers and platforms.
+            - generic [ref=e170]:
+              - link "Process Audio" [ref=e171] [cursor=pointer]:
+                - /url: /tools/mastering
+              - link "Learn More" [ref=e172] [cursor=pointer]:
+                - /url: /tools/mastering
+                - text: Learn More
+                - img [ref=e173]
+          - article [ref=e178]:
+            - generic [ref=e180]:
+              - img [ref=e181]
+              - text: Key + BPM
+            - heading "Key + BPM Detection" [level=3] [ref=e185]
+            - paragraph [ref=e186]: Quickly detect harmonic and tempo metadata to organize, DJ, and remix with confidence.
+            - generic [ref=e187]:
+              - link "Process Audio" [ref=e188] [cursor=pointer]:
+                - /url: /tools/key-bpm
+              - link "Learn More" [ref=e189] [cursor=pointer]:
+                - /url: /tools/key-bpm
+                - text: Learn More
+                - img [ref=e190]
+          - article [ref=e195]:
+            - generic [ref=e197]:
+              - img [ref=e198]
+              - text: Loudness Report
+            - heading "Loudness Report" [level=3] [ref=e203]
+            - paragraph [ref=e204]: Check if your music hits loudness targets and avoid clipping before publishing.
+            - generic [ref=e205]:
+              - link "Process Audio" [ref=e206] [cursor=pointer]:
+                - /url: /tools/loudness-report
+              - link "Learn More" [ref=e207] [cursor=pointer]:
+                - /url: /tools/loudness-report
+                - text: Learn More
+                - img [ref=e208]
+          - article [ref=e213]:
+            - generic [ref=e215]:
+              - img [ref=e216]
+              - text: MIDI Extraction
+            - heading "MIDI Extraction" [level=3] [ref=e221]
+            - paragraph [ref=e222]: Turn audio ideas into MIDI notes you can edit, reharmonize, and reuse.
+            - generic [ref=e223]:
+              - link "Process Audio" [ref=e224] [cursor=pointer]:
+                - /url: /tools/midi-extract
+              - link "Learn More" [ref=e225] [cursor=pointer]:
+                - /url: /tools/midi-extract
+                - text: Learn More
+                - img [ref=e226]
+      - generic [ref=e230]:
+        - generic [ref=e231]:
+          - heading "Recent Sessions" [level=2] [ref=e232]
+          - generic [ref=e233]:
+            - img [ref=e234]
+            - text: Session History
+        - paragraph [ref=e238]: Loading recent sessions...

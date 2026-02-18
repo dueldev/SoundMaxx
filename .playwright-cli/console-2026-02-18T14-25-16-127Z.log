@@ -1,0 +1,189 @@
+Total messages: 187 (Errors: 0, Warnings: 7)
+
+[TIMESTAMP] NavigationMenuProvider @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2800
+[TIMESTAMP] NavigationMenuProvider @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2800
+[TIMESTAMP] NavigationMenuCollectionProvider @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2800
+[TIMESTAMP] NavigationMenuCollectionProviderProvider @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2800
+[TIMESTAMP] NavigationMenuProvider @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2800
+[TIMESTAMP] Primitive.nav @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2800
+[TIMESTAMP] NavigationMenuList @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2800
+[TIMESTAMP] NavigationMenuList @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2800
+[TIMESTAMP] Primitive.div @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2800
+[TIMESTAMP] NavigationMenuCollectionSlot @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2800
+[TIMESTAMP] NavigationMenuCollectionSlot.Slot @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2800
+[TIMESTAMP] NavigationMenuCollectionSlot.SlotClone @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2800
+[TIMESTAMP] ForwardRef @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2800
+[TIMESTAMP] NavigationMenuCollectionProvider @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2800
+[TIMESTAMP] NavigationMenuCollectionProviderProvider @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2800
+[TIMESTAMP] NavigationMenuCollectionSlot @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2800
+[TIMESTAMP] NavigationMenuCollectionSlot.Slot @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2800
+[TIMESTAMP] NavigationMenuCollectionSlot.SlotClone @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2800
+[TIMESTAMP] Primitive.div @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2800
+[TIMESTAMP] Primitive.div.Slot @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2800
+[TIMESTAMP] Primitive.div.SlotClone @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2800
+[TIMESTAMP] Primitive.ul @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2800
+[TIMESTAMP] NavigationMenuItem @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2800
+[TIMESTAMP] NavigationMenuItemProvider @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2800
+[TIMESTAMP] Primitive.li @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2800
+[TIMESTAMP] NavLink @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2800
+[TIMESTAMP] NavigationMenuLink @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2800
+[TIMESTAMP] ForwardRef @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2800
+[TIMESTAMP] NavigationMenuCollectionItemSlot @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2800
+[TIMESTAMP] NavigationMenuCollectionItemSlot.Slot @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2800
+[TIMESTAMP] NavigationMenuCollectionItemSlot.SlotClone @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2800
+[TIMESTAMP] Primitive.button @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2800
+[TIMESTAMP] Primitive.button.Slot @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2800
+[TIMESTAMP] Primitive.button.SlotClone @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2800
+[TIMESTAMP] Primitive.a @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2800
+[TIMESTAMP] Primitive.a.Slot @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2800
+[TIMESTAMP] Primitive.a.SlotClone @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2800
+[TIMESTAMP] LinkComponent @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2800
+[TIMESTAMP] House @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2800
+[TIMESTAMP] NavigationMenuItem @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2800
+[TIMESTAMP] NavigationMenuItemProvider @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2800
+[TIMESTAMP] Primitive.li @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2800
+[TIMESTAMP] NavLink @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2800
+[TIMESTAMP] NavigationMenuLink @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2800
+[TIMESTAMP] ForwardRef @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2800
+[TIMESTAMP] NavigationMenuCollectionItemSlot @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2800
+[TIMESTAMP] NavigationMenuItem @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2800
+[TIMESTAMP] NavigationMenuItemProvider @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2800
+[TIMESTAMP] Primitive.li @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2800
+[TIMESTAMP] NavigationMenuTrigger @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2800
+[TIMESTAMP] NavigationMenuTrigger @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2800
+[TIMESTAMP] NavigationMenuCollectionItemSlot @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2800
+[TIMESTAMP] NavigationMenuCollectionItemSlot.Slot @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2800
+[TIMESTAMP] NavigationMenuCollectionItemSlot.SlotClone @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2800
+[TIMESTAMP] ForwardRef @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2800
+[TIMESTAMP] NavigationMenuCollectionItemSlot @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2800
+[TIMESTAMP] NavigationMenuCollectionItemSlot.Slot @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2800
+[TIMESTAMP] NavigationMenuCollectionItemSlot.SlotClone @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2800
+[TIMESTAMP] Primitive.button @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2800
+[TIMESTAMP] Primitive.button.Slot @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2800
+[TIMESTAMP] NavigationMenuContent @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2800
+[TIMESTAMP] NavigationMenuContent @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2800
+[TIMESTAMP] Presence @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2800
+[TIMESTAMP] NavigationMenuViewport @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2800
+[TIMESTAMP] NavigationMenuViewport @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2800
+[TIMESTAMP] Presence @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2800
+[TIMESTAMP] ThemeToggle @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2800
+[TIMESTAMP] Button @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2800
+[TIMESTAMP] Slot.Slot @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2800
+[TIMESTAMP] ThemeToggle @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2800
+[TIMESTAMP] SunHigh @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2800
+[TIMESTAMP] MobileMenu @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2800
+[TIMESTAMP] OuterLayoutRouter @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2800
+[TIMESTAMP] SegmentStateProvider @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2800
+[TIMESTAMP] RenderFromTemplateContext @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2800
+[TIMESTAMP] ScrollAndFocusHandler @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2800
+[TIMESTAMP] InnerScrollAndFocusHandler @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2800
+[TIMESTAMP] ErrorBoundary @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2800
+[TIMESTAMP] LoadingBoundary @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2800
+[TIMESTAMP] HTTPAccessFallbackBoundary @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2800
+[TIMESTAMP] HTTPAccessFallbackErrorBoundary @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2800
+[TIMESTAMP] RedirectBoundary @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2800
+[TIMESTAMP] RedirectErrorBoundary @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2800
+[TIMESTAMP] InnerLayoutRouter @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2800
+[TIMESTAMP] SegmentViewNode @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2800
+[TIMESTAMP] SegmentTrieNode @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2800
+[TIMESTAMP] LinkComponent @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2800
+[TIMESTAMP] __next_outlet_boundary__ @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2800
+[TIMESTAMP] SegmentViewStateNode @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2800
+[TIMESTAMP] AppRouterAnnouncer @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2800
+[TIMESTAMP] Remaining Effects @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:9980
+[TIMESTAMP] Blocking Track @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:9253
+[TIMESTAMP] Transition Track @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:9253
+[TIMESTAMP] Suspense Track @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:9253
+[TIMESTAMP] Idle Track @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:9253
+[TIMESTAMP] Render @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2876
+[TIMESTAMP] nav @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2870
+[TIMESTAMP] Commit @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2945
+[TIMESTAMP] NavigationMenu @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2800
+[TIMESTAMP] NavigationMenuList @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2800
+[TIMESTAMP] ForwardRef @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2800
+[TIMESTAMP] ForwardRef @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2800
+[TIMESTAMP] NavigationMenuTrigger @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2800
+[TIMESTAMP] AppRouterAnnouncer @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:2800
+[TIMESTAMP] Remaining Effects @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:9980
+[TIMESTAMP] Blocking Track @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:9253
+[TIMESTAMP] Transition Track @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:9253
+[TIMESTAMP] Suspense Track @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:9253
+[TIMESTAMP] Idle Track @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:9253
+[TIMESTAMP] Blocking Track @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:9253
+[TIMESTAMP] Transition Track @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:9253
+[TIMESTAMP] Suspense Track @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:9253
+[TIMESTAMP] Idle Track @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:9253
+[TIMESTAMP] Blocking Track @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:9253
+[TIMESTAMP] Transition Track @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:9253
+[TIMESTAMP] Suspense Track @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:9253
+[TIMESTAMP] Idle Track @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:9253
+[TIMESTAMP] Server Requests Track @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_9212ccad._.js:696
+[TIMESTAMP] Server Components Track @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_9212ccad._.js:696
+[TIMESTAMP] ​Preloads @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_9212ccad._.js:2187
+[TIMESTAMP] ​HTTPAccessErrorFallback @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_9212ccad._.js:2187
+[TIMESTAMP] ​NotFound @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_9212ccad._.js:2187
+[TIMESTAMP] ​RootLayout @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_9212ccad._.js:2187
+[TIMESTAMP] ​ @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_9212ccad._.js:2187
+[TIMESTAMP] ​Sparkles @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_9212ccad._.js:2187
+[TIMESTAMP] ​ @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_9212ccad._.js:2187
+[TIMESTAMP] ​ArrowUpRight @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_9212ccad._.js:2187
+[TIMESTAMP] ​LinkComponent @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_9212ccad._.js:2187
+[TIMESTAMP] ​LinkComponent @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_9212ccad._.js:2187
+[TIMESTAMP] ​ @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_9212ccad._.js:2187
+[TIMESTAMP] ​Layers @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_9212ccad._.js:2187
+[TIMESTAMP] ​ @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_9212ccad._.js:2187
+[TIMESTAMP] ​ShieldCheck @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_9212ccad._.js:2187
+[TIMESTAMP] ​ @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_9212ccad._.js:2187
+[TIMESTAMP] ​Activity @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_9212ccad._.js:2187
+[TIMESTAMP] ​ @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_9212ccad._.js:2187
+[TIMESTAMP] ​ArrowUpRight @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_9212ccad._.js:2187
+[TIMESTAMP] ​LinkComponent @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_9212ccad._.js:2187
+[TIMESTAMP] ​ @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_9212ccad._.js:2187
+[TIMESTAMP] ​Activity @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_9212ccad._.js:2187
+[TIMESTAMP] ​ @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_9212ccad._.js:2187
+[TIMESTAMP] ​Music3 @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_9212ccad._.js:2187
+[TIMESTAMP] ​ @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_9212ccad._.js:2187
+[TIMESTAMP] ​Gauge @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_9212ccad._.js:2187
+[TIMESTAMP] ​ @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_9212ccad._.js:2187
+[TIMESTAMP] ​Layers @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_9212ccad._.js:2187
+[TIMESTAMP] ​ @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_9212ccad._.js:2187
+[TIMESTAMP] ​Clock3 @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_9212ccad._.js:2187
+[TIMESTAMP] ​ @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_9212ccad._.js:2187
+[TIMESTAMP] ​AudioLines @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_9212ccad._.js:2187
+[TIMESTAMP] ​ @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_9212ccad._.js:2187
+[TIMESTAMP] ​ArrowUpRight @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_9212ccad._.js:2187
+[TIMESTAMP] ​LinkComponent @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_9212ccad._.js:2187
+[TIMESTAMP] ​ @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_9212ccad._.js:2187
+[TIMESTAMP] ​WandSparkles @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_9212ccad._.js:2187
+[TIMESTAMP] ​ @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_9212ccad._.js:2187
+[TIMESTAMP] ​ArrowUpRight @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_9212ccad._.js:2187
+[TIMESTAMP] ​LinkComponent @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_9212ccad._.js:2187
+[TIMESTAMP] ​ @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_9212ccad._.js:2187
+[TIMESTAMP] ​Clock3 @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_9212ccad._.js:2187
+[TIMESTAMP] ​ @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_9212ccad._.js:2187
+[TIMESTAMP] ​ArrowUpRight @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_9212ccad._.js:2187
+[TIMESTAMP] ​LinkComponent @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_9212ccad._.js:2187
+[TIMESTAMP] ​ @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_9212ccad._.js:2187
+[TIMESTAMP] ​Gauge @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_9212ccad._.js:2187
+[TIMESTAMP] ​ @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_9212ccad._.js:2187
+[TIMESTAMP] ​ArrowUpRight @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_9212ccad._.js:2187
+[TIMESTAMP] ​LinkComponent @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_9212ccad._.js:2187
+[TIMESTAMP] ​ @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_9212ccad._.js:2187
+[TIMESTAMP] ​Music3 @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_9212ccad._.js:2187
+[TIMESTAMP] ​ @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_9212ccad._.js:2187
+[TIMESTAMP] ​ArrowUpRight @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_9212ccad._.js:2187
+[TIMESTAMP] ​LinkComponent @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_9212ccad._.js:2187
+[TIMESTAMP] ​Home @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_9212ccad._.js:2187
+[TIMESTAMP] ​Next.MetadataOutlet @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_9212ccad._.js:2187
+[TIMESTAMP] ​NonIndex @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_9212ccad._.js:2187
+[TIMESTAMP] ​Next.Viewport @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_9212ccad._.js:2187
+[TIMESTAMP] ​ViewportWrapper @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_9212ccad._.js:2187
+[TIMESTAMP] ​Next.Metadata @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_9212ccad._.js:2187
+[TIMESTAMP] ​MetadataWrapper @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_9212ccad._.js:2187
+[WARNING] [JavaScript Warning: "The resource at “http://127.0.0.1:3000/_next/static/media/1ccf8ef962b3f693-s.p.1edb596a.woff2” preloaded with link preload was not used within a few seconds. Make sure all attributes of the preload tag are set correctly." {file: "http://127.0.0.1:3000/" line: 0}] @ http://127.0.0.1:3000/:0
+[WARNING] [JavaScript Warning: "The resource at “http://127.0.0.1:3000/_next/static/media/23b7a97ae3b5c134-s.p.2902b61f.woff2” preloaded with link preload was not used within a few seconds. Make sure all attributes of the preload tag are set correctly." {file: "http://127.0.0.1:3000/" line: 0}] @ http://127.0.0.1:3000/:0
+[WARNING] [JavaScript Warning: "The resource at “http://127.0.0.1:3000/_next/static/media/374a88ea0960b3d4-s.p.eb0a589c.woff2” preloaded with link preload was not used within a few seconds. Make sure all attributes of the preload tag are set correctly." {file: "http://127.0.0.1:3000/" line: 0}] @ http://127.0.0.1:3000/:0
+[WARNING] [JavaScript Warning: "The resource at “http://127.0.0.1:3000/_next/static/media/638f182e7ded7477-s.p.5461cf5a.woff2” preloaded with link preload was not used within a few seconds. Make sure all attributes of the preload tag are set correctly." {file: "http://127.0.0.1:3000/" line: 0}] @ http://127.0.0.1:3000/:0
+[WARNING] [JavaScript Warning: "The resource at “http://127.0.0.1:3000/_next/static/media/99e609270109b47d-s.p.64b9304e.woff2” preloaded with link preload was not used within a few seconds. Make sure all attributes of the preload tag are set correctly." {file: "http://127.0.0.1:3000/" line: 0}] @ http://127.0.0.1:3000/:0
+[WARNING] [JavaScript Warning: "The resource at “http://127.0.0.1:3000/_next/static/media/dc0c65e819e3bb6c-s.p.c8bc5246.woff2” preloaded with link preload was not used within a few seconds. Make sure all attributes of the preload tag are set correctly." {file: "http://127.0.0.1:3000/" line: 0}] @ http://127.0.0.1:3000/:0
+[WARNING] [JavaScript Warning: "The resource at “http://127.0.0.1:3000/_next/static/media/effe91970fc4db64-s.p.19510058.woff2” preloaded with link preload was not used within a few seconds. Make sure all attributes of the preload tag are set correctly." {file: "http://127.0.0.1:3000/" line: 0}] @ http://127.0.0.1:3000/:0

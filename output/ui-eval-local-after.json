@@ -1,0 +1,9 @@
+{
+  "testedUrls": [
+    "http://localhost:3001/",
+    "http://localhost:3001/tools/stem-isolation"
+  ],
+  "console": [],
+  "non2xx": [],
+  "blanks": []
+}

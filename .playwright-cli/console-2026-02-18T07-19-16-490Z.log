@@ -1,0 +1,80 @@
+[   10146ms] [WARNING] [JavaScript Warning: "The resource at “http://localhost:3000/_next/static/media/0c89a48fa5027cee-s.p.4564287c.woff2” preloaded with link preload was not used within a few seconds. Make sure all attributes of the preload tag are set correctly." {file: "http://localhost:3000/ops" line: 0}] @ http://localhost:3000/ops:0
+[   10147ms] [WARNING] [JavaScript Warning: "The resource at “http://localhost:3000/_next/static/media/36363bfb06833f56-s.p.d8302362.woff2” preloaded with link preload was not used within a few seconds. Make sure all attributes of the preload tag are set correctly." {file: "http://localhost:3000/ops" line: 0}] @ http://localhost:3000/ops:0
+[   10147ms] [WARNING] [JavaScript Warning: "The resource at “http://localhost:3000/_next/static/media/a73419dd2ba2d841-s.p.f2813c2a.woff2” preloaded with link preload was not used within a few seconds. Make sure all attributes of the preload tag are set correctly." {file: "http://localhost:3000/ops" line: 0}] @ http://localhost:3000/ops:0
+[  184435ms] [ERROR] Failed to fetch RSC payload for http://localhost:3000/ops. Falling back to browser navigation. Error @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[  184436ms] [ERROR] Failed to fetch RSC payload for http://localhost:3000/ops. Falling back to browser navigation. Error @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[  194708ms] [WARNING] [JavaScript Warning: "The resource at “http://localhost:3000/_next/static/media/1ccf8ef962b3f693-s.p.1edb596a.woff2” preloaded with link preload was not used within a few seconds. Make sure all attributes of the preload tag are set correctly." {file: "http://localhost:3000/ops" line: 0}] @ http://localhost:3000/ops:0
+[  194709ms] [WARNING] [JavaScript Warning: "The resource at “http://localhost:3000/_next/static/media/23b7a97ae3b5c134-s.p.2902b61f.woff2” preloaded with link preload was not used within a few seconds. Make sure all attributes of the preload tag are set correctly." {file: "http://localhost:3000/ops" line: 0}] @ http://localhost:3000/ops:0
+[  194709ms] [WARNING] [JavaScript Warning: "The resource at “http://localhost:3000/_next/static/media/374a88ea0960b3d4-s.p.eb0a589c.woff2” preloaded with link preload was not used within a few seconds. Make sure all attributes of the preload tag are set correctly." {file: "http://localhost:3000/ops" line: 0}] @ http://localhost:3000/ops:0
+[  194709ms] [WARNING] [JavaScript Warning: "The resource at “http://localhost:3000/_next/static/media/638f182e7ded7477-s.p.5461cf5a.woff2” preloaded with link preload was not used within a few seconds. Make sure all attributes of the preload tag are set correctly." {file: "http://localhost:3000/ops" line: 0}] @ http://localhost:3000/ops:0
+[  194709ms] [WARNING] [JavaScript Warning: "The resource at “http://localhost:3000/_next/static/media/99e609270109b47d-s.p.64b9304e.woff2” preloaded with link preload was not used within a few seconds. Make sure all attributes of the preload tag are set correctly." {file: "http://localhost:3000/ops" line: 0}] @ http://localhost:3000/ops:0
+[  194709ms] [WARNING] [JavaScript Warning: "The resource at “http://localhost:3000/_next/static/media/dc0c65e819e3bb6c-s.p.c8bc5246.woff2” preloaded with link preload was not used within a few seconds. Make sure all attributes of the preload tag are set correctly." {file: "http://localhost:3000/ops" line: 0}] @ http://localhost:3000/ops:0
+[  194709ms] [WARNING] [JavaScript Warning: "The resource at “http://localhost:3000/_next/static/media/effe91970fc4db64-s.p.19510058.woff2” preloaded with link preload was not used within a few seconds. Make sure all attributes of the preload tag are set correctly." {file: "http://localhost:3000/ops" line: 0}] @ http://localhost:3000/ops:0
+[  312396ms] [WARNING] [JavaScript Warning: "The resource at “http://localhost:3000/_next/static/media/1ccf8ef962b3f693-s.p.1edb596a.woff2” preloaded with link preload was not used within a few seconds. Make sure all attributes of the preload tag are set correctly." {file: "http://localhost:3000/ops" line: 0}] @ http://localhost:3000/ops:0
+[  312397ms] [WARNING] [JavaScript Warning: "The resource at “http://localhost:3000/_next/static/media/23b7a97ae3b5c134-s.p.2902b61f.woff2” preloaded with link preload was not used within a few seconds. Make sure all attributes of the preload tag are set correctly." {file: "http://localhost:3000/ops" line: 0}] @ http://localhost:3000/ops:0
+[  312399ms] [WARNING] [JavaScript Warning: "The resource at “http://localhost:3000/_next/static/media/374a88ea0960b3d4-s.p.eb0a589c.woff2” preloaded with link preload was not used within a few seconds. Make sure all attributes of the preload tag are set correctly." {file: "http://localhost:3000/ops" line: 0}] @ http://localhost:3000/ops:0
+[  312399ms] [WARNING] [JavaScript Warning: "The resource at “http://localhost:3000/_next/static/media/638f182e7ded7477-s.p.5461cf5a.woff2” preloaded with link preload was not used within a few seconds. Make sure all attributes of the preload tag are set correctly." {file: "http://localhost:3000/ops" line: 0}] @ http://localhost:3000/ops:0
+[  312400ms] [WARNING] [JavaScript Warning: "The resource at “http://localhost:3000/_next/static/media/99e609270109b47d-s.p.64b9304e.woff2” preloaded with link preload was not used within a few seconds. Make sure all attributes of the preload tag are set correctly." {file: "http://localhost:3000/ops" line: 0}] @ http://localhost:3000/ops:0
+[  312400ms] [WARNING] [JavaScript Warning: "The resource at “http://localhost:3000/_next/static/media/dc0c65e819e3bb6c-s.p.c8bc5246.woff2” preloaded with link preload was not used within a few seconds. Make sure all attributes of the preload tag are set correctly." {file: "http://localhost:3000/ops" line: 0}] @ http://localhost:3000/ops:0
+[  312400ms] [WARNING] [JavaScript Warning: "The resource at “http://localhost:3000/_next/static/media/effe91970fc4db64-s.p.19510058.woff2” preloaded with link preload was not used within a few seconds. Make sure all attributes of the preload tag are set correctly." {file: "http://localhost:3000/ops" line: 0}] @ http://localhost:3000/ops:0
+[  508813ms] ReferenceError: cn is not defined
+    at OpsPage (http://localhost:3000/_next/static/chunks/_f5607e73._.js?id=%255Bproject%255D%252Fsrc%252Fapp%252Fops%252Fpage.tsx+%255Bapp-client%255D+%2528ecmascript%2529:339:45)
+    at react_stack_bottom_frame (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:14826:24)
+    at renderWithHooks (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:4651:42)
+    at updateFunctionComponent (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:6112:21)
+    at beginWork (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:6708:24)
+    at runWithFiberInDEV (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:965:131)
+    at performUnitOfWork (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:9562:97)
+    at workLoopSync (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:9456:57)
+    at renderRootSync (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:9440:13)
+    at performWorkOnRoot (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:9105:47)
+    at performSyncWorkOnRoot (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:10238:26)
+    at flushSyncWorkAcrossRoots_impl (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:10154:316)
+    at flushSyncWork$1 (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:9237:86)
+    at scheduleRefresh (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:299:13)
+    at performReactRefresh/< (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_a0e4c7b4._.js:391:33)
+    at performReactRefresh (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_a0e4c7b4._.js:384:38)
+    at applyUpdate (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_a0e4c7b4._.js:878:31)
+    at scheduleUpdate/< (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_a0e4c7b4._.js:886:13)
+    at promise callback*scheduleUpdate (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_a0e4c7b4._.js:885:27)
+    at registerExportsAndSetupBoundaryForReactRefresh (http://localhost:3000/_next/static/chunks/turbopack-_23a915ee._.js:951:25)
+    at  (http://localhost:3000/_next/static/chunks/_f5607e73._.js?id=%255Bproject%255D%252Fsrc%252Fapp%252Fops%252Fpage.tsx+%255Bapp-client%255D+%2528ecmascript%2529:698:29)
+    at instantiateModule/< (http://localhost:3000/_next/static/chunks/turbopack-_23a915ee._.js:879:26)
+    at runModuleExecutionHooks (http://localhost:3000/_next/static/chunks/turbopack-_23a915ee._.js:904:26)
+    at instantiateModule (http://localhost:3000/_next/static/chunks/turbopack-_23a915ee._.js:877:32)
+    at applyPhase (http://localhost:3000/_next/static/chunks/turbopack-_23a915ee._.js:1127:30)
+    at applyInternal (http://localhost:3000/_next/static/chunks/turbopack-_23a915ee._.js:1213:15)
+    at applyEcmascriptMergedUpdate (http://localhost:3000/_next/static/chunks/turbopack-_23a915ee._.js:1193:18)
+    at applyChunkListUpdate (http://localhost:3000/_next/static/chunks/turbopack-_23a915ee._.js:1159:48)
+    at applyUpdate (http://localhost:3000/_next/static/chunks/turbopack-_23a915ee._.js:1148:33)
+    at handleApply (http://localhost:3000/_next/static/chunks/turbopack-_23a915ee._.js:1368:28)
+    at triggerUpdate (http://localhost:3000/_next/static/chunks/%5Bturbopack%5D_browser_dev_hmr-client_hmr-client_ts_c8c997ce._.js:452:17)
+    at applyAggregatedUpdates (http://localhost:3000/_next/static/chunks/%5Bturbopack%5D_browser_dev_hmr-client_hmr-client_ts_c8c997ce._.js:98:22)
+    at connect/< (http://localhost:3000/_next/static/chunks/%5Bturbopack%5D_browser_dev_hmr-client_hmr-client_ts_c8c997ce._.js:32:21)
+    at processTurbopackMessage (http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_17643121._.js:10950:21)
+    at processMessage (http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_17643121._.js:11591:40)
+    at handleMessage (http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_17643121._.js:10914:52)
+    at EventHandlerNonNull*init (http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_17643121._.js:10937:9)
+    at createWebSocket (http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_17643121._.js:10941:12)
+    at hydrate (http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_17643121._.js:12626:21)
+    at  (http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_17643121._.js:12705:16)
+    at appBootstrap/< (http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_17643121._.js:177:16)
+    at loadScriptsInSequence (http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_17643121._.js:141:16)
+    at appBootstrap (http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_17643121._.js:170:26)
+    at  (http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_17643121._.js:12702:32)
+    at instantiateModule/< (http://localhost:3000/_next/static/chunks/turbopack-_23a915ee._.js:879:26)
+    at runModuleExecutionHooks (http://localhost:3000/_next/static/chunks/turbopack-_23a915ee._.js:904:26)
+    at instantiateModule (http://localhost:3000/_next/static/chunks/turbopack-_23a915ee._.js:877:32)
+    at getOrInstantiateRuntimeModule (http://localhost:3000/_next/static/chunks/turbopack-_23a915ee._.js:808:12)
+    at registerChunk (http://localhost:3000/_next/static/chunks/turbopack-_23a915ee._.js:1626:50)
+    at async*registerChunk (http://localhost:3000/_next/static/chunks/turbopack-_23a915ee._.js:1564:20)
+    at  (http://localhost:3000/_next/static/chunks/turbopack-_23a915ee._.js:1853:18)
+    at  (http://localhost:3000/_next/static/chunks/turbopack-_23a915ee._.js:1857:3)
+[  515756ms] [WARNING] [Fast Refresh] performing full reload because your application had an unrecoverable error @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[  526059ms] [WARNING] [JavaScript Warning: "The resource at “http://localhost:3000/_next/static/media/1ccf8ef962b3f693-s.p.1edb596a.woff2” preloaded with link preload was not used within a few seconds. Make sure all attributes of the preload tag are set correctly." {file: "http://localhost:3000/ops" line: 0}] @ http://localhost:3000/ops:0
+[  526059ms] [WARNING] [JavaScript Warning: "The resource at “http://localhost:3000/_next/static/media/23b7a97ae3b5c134-s.p.2902b61f.woff2” preloaded with link preload was not used within a few seconds. Make sure all attributes of the preload tag are set correctly." {file: "http://localhost:3000/ops" line: 0}] @ http://localhost:3000/ops:0
+[  526059ms] [WARNING] [JavaScript Warning: "The resource at “http://localhost:3000/_next/static/media/374a88ea0960b3d4-s.p.eb0a589c.woff2” preloaded with link preload was not used within a few seconds. Make sure all attributes of the preload tag are set correctly." {file: "http://localhost:3000/ops" line: 0}] @ http://localhost:3000/ops:0
+[  526060ms] [WARNING] [JavaScript Warning: "The resource at “http://localhost:3000/_next/static/media/638f182e7ded7477-s.p.5461cf5a.woff2” preloaded with link preload was not used within a few seconds. Make sure all attributes of the preload tag are set correctly." {file: "http://localhost:3000/ops" line: 0}] @ http://localhost:3000/ops:0
+[  526060ms] [WARNING] [JavaScript Warning: "The resource at “http://localhost:3000/_next/static/media/99e609270109b47d-s.p.64b9304e.woff2” preloaded with link preload was not used within a few seconds. Make sure all attributes of the preload tag are set correctly." {file: "http://localhost:3000/ops" line: 0}] @ http://localhost:3000/ops:0
+[  526060ms] [WARNING] [JavaScript Warning: "The resource at “http://localhost:3000/_next/static/media/dc0c65e819e3bb6c-s.p.c8bc5246.woff2” preloaded with link preload was not used within a few seconds. Make sure all attributes of the preload tag are set correctly." {file: "http://localhost:3000/ops" line: 0}] @ http://localhost:3000/ops:0
+[  526061ms] [WARNING] [JavaScript Warning: "The resource at “http://localhost:3000/_next/static/media/effe91970fc4db64-s.p.19510058.woff2” preloaded with link preload was not used within a few seconds. Make sure all attributes of the preload tag are set correctly." {file: "http://localhost:3000/ops" line: 0}] @ http://localhost:3000/ops:0

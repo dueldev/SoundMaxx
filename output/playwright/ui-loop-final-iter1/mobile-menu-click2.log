@@ -1,0 +1,12 @@
+### Ran Playwright code
+```js
+await page.getByRole('button', { name: 'Toggle menu' }).click();
+```
+### Page
+- Page URL: http://localhost:3000/
+- Page Title: SoundMaxx | Audio Tool Studio
+- Console: 1 errors, 7 warnings
+### Snapshot
+- [Snapshot](.playwright-cli/page-2026-02-18T07-33-31-872Z.yml)
+### Events
+- New console entries: .playwright-cli/console-2026-02-18T07-32-55-706Z.log#L143-L149

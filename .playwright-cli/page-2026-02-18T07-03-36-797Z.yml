@@ -1,0 +1,100 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - navigation [ref=e3]:
+      - link "SoundMaxx" [ref=e4] [cursor=pointer]:
+        - /url: /
+        - img [ref=e6]
+        - text: SoundMaxx
+      - navigation "Main" [ref=e11]:
+        - list [ref=e13]:
+          - listitem [ref=e14]:
+            - link "Home" [ref=e15] [cursor=pointer]:
+              - /url: /
+              - img [ref=e16]
+              - text: Home
+          - listitem [ref=e19]:
+            - button "Tools" [ref=e20]:
+              - img [ref=e21]
+              - text: Tools
+              - img [ref=e23]
+  - main [ref=e25]:
+    - generic [ref=e27]:
+      - generic [ref=e29]:
+        - generic [ref=e30]:
+          - paragraph [ref=e31]:
+            - img [ref=e32]
+            - text: Ops Control
+          - heading "Operational signal, without guesswork." [level=1] [ref=e35]
+          - paragraph [ref=e36]: Monitor queue pressure, live jobs, and failure risk in one surface. This view is optimized for fast triage and clear next actions.
+          - generic [ref=e37]:
+            - generic [ref=e38]:
+              - img [ref=e39]
+              - text: Degraded
+            - generic [ref=e43]:
+              - img [ref=e44]
+              - text: Updated 02:03:36
+        - complementary [ref=e47]:
+          - paragraph [ref=e48]: Response playbook
+          - paragraph [ref=e49]: Ops metrics are partially unavailable. Showing fallback values.
+          - list [ref=e50]:
+            - listitem [ref=e51]: 1. Confirm queue and worker status.
+            - listitem [ref=e52]: 2. Prioritize failed jobs from the last 24h.
+            - listitem [ref=e53]: 3. Route users to a stable workflow when needed.
+          - link "Open Studio" [ref=e55] [cursor=pointer]:
+            - /url: /tools/stem-isolation
+            - text: Open Studio
+            - img [ref=e56]
+      - generic [ref=e59]:
+        - generic [ref=e60]:
+          - generic [ref=e61]:
+            - paragraph [ref=e62]: System posture
+            - heading "What is happening right now." [level=2] [ref=e63]
+          - button "Refresh now" [ref=e64]:
+            - img [ref=e65]
+            - text: Refresh now
+        - paragraph [ref=e70]:
+          - img [ref=e71]
+          - text: Ops metrics are partially unavailable. Showing fallback values.
+        - generic [ref=e75]:
+          - generic [ref=e76]:
+            - term [ref=e77]:
+              - img [ref=e78]
+              - text: Total sessions
+            - definition [ref=e83]: "0"
+            - paragraph [ref=e84]: Active product usage footprint.
+          - generic [ref=e85]:
+            - term [ref=e86]:
+              - img [ref=e87]
+              - text: Active jobs
+            - definition [ref=e91]: "0"
+            - paragraph [ref=e92]: Jobs currently being processed.
+          - generic [ref=e93]:
+            - term [ref=e94]:
+              - img [ref=e95]
+              - text: Failed jobs (24h)
+            - definition [ref=e97]: "0"
+            - paragraph [ref=e98]: Failure load that requires triage.
+          - generic [ref=e99]:
+            - term [ref=e100]:
+              - img [ref=e101]
+              - text: Queue depth
+            - definition [ref=e104]: "0"
+            - paragraph [ref=e105]: Backlog waiting for workers.
+      - generic [ref=e106]:
+        - article [ref=e107]:
+          - paragraph [ref=e108]: Intervention guide
+          - heading "Next best operator move" [level=3] [ref=e109]
+          - paragraph [ref=e110]: System is stable. Keep sampling telemetry while usage rises.
+        - article [ref=e111]:
+          - paragraph [ref=e112]: Decision thresholds
+          - heading "Signal interpretation" [level=3] [ref=e113]
+          - generic [ref=e114]:
+            - paragraph [ref=e115]:
+              - generic [ref=e116]: Queue depth
+              - generic [ref=e117]: Within range
+            - paragraph [ref=e118]:
+              - generic [ref=e119]: Failed jobs (24h)
+              - generic [ref=e120]: No active failures
+  - button "Open Next.js Dev Tools" [ref=e126] [cursor=pointer]:
+    - img [ref=e127]
+  - alert [ref=e131]

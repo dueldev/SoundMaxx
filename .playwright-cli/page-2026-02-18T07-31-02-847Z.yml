@@ -1,0 +1,199 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e6] [cursor=pointer]:
+    - button "Open Next.js Dev Tools" [ref=e7]:
+      - img [ref=e8]
+    - generic [ref=e12]:
+      - button "Open issues overlay" [ref=e13]:
+        - generic [ref=e14]:
+          - generic [ref=e15]: "0"
+          - generic [ref=e16]: "1"
+        - generic [ref=e17]: Issue
+      - button "Collapse issues badge" [ref=e18]:
+        - img [ref=e19]
+  - link "Skip to main content" [ref=e21] [cursor=pointer]:
+    - /url: "#main-content"
+  - banner [ref=e22]:
+    - generic [ref=e24]:
+      - link "SoundMaxx home" [ref=e25] [cursor=pointer]:
+        - /url: /
+        - img [ref=e27]
+        - generic [ref=e32]:
+          - generic [ref=e33]: SoundMaxx
+          - generic [ref=e34]: Audio Command Deck
+      - navigation "Main" [ref=e35]:
+        - list [ref=e37]:
+          - listitem [ref=e38]:
+            - link "Home" [ref=e39] [cursor=pointer]:
+              - /url: /
+              - img [ref=e40]
+              - text: Home
+          - listitem [ref=e43]:
+            - link "Ops" [ref=e44] [cursor=pointer]:
+              - /url: /ops
+              - img [ref=e45]
+              - text: Ops
+          - listitem [ref=e47]:
+            - button "Tools" [ref=e48]:
+              - img [ref=e49]
+              - text: Tools
+              - img [ref=e51]
+      - generic [ref=e53]:
+        - button "Switch to dark theme" [ref=e54]:
+          - img [ref=e55]
+          - generic [ref=e59]: Dark
+        - link "Open Tool" [ref=e60] [cursor=pointer]:
+          - /url: /tools/stem-isolation
+  - main [ref=e61]:
+    - generic [ref=e63]:
+      - generic [ref=e65]:
+        - generic [ref=e66]:
+          - paragraph [ref=e67]:
+            - img [ref=e68]
+            - text: Why SoundMaxx
+          - heading "Release-ready audio workflows without hidden states." [level=1] [ref=e73]
+          - paragraph [ref=e74]: SoundMaxx keeps upload, processing, and export explicit so creators can move fast and operators can trust every state change.
+          - generic [ref=e75]:
+            - link "Open Tool" [ref=e76] [cursor=pointer]:
+              - /url: /tools/stem-isolation
+              - text: Open Tool
+              - img [ref=e77]
+            - link "View Ops" [ref=e80] [cursor=pointer]:
+              - /url: /ops
+          - generic [ref=e81]:
+            - article [ref=e82]:
+              - paragraph [ref=e83]:
+                - img [ref=e84]
+                - text: Tool Routes
+              - paragraph [ref=e88]: "5"
+            - article [ref=e89]:
+              - paragraph [ref=e90]:
+                - img [ref=e91]
+                - text: Session Retention
+              - paragraph [ref=e94]: 24h
+            - article [ref=e95]:
+              - paragraph [ref=e96]:
+                - img [ref=e97]
+                - text: Queue Target
+              - paragraph [ref=e99]: < 12s
+        - complementary [ref=e100]:
+          - paragraph [ref=e101]: Decision Loop
+          - 'heading "First screen: why. Second: risk. Third: action." [level=2] [ref=e102]'
+          - generic [ref=e103]:
+            - article [ref=e104]:
+              - paragraph [ref=e105]: "01"
+              - paragraph [ref=e106]: Upload
+              - paragraph [ref=e107]: Rights check and file prep before processing.
+            - article [ref=e108]:
+              - paragraph [ref=e109]: "02"
+              - paragraph [ref=e110]: Process
+              - paragraph [ref=e111]: Live state, progress, and ETA with clear status.
+            - article [ref=e112]:
+              - paragraph [ref=e113]: "03"
+              - paragraph [ref=e114]: Export
+              - paragraph [ref=e115]: A/B compare with artifact expiry timing.
+      - generic [ref=e116]:
+        - generic [ref=e117]:
+          - generic [ref=e118]:
+            - paragraph [ref=e119]: What You See Instantly
+            - heading "A control surface built for speed and trust." [level=2] [ref=e120]
+          - link "Ops Posture" [ref=e121] [cursor=pointer]:
+            - /url: /ops
+            - text: Ops Posture
+            - img [ref=e122]
+        - generic [ref=e125]:
+          - article [ref=e126]:
+            - img [ref=e128]
+            - heading "State-first workflow" [level=3] [ref=e130]
+            - paragraph [ref=e131]: Upload, running, succeeded, and failed states stay visible without guesswork.
+          - article [ref=e132]:
+            - img [ref=e134]
+            - heading "Evidence-ready outputs" [level=3] [ref=e137]
+            - paragraph [ref=e138]: Compare original and processed tracks before export and expiry.
+          - article [ref=e139]:
+            - img [ref=e141]
+            - heading "Operator runway" [level=3] [ref=e144]
+            - paragraph [ref=e145]: Queue depth, failed runs, and intervention guidance live on one route.
+          - article [ref=e146]:
+            - img [ref=e148]
+            - heading "Fast routing" [level=3] [ref=e152]
+            - paragraph [ref=e153]: One upload fans out into five tool workflows with direct next action.
+      - generic [ref=e154]:
+        - generic [ref=e155]:
+          - generic [ref=e156]:
+            - paragraph [ref=e157]: Tool Matrix
+            - heading "Pick a workflow and start processing now." [level=2] [ref=e158]
+          - generic [ref=e159]:
+            - img [ref=e160]
+            - text: Updated live
+        - generic [ref=e163]:
+          - article [ref=e164]:
+            - generic [ref=e165]:
+              - generic [ref=e166]:
+                - img [ref=e167]
+                - text: Stem Isolation
+              - generic [ref=e174]: 96% ready
+            - heading "Stem Isolation" [level=3] [ref=e175]
+            - paragraph [ref=e176]: Pull apart full mixes into stems for remixing, practice, and arrangement edits.
+            - generic [ref=e179]:
+              - link "Launch" [ref=e180] [cursor=pointer]:
+                - /url: /tools/stem-isolation
+                - text: Launch
+                - img [ref=e181]
+              - generic [ref=e184]: Audio In • Artifact Out
+          - article [ref=e185]:
+            - generic [ref=e186]:
+              - generic [ref=e187]:
+                - img [ref=e188]
+                - text: Mastering
+              - generic [ref=e197]: 93% ready
+            - heading "Mastering" [level=3] [ref=e198]
+            - paragraph [ref=e199]: Give your track a polished finish that translates better across speakers and platforms.
+            - generic [ref=e202]:
+              - link "Launch" [ref=e203] [cursor=pointer]:
+                - /url: /tools/mastering
+                - text: Launch
+                - img [ref=e204]
+              - generic [ref=e207]: Audio In • Artifact Out
+          - article [ref=e208]:
+            - generic [ref=e209]:
+              - generic [ref=e210]:
+                - img [ref=e211]
+                - text: Key + BPM
+              - generic [ref=e214]: 92% ready
+            - heading "Key + BPM Detection" [level=3] [ref=e215]
+            - paragraph [ref=e216]: Quickly detect harmonic and tempo metadata to organize, DJ, and remix with confidence.
+            - generic [ref=e219]:
+              - link "Launch" [ref=e220] [cursor=pointer]:
+                - /url: /tools/key-bpm
+                - text: Launch
+                - img [ref=e221]
+              - generic [ref=e224]: Audio In • Artifact Out
+          - article [ref=e225]:
+            - generic [ref=e226]:
+              - generic [ref=e227]:
+                - img [ref=e228]
+                - text: Loudness Report
+              - generic [ref=e231]: 91% ready
+            - heading "Loudness Report" [level=3] [ref=e232]
+            - paragraph [ref=e233]: Check if your music hits loudness targets and avoid clipping before publishing.
+            - generic [ref=e236]:
+              - link "Launch" [ref=e237] [cursor=pointer]:
+                - /url: /tools/loudness-report
+                - text: Launch
+                - img [ref=e238]
+              - generic [ref=e241]: Audio In • Artifact Out
+          - article [ref=e242]:
+            - generic [ref=e243]:
+              - generic [ref=e244]:
+                - img [ref=e245]
+                - text: MIDI Extraction
+              - generic [ref=e248]: 88% ready
+            - heading "MIDI Extraction" [level=3] [ref=e249]
+            - paragraph [ref=e250]: Turn audio ideas into MIDI notes you can edit, reharmonize, and reuse.
+            - generic [ref=e253]:
+              - link "Launch" [ref=e254] [cursor=pointer]:
+                - /url: /tools/midi-extract
+                - text: Launch
+                - img [ref=e255]
+              - generic [ref=e258]: Audio In • Artifact Out
+  - alert [ref=e259]

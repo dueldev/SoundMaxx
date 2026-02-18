@@ -1,7 +1,7 @@
 "use client";
 
 import { useDropzone } from "react-dropzone";
-import { CheckCircle2Icon, CloudUploadIcon, FileAudioIcon, ShieldCheckIcon, SparklesIcon } from "lucide-react";
+import { CheckIcon, FileAudioIcon, ShieldCheckIcon, SparklesIcon, UploadIcon } from "lucide-react";
 import { WaveformPlayer } from "@/components/waveform-player";
 import { Button } from "@/components/ui/button";
 import type { UploadState } from "@/components/studio/types";
@@ -29,28 +29,33 @@ function readableSize(bytes: number) {
 }
 
 function uploadStateLabel(state: UploadState) {
-  if (state === "preparing") return "Preparing";
-  if (state === "uploading") return "Uploading";
-  if (state === "uploaded") return "Uploaded";
-  if (state === "failed") return "Failed";
-  return "Waiting";
+  if (state === "preparing") return "PREPARING";
+  if (state === "uploading") return "UPLOADING";
+  if (state === "uploaded") return "UPLOADED";
+  if (state === "failed") return "FAILED";
+  return "IDLE";
 }
 
-function uploadNextStep(args: { file: File | null; rightsConfirmed: boolean; uploadState: UploadState }) {
+function nextStep(args: { file: File | null; rightsConfirmed: boolean; uploadState: UploadState }) {
   if (args.uploadState === "preparing" || args.uploadState === "uploading") {
-    return "Upload in progress. Keep this tab open until completion.";
+    return "Upload in progress — keep this tab open.";
   }
   if (args.uploadState === "uploaded") {
-    return "Upload complete. Configure process settings and run the tool.";
+    return "Uploaded. Configure and run the tool.";
   }
-  if (!args.file) {
-    return "Select one audio file to start.";
-  }
-  if (!args.rightsConfirmed) {
-    return "Confirm rights to enable upload.";
-  }
+  if (!args.file) return "Select an audio file to begin.";
+  if (!args.rightsConfirmed) return "Confirm rights to enable upload.";
   return "Ready to upload.";
 }
+
+function stateTagClass(state: UploadState) {
+  if (state === "uploaded") return "tag tag-ok";
+  if (state === "failed") return "tag tag-error";
+  if (state === "uploading" || state === "preparing") return "tag tag-warn";
+  return "tag";
+}
+
+const isBusy = (s: UploadState) => s === "preparing" || s === "uploading";
 
 export function UploadPanel({
   file,
@@ -67,103 +72,166 @@ export function UploadPanel({
   onUpload,
 }: UploadPanelProps) {
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    accept: {
-      "audio/*": [".mp3", ".wav", ".flac", ".ogg", ".aac", ".m4a"],
-    },
+    accept: { "audio/*": [".mp3", ".wav", ".flac", ".ogg", ".aac", ".m4a"] },
     maxFiles: 1,
-    onDrop: (acceptedFiles) => {
-      onFileSelected(acceptedFiles[0] ?? null);
-    },
+    onDrop: (files) => onFileSelected(files[0] ?? null),
   });
 
+  const busy = isBusy(uploadState);
+
   return (
-    <section className="smx-frame p-5 md:p-6">
-      <header className="flex flex-wrap items-start justify-between gap-3">
+    <section className="brutal-card p-5 md:p-6">
+      {/* Header */}
+      <div className="flex items-start justify-between gap-3">
         <div>
-          <h2 className="text-3xl font-semibold tracking-tight">1. Upload</h2>
-          <p className="smx-kicker mt-2">Stage source, confirm rights, then upload.</p>
+          <span className="step-num">STEP 01</span>
+          <h2 className="mt-1 text-2xl font-bold">Upload</h2>
         </div>
-        <span className="smx-chip">
-          {uploadState === "uploaded" ? <CheckCircle2Icon className="size-3.5 text-primary" /> : null}
+        <span className={stateTagClass(uploadState)}>
           {uploadStateLabel(uploadState)}
         </span>
-      </header>
+      </div>
 
+      <hr className="section-rule mt-4 mb-4" />
+
+      {/* Dropzone */}
       <div
         {...getRootProps()}
         className={cn(
-          "smx-subframe mt-4 cursor-pointer border-2 border-dashed p-5 transition",
-          "border-border bg-background/72 hover:border-[color-mix(in_srgb,var(--brand-cobalt)_42%,var(--border))]",
-          isDragActive && "border-[color-mix(in_srgb,var(--brand-cobalt)_62%,var(--border))] bg-accent/10",
+          "cursor-pointer border-2 border-dashed p-8 text-center transition-colors duration-150",
+          isDragActive
+            ? "border-[var(--accent)] bg-[var(--muted)]"
+            : "border-[var(--foreground)] hover:border-[var(--accent)] hover:bg-[var(--muted)]",
         )}
       >
         <input {...getInputProps()} />
-        <p className="inline-flex items-center gap-2 text-sm font-semibold tracking-tight">
-          <CloudUploadIcon className="size-4" />
-          {isDragActive ? "Drop file to stage upload" : "Drag and drop audio or click to browse"}
+        <UploadIcon
+          className="mx-auto mb-3 size-7"
+          style={{ color: isDragActive ? "var(--accent)" : "var(--muted-foreground)" }}
+        />
+        <p className="text-sm font-semibold">
+          {isDragActive ? "Drop to stage" : "Drop audio here or click to browse"}
         </p>
-        <p className="mt-2 text-xs text-muted-foreground">WAV, MP3, FLAC, AAC, OGG, M4A. Max 100MB and 15 minutes.</p>
+        <p className="mt-1.5 font-mono text-xs" style={{ color: "var(--muted-foreground)" }}>
+          WAV · MP3 · FLAC · AAC · OGG · M4A · Max 100 MB · 15 min
+        </p>
 
         {file ? (
-          <p className="smx-chip mt-3">
-            <FileAudioIcon className="size-3.5 text-primary" />
-            {file.name} • {readableSize(file.size)}
-          </p>
+          <span
+            className="mt-4 inline-flex items-center gap-2 border px-3 py-1.5 font-mono text-xs font-semibold"
+            style={{ borderColor: "var(--foreground)" }}
+          >
+            <FileAudioIcon className="size-3.5" />
+            {file.name} · {readableSize(file.size)}
+          </span>
         ) : null}
       </div>
 
+      {/* Waveform */}
       {filePreviewUrl ? (
         <div className="mt-4">
           <WaveformPlayer src={filePreviewUrl} />
         </div>
       ) : null}
 
-      <div className="mt-4 grid gap-2">
-        <label className="smx-subframe flex gap-3 p-3 text-sm">
+      {/* Consent */}
+      <div className="mt-4 flex flex-col gap-2">
+        <label
+          className="flex cursor-pointer gap-3.5 border p-4 transition-colors hover:bg-[var(--muted)]"
+          style={{ borderColor: "var(--muted)" }}
+        >
           <input
             type="checkbox"
-            className="mt-0.5"
+            className="mt-0.5 shrink-0"
             checked={rightsConfirmed}
-            onChange={(event) => onRightsConfirmedChange(event.target.checked)}
+            onChange={(e) => onRightsConfirmedChange(e.target.checked)}
+            aria-label="Rights confirmation"
           />
           <span>
-            <span className="inline-flex items-center gap-2 font-semibold tracking-tight">
-              <ShieldCheckIcon className="size-4 text-primary" />
+            <span className="inline-flex items-center gap-2 text-sm font-semibold">
+              <ShieldCheckIcon className="size-4" style={{ color: "var(--accent)" }} />
               Rights confirmation
             </span>
-            <span className="mt-1 block text-xs text-muted-foreground">I own rights or have permission to process this audio.</span>
+            <span
+              className="mt-1 block text-xs leading-relaxed"
+              style={{ color: "var(--muted-foreground)" }}
+            >
+              I own rights or have permission to process this audio.
+            </span>
           </span>
         </label>
 
-        <label className="smx-subframe flex gap-3 p-3 text-sm">
+        <label
+          className="flex cursor-pointer gap-3.5 border p-4 transition-colors hover:bg-[var(--muted)]"
+          style={{ borderColor: "var(--muted)" }}
+        >
           <input
             type="checkbox"
-            className="mt-0.5"
+            className="mt-0.5 shrink-0"
             checked={trainingConsent}
-            onChange={(event) => onTrainingConsentChange(event.target.checked)}
+            onChange={(e) => onTrainingConsentChange(e.target.checked)}
+            aria-label="Optional dataset consent"
           />
           <span>
-            <span className="inline-flex items-center gap-2 font-semibold tracking-tight">
-              <SparklesIcon className="size-4 text-primary" />
+            <span className="inline-flex items-center gap-2 text-sm font-semibold">
+              <SparklesIcon className="size-4" style={{ color: "var(--muted-foreground)" }} />
               Optional dataset consent
             </span>
-            <span className="mt-1 block text-xs text-muted-foreground">
-              Allow this track and outputs in a consented dataset for future model tuning.
+            <span
+              className="mt-1 block text-xs leading-relaxed"
+              style={{ color: "var(--muted-foreground)" }}
+            >
+              Allow this track in a consented dataset for future model tuning.
             </span>
           </span>
         </label>
       </div>
 
-      <div className="mt-5 flex flex-wrap items-center gap-3">
-        <Button onClick={onUpload} disabled={!canUpload} className="smx-button-primary rounded-md px-4 py-2 text-[11px]">
-          {uploadState === "preparing" ? "Preparing..." : uploadState === "uploading" ? "Uploading..." : "Upload Audio"}
+      {/* Upload button */}
+      <div className="mt-5">
+        <Button
+          onClick={onUpload}
+          disabled={!canUpload}
+          className="brutal-button-primary w-full justify-center py-3.5 text-xs"
+          style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}
+        >
+          {busy ? (
+            <>
+              <span className="inline-block size-3.5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+              {uploadState === "preparing" ? "Preparing…" : "Uploading…"}
+            </>
+          ) : uploadState === "uploaded" ? (
+            <>
+              <CheckIcon className="size-3.5" />
+              Uploaded
+            </>
+          ) : (
+            <>
+              <UploadIcon className="size-3.5" />
+              Upload Audio
+            </>
+          )}
         </Button>
-        {uploadExpiry ? <span className="smx-chip">Expires {new Date(uploadExpiry).toLocaleString()}</span> : null}
       </div>
 
-      <p className="mt-3 text-xs text-muted-foreground">{uploadNextStep({ file, rightsConfirmed, uploadState })}</p>
+      {uploadExpiry ? (
+        <p className="mt-2.5 font-mono text-xs" style={{ color: "var(--muted-foreground)" }}>
+          Expires {new Date(uploadExpiry).toLocaleString()}
+        </p>
+      ) : null}
 
-      {uploadError ? <p className="mt-3 text-xs font-semibold uppercase tracking-[0.08em] text-destructive">{uploadError}</p> : null}
+      <p className="mt-2 font-mono text-xs" style={{ color: "var(--muted-foreground)" }}>
+        {nextStep({ file, rightsConfirmed, uploadState })}
+      </p>
+
+      {uploadError ? (
+        <p
+          className="mt-3 font-mono text-xs font-bold uppercase tracking-wide"
+          style={{ color: "var(--destructive)" }}
+        >
+          ⚠ {uploadError}
+        </p>
+      ) : null}
     </section>
   );
 }

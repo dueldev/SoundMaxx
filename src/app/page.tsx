@@ -1,16 +1,5 @@
 import Link from "next/link";
-import {
-  ActivityIcon,
-  ArrowUpRightIcon,
-  AudioLinesIcon,
-  Clock3Icon,
-  GaugeIcon,
-  Layers3Icon,
-  Music3Icon,
-  ShieldCheckIcon,
-  SparklesIcon,
-  WandSparklesIcon,
-} from "lucide-react";
+import { ArrowRightIcon } from "lucide-react";
 import { TOOL_CONFIGS } from "@/lib/tool-config";
 
 const readinessByTool: Record<string, number> = {
@@ -21,172 +10,242 @@ const readinessByTool: Record<string, number> = {
   "midi-extract": 88,
 };
 
-const iconBySlug: Record<string, typeof AudioLinesIcon> = {
-  "stem-isolation": AudioLinesIcon,
-  mastering: WandSparklesIcon,
-  "key-bpm": Clock3Icon,
-  "loudness-report": GaugeIcon,
-  "midi-extract": Music3Icon,
-};
+const TICKER_ITEMS = [
+  "Stem Isolation",
+  "Mastering",
+  "Key + BPM Detection",
+  "Loudness Report",
+  "MIDI Extraction",
+];
+const TICKER_DOUBLED = [...TICKER_ITEMS, ...TICKER_ITEMS];
 
 export default function Home() {
   return (
-    <div className="relative overflow-x-hidden pb-14">
-      <div className="smx-shell flex flex-col gap-6 pt-4 md:pt-8">
-        <section className="smx-dark-frame smx-hero animate-rise p-5 md:p-8">
-          <div className="grid gap-7 xl:grid-cols-[1.12fr_0.88fr]">
-            <div>
-              <p className="smx-kicker text-white/70">
-                <SparklesIcon className="size-3.5" />
-                Why SoundMaxx
-              </p>
-              <h1 className="mt-4 max-w-4xl text-4xl font-semibold leading-[0.92] tracking-[0.01em] text-[#f6f8ff] md:text-6xl">
-                Release-ready audio workflows without hidden states.
-              </h1>
-              <p className="mt-4 max-w-2xl text-sm leading-relaxed text-white/72 md:text-base">
-                SoundMaxx keeps upload, processing, and export explicit so creators can move fast and operators can trust every state change.
-              </p>
+    <div className="pb-24">
+      {/* ── Orange accent bar ──────────────────────────────────────────── */}
+      <div className="accent-bar" />
 
-              <div className="mt-5 flex flex-wrap gap-2">
-                <Link href="/tools/stem-isolation" className="smx-button-primary px-4 py-2 text-[11px]">
-                  Open Tool
-                  <ArrowUpRightIcon className="size-3.5" />
-                </Link>
-                <Link href="/ops" className="smx-button-secondary border-white/20 bg-white/8 px-4 py-2 text-[11px] text-white">
-                  View Ops
-                </Link>
-              </div>
+      <div className="smx-shell">
+        {/* ── Hero ──────────────────────────────────────────────────────── */}
+        <section className="animate-rise pt-12 pb-10 md:pt-20 md:pb-16">
+          <p
+            className="mb-6 font-mono text-xs font-semibold uppercase tracking-[0.22em]"
+            style={{ color: "var(--muted-foreground)" }}
+          >
+            SoundMaxx · Audio Tool Studio · Est. 2025
+          </p>
 
-              <div className="mt-5 grid gap-2 sm:grid-cols-3">
-                {[
-                  { label: "Tool Routes", value: String(TOOL_CONFIGS.length), icon: Layers3Icon },
-                  { label: "Session Retention", value: "24h", icon: ShieldCheckIcon },
-                  { label: "Queue Target", value: "< 12s", icon: ActivityIcon },
-                ].map((metric) => (
-                  <article key={metric.label} className="rounded-xl border border-white/16 bg-white/[0.03] px-3 py-3">
-                    <p className="smx-kicker text-white/62">
-                      <metric.icon className="size-3.5" />
-                      {metric.label}
-                    </p>
-                    <p className="mt-2 text-2xl font-semibold tracking-tight text-[#f6f8ff]">{metric.value}</p>
-                  </article>
-                ))}
-              </div>
-            </div>
+          <h1
+            className="font-bold leading-[0.88] tracking-[-0.03em]"
+            style={{ fontSize: "clamp(3.2rem, 11vw, 8rem)" }}
+          >
+            Professional
+            <br />
+            Audio Tools.
+            <br />
+            <span style={{ color: "var(--accent)" }}>Zero Hidden States.</span>
+          </h1>
 
-            <aside className="rounded-2xl border border-white/16 bg-white/[0.04] p-4 backdrop-blur-sm">
-              <p className="smx-kicker text-white/70">Decision Loop</p>
-              <h2 className="mt-2 text-2xl font-semibold tracking-tight text-[#f6f8ff]">First screen: why. Second: risk. Third: action.</h2>
-              <div className="mt-4 grid gap-2">
-                {[
-                  ["01", "Upload", "Rights check and file prep before processing."],
-                  ["02", "Process", "Live state, progress, and ETA with clear status."],
-                  ["03", "Export", "A/B compare with artifact expiry timing."],
-                ].map(([step, title, description]) => (
-                  <article key={step} className="rounded-xl border border-white/14 bg-white/[0.02] px-3 py-2.5">
-                    <p className="smx-kicker text-white/65">{step}</p>
-                    <p className="mt-1 text-sm font-semibold text-[#f6f8ff]">{title}</p>
-                    <p className="mt-1 text-xs leading-relaxed text-white/63">{description}</p>
-                  </article>
-                ))}
-              </div>
-            </aside>
-          </div>
-        </section>
+          <p
+            className="mt-8 max-w-2xl text-base leading-relaxed md:text-lg"
+            style={{ color: "var(--muted-foreground)" }}
+          >
+            Stem isolation, mastering, key detection, loudness analysis, and MIDI
+            extraction — all with transparent upload, process, and export states.
+          </p>
 
-        <section className="smx-frame p-5 md:p-6">
-          <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
-            <div>
-              <p className="smx-kicker">What You See Instantly</p>
-              <h2 className="mt-2 text-3xl font-semibold tracking-tight">A control surface built for speed and trust.</h2>
-            </div>
-            <Link href="/ops" className="smx-button-secondary px-3 py-2 text-[11px]">
-              Ops Posture
-              <ArrowUpRightIcon className="size-3.5" />
+          <div className="mt-10 flex flex-wrap gap-3">
+            <Link href="/tools/stem-isolation" className="brutal-button-primary">
+              Open Studio
+              <ArrowRightIcon className="size-3.5" />
+            </Link>
+            <Link href="/ops" className="brutal-button-ghost">
+              Ops Dashboard
             </Link>
           </div>
+        </section>
+      </div>
 
-          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+      {/* ── Ticker marquee ────────────────────────────────────────────── */}
+      <div className="ticker-strip" aria-hidden="true">
+        <div className="ticker-inner">
+          {TICKER_DOUBLED.map((item, i) => (
+            <span key={i} className="inline-flex items-center">
+              <span className="ticker-item">{item}</span>
+              <span className="ticker-sep">◆</span>
+            </span>
+          ))}
+        </div>
+      </div>
+
+      <div className="smx-shell">
+        {/* ── Stats bar ─────────────────────────────────────────────────── */}
+        <section className="py-10">
+          <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
             {[
-              {
-                title: "State-first workflow",
-                description: "Upload, running, succeeded, and failed states stay visible without guesswork.",
-                icon: ActivityIcon,
-              },
-              {
-                title: "Evidence-ready outputs",
-                description: "Compare original and processed tracks before export and expiry.",
-                icon: Music3Icon,
-              },
-              {
-                title: "Operator runway",
-                description: "Queue depth, failed runs, and intervention guidance live on one route.",
-                icon: GaugeIcon,
-              },
-              {
-                title: "Fast routing",
-                description: "One upload fans out into five tool workflows with direct next action.",
-                icon: Layers3Icon,
-              },
-            ].map((card) => (
-              <article key={card.title} className="smx-subframe hover-lift p-4">
-                <span className="icon-pill size-9 rounded-lg">
-                  <card.icon className="size-4" />
+              { label: "Tools Available", value: String(TOOL_CONFIGS.length) },
+              { label: "Session Retention", value: "24h" },
+              { label: "Queue Target", value: "<12s" },
+              { label: "Workflow States", value: "5" },
+            ].map((stat) => (
+              <div
+                key={stat.label}
+                className="border-l-2 pl-4"
+                style={{ borderColor: "var(--foreground)" }}
+              >
+                <span className="font-mono text-4xl font-bold leading-none md:text-5xl">
+                  {stat.value}
                 </span>
-                <h3 className="mt-3 text-xl font-semibold tracking-tight">{card.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{card.description}</p>
-              </article>
+                <p
+                  className="mt-1.5 font-mono text-xs uppercase tracking-[0.14em]"
+                  style={{ color: "var(--muted-foreground)" }}
+                >
+                  {stat.label}
+                </p>
+              </div>
             ))}
           </div>
         </section>
 
-        <section className="smx-frame p-5 md:p-6">
-          <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
+        <hr className="section-rule" />
+
+        {/* ── Tool matrix ───────────────────────────────────────────────── */}
+        <section className="py-14">
+          <div className="mb-10 flex flex-wrap items-end justify-between gap-4">
             <div>
-              <p className="smx-kicker">Tool Matrix</p>
-              <h2 className="mt-2 text-3xl font-semibold tracking-tight">Pick a workflow and start processing now.</h2>
+              <hr className="accent-rule mb-4" />
+              <h2
+                className="font-bold leading-tight"
+                style={{ fontSize: "clamp(2rem, 4.5vw, 3rem)" }}
+              >
+                The Tools
+              </h2>
             </div>
-            <span className="smx-chip">
-              <Clock3Icon className="size-3.5" />
-              Updated live
-            </span>
+            <span className="tag">All {TOOL_CONFIGS.length} Available</span>
           </div>
 
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {TOOL_CONFIGS.map((tool) => {
-              const Icon = iconBySlug[tool.slug] ?? AudioLinesIcon;
+          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+            {TOOL_CONFIGS.map((tool, index) => {
               const readiness = readinessByTool[tool.slug] ?? 86;
+              const num = String(index + 1).padStart(2, "0");
 
               return (
-                <article key={tool.slug} className="smx-subframe hover-lift flex min-h-[13rem] flex-col p-4">
-                  <div className="flex items-start justify-between gap-3">
-                    <span className="smx-chip">
-                      <Icon className="size-3.5" />
-                      {tool.navLabel}
+                <Link
+                  key={tool.slug}
+                  href={tool.href}
+                  className="brutal-card-interactive group flex flex-col p-6"
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <span
+                      className="font-mono text-4xl font-bold leading-none"
+                      style={{ color: "var(--accent)" }}
+                    >
+                      {num}
                     </span>
-                    <span className="text-xs font-semibold uppercase tracking-[0.11em] text-muted-foreground">{readiness}% ready</span>
+                    <span className="tag font-mono">{readiness}%</span>
                   </div>
 
-                  <h3 className="mt-3 text-2xl font-semibold tracking-tight">{tool.label}</h3>
-                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{tool.marketingBlurb}</p>
+                  <h3 className="mt-5 text-xl font-bold leading-tight">{tool.label}</h3>
+                  <p
+                    className="mt-2 flex-1 text-base leading-relaxed"
+                    style={{ color: "var(--muted-foreground)" }}
+                  >
+                    {tool.marketingBlurb}
+                  </p>
 
-                  <div className="mt-4 h-2 w-full overflow-hidden rounded-full border border-border/70 bg-background/70">
-                    <div
-                      className="h-full rounded-full bg-[linear-gradient(90deg,var(--brand-coral),var(--brand-cobalt),var(--brand-mint))]"
-                      style={{ width: `${readiness}%` }}
-                    />
+                  <div className="mt-6 flex items-center gap-2 font-mono text-xs font-bold uppercase tracking-[0.1em]">
+                    Launch
+                    <ArrowRightIcon className="size-3.5 transition-transform group-hover:translate-x-1" />
                   </div>
-
-                  <div className="mt-4 action-rail">
-                    <Link href={tool.href} className="smx-button-primary px-3 py-2 text-[11px]">
-                      Launch
-                      <ArrowUpRightIcon className="size-3.5" />
-                    </Link>
-                    <span className="smx-chip">Audio In • Artifact Out</span>
-                  </div>
-                </article>
+                </Link>
               );
             })}
+          </div>
+        </section>
+
+        <hr className="section-rule" />
+
+        {/* ── How it works ──────────────────────────────────────────────── */}
+        <section className="py-14">
+          <div className="mb-10">
+            <hr className="accent-rule mb-4" />
+            <h2
+              className="font-bold leading-tight"
+              style={{ fontSize: "clamp(2rem, 4.5vw, 3rem)" }}
+            >
+              How It Works
+            </h2>
+          </div>
+
+          <div className="grid gap-10 md:grid-cols-3">
+            {[
+              {
+                num: "01",
+                title: "Upload",
+                body: "Drop your audio file, confirm rights, and stage it for processing. WAV, MP3, FLAC, AAC, OGG, and M4A supported. Files are retained for 24 hours.",
+              },
+              {
+                num: "02",
+                title: "Configure & Run",
+                body: "Select tool parameters — stems, mastering preset, LUFS target — then submit. Track live queue position, progress, and ETA without leaving the page.",
+              },
+              {
+                num: "03",
+                title: "Compare & Export",
+                body: "A/B listen to original and processed audio side-by-side. Download artifacts before they expire. Every state is visible and explicit.",
+              },
+            ].map(({ num, title, body }) => (
+              <div
+                key={num}
+                className="relative border-l-2 pl-7"
+                style={{ borderColor: "var(--foreground)" }}
+              >
+                <span
+                  className="absolute -left-px top-0 h-10 w-[2px]"
+                  style={{ background: "var(--accent)" }}
+                />
+                <span
+                  className="font-mono text-5xl font-bold leading-none"
+                  style={{ color: "var(--muted-foreground)", opacity: 0.35 }}
+                >
+                  {num}
+                </span>
+                <h3 className="mt-4 text-xl font-bold">{title}</h3>
+                <p
+                  className="mt-3 text-base leading-relaxed"
+                  style={{ color: "var(--muted-foreground)" }}
+                >
+                  {body}
+                </p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* ── Footer CTA ────────────────────────────────────────────────── */}
+        <section
+          className="py-14 border-t-2"
+          style={{ borderColor: "var(--foreground)" }}
+        >
+          <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+            <div>
+              <h2
+                className="font-bold leading-tight"
+                style={{ fontSize: "clamp(1.5rem, 3vw, 2.4rem)" }}
+              >
+                Ready to process?
+              </h2>
+              <p
+                className="mt-2 text-base"
+                style={{ color: "var(--muted-foreground)" }}
+              >
+                No account required. Sessions last 24 hours.
+              </p>
+            </div>
+            <Link href="/tools/stem-isolation" className="brutal-button-primary whitespace-nowrap">
+              Start Now
+              <ArrowRightIcon className="size-3.5" />
+            </Link>
           </div>
         </section>
       </div>

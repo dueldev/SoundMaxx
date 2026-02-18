@@ -1,0 +1,211 @@
+- generic [ref=e1]:
+  - banner [ref=e2]:
+    - navigation [ref=e3]:
+      - link "SoundMaxx" [ref=e4] [cursor=pointer]:
+        - /url: /
+        - img [ref=e6]
+        - text: SoundMaxx
+      - button "Toggle menu" [expanded] [active] [ref=e11]:
+        - img [ref=e12]
+  - main [ref=e15]:
+    - generic [ref=e17]:
+      - generic [ref=e20]:
+        - paragraph [ref=e21]: Halide Core
+        - heading "SILVER SULPHIDE" [level=1] [ref=e22]:
+          - text: SILVER
+          - text: SULPHIDE
+        - paragraph [ref=e23]: Surface tension and topographical light. A cinematic control plane for high-resolution audio tooling.
+        - generic [ref=e24]:
+          - link "Explore Depth" [ref=e25] [cursor=pointer]:
+            - /url: /tools/stem-isolation
+          - generic [ref=e26]: Archive 2026
+        - generic [ref=e27]:
+          - generic [ref=e28]: Realtime Status
+          - generic [ref=e29]: Single Upload Workflow
+      - generic [ref=e32]:
+        - generic [ref=e33]:
+          - generic [ref=e34]:
+            - paragraph [ref=e35]: Platform Signal
+            - heading "One upload. Five outcomes. Transparent status." [level=2] [ref=e36]
+          - link "Start now" [ref=e37] [cursor=pointer]:
+            - /url: /tools/stem-isolation
+            - text: Start now
+            - img [ref=e38]
+        - generic [ref=e41]:
+          - article [ref=e42]:
+            - paragraph [ref=e43]:
+              - img [ref=e44]
+              - text: Tool Routes
+            - paragraph [ref=e48]: "5"
+          - article [ref=e49]:
+            - paragraph [ref=e50]:
+              - img [ref=e51]
+              - text: Avg Queue Start
+            - paragraph [ref=e54]: < 12s
+          - article [ref=e55]:
+            - paragraph [ref=e56]:
+              - img [ref=e57]
+              - text: State Visibility
+            - paragraph [ref=e59]: 100%
+      - generic [ref=e60]:
+        - generic [ref=e61]:
+          - generic [ref=e62]:
+            - paragraph [ref=e63]: Tool Surfaces
+            - heading "Choose a workflow and jump in." [level=2] [ref=e64]
+          - link "View Studio" [ref=e65] [cursor=pointer]:
+            - /url: /tools/stem-isolation
+            - text: View Studio
+            - img [ref=e66]
+        - generic [ref=e69]:
+          - article [ref=e70]:
+            - generic [ref=e71]:
+              - paragraph [ref=e72]:
+                - img [ref=e73]
+                - text: Stem Isolation
+              - link "Open" [ref=e75] [cursor=pointer]:
+                - /url: /tools/stem-isolation
+                - text: Open
+                - img [ref=e76]
+            - paragraph [ref=e79]: Separate vocals, drums, bass, and music into clean stems.
+            - generic [ref=e81]:
+              - generic [ref=e82]:
+                - generic [ref=e83]: Pipeline readiness
+                - generic [ref=e84]: 94%
+              - progressbar [ref=e85]
+          - article [ref=e104]:
+            - generic [ref=e105]:
+              - paragraph [ref=e106]:
+                - img [ref=e107]
+                - text: Mastering
+              - link "Open" [ref=e109] [cursor=pointer]:
+                - /url: /tools/mastering
+                - text: Open
+                - img [ref=e110]
+            - paragraph [ref=e113]: Shape loudness, tone, and energy for release-ready mixes.
+            - generic [ref=e115]:
+              - generic [ref=e116]:
+                - generic [ref=e117]: Pipeline readiness
+                - generic [ref=e118]: 88%
+              - progressbar [ref=e119]
+          - article [ref=e138]:
+            - generic [ref=e139]:
+              - paragraph [ref=e140]:
+                - img [ref=e141]
+                - text: Key + BPM
+              - link "Open" [ref=e143] [cursor=pointer]:
+                - /url: /tools/key-bpm
+                - text: Open
+                - img [ref=e144]
+            - paragraph [ref=e147]: Identify musical key and tempo for faster production workflows.
+            - generic [ref=e149]:
+              - generic [ref=e150]:
+                - generic [ref=e151]: Pipeline readiness
+                - generic [ref=e152]: 91%
+              - progressbar [ref=e153]
+          - article [ref=e172]:
+            - generic [ref=e173]:
+              - paragraph [ref=e174]:
+                - img [ref=e175]
+                - text: Loudness Report
+              - link "Open" [ref=e177] [cursor=pointer]:
+                - /url: /tools/loudness-report
+                - text: Open
+                - img [ref=e178]
+            - paragraph [ref=e181]: Measure loudness, true peak, and dynamic range before release.
+            - generic [ref=e183]:
+              - generic [ref=e184]:
+                - generic [ref=e185]: Pipeline readiness
+                - generic [ref=e186]: 86%
+              - progressbar [ref=e187]
+          - article [ref=e206]:
+            - generic [ref=e207]:
+              - paragraph [ref=e208]:
+                - img [ref=e209]
+                - text: MIDI Extraction
+              - link "Open" [ref=e211] [cursor=pointer]:
+                - /url: /tools/midi-extract
+                - text: Open
+                - img [ref=e212]
+            - paragraph [ref=e215]: Convert melodic material into editable MIDI for your DAW.
+            - generic [ref=e217]:
+              - generic [ref=e218]:
+                - generic [ref=e219]: Pipeline readiness
+                - generic [ref=e220]: 83%
+              - progressbar [ref=e221]
+      - generic [ref=e240]:
+        - generic [ref=e241]:
+          - paragraph [ref=e242]:
+            - img [ref=e243]
+            - text: Live Processing State
+          - heading "Operational feedback that stays legible under pressure." [level=3] [ref=e248]
+          - paragraph [ref=e249]: Upload, queue, process, and export are intentionally explicit. No hidden transitions, no uncertainty about status.
+          - generic [ref=e250]:
+            - generic [ref=e251]:
+              - img [ref=e253]
+              - img [ref=e257]
+              - img [ref=e309]
+              - img [ref=e313]
+              - img [ref=e317]
+              - img [ref=e321]
+            - generic [ref=e260]: Fetching...
+          - generic [ref=e261]:
+            - paragraph [ref=e262]: Upload state is always visible.
+            - paragraph [ref=e264]: Processing progress includes percent + status text.
+            - paragraph [ref=e266]: Results panel keeps export actions one click away.
+        - generic [ref=e269]:
+          - generic:
+            - generic: "01"
+          - generic [ref=e270]:
+            - generic [ref=e272]: Testimonials
+            - generic [ref=e275]:
+              - generic [ref=e277]: Linear
+              - blockquote [ref=e280]:
+                - generic [ref=e324]: Transformed
+                - generic [ref=e325]: our
+                - generic [ref=e326]: entire
+                - generic [ref=e327]: creative
+                - generic [ref=e328]: process
+                - generic [ref=e329]: overnight.
+              - generic [ref=e281]:
+                - generic [ref=e283]:
+                  - paragraph [ref=e284]: Sarah Chen
+                  - paragraph [ref=e285]: Design Director
+                - generic [ref=e286]:
+                  - button "Previous testimonial" [ref=e287]:
+                    - img [ref=e288]
+                  - button "Next testimonial" [ref=e290]:
+                    - img [ref=e291]
+  - button "Open Next.js Dev Tools" [ref=e298] [cursor=pointer]:
+    - img [ref=e299]
+  - alert [ref=e303]
+  - generic [ref=e332]:
+    - link "Home" [ref=e333] [cursor=pointer]:
+      - /url: /
+      - generic [ref=e334]:
+        - img [ref=e335]
+        - text: Home
+    - generic [ref=e338]:
+      - paragraph [ref=e339]:
+        - img [ref=e340]
+        - text: Tools
+      - generic [ref=e342]:
+        - link "Stem Isolation Separate vocals, drums, bass, and music into clean stems." [ref=e343] [cursor=pointer]:
+          - /url: /tools/stem-isolation
+          - paragraph [ref=e344]: Stem Isolation
+          - paragraph [ref=e345]: Separate vocals, drums, bass, and music into clean stems.
+        - link "Mastering Shape loudness, tone, and energy for release-ready mixes." [ref=e346] [cursor=pointer]:
+          - /url: /tools/mastering
+          - paragraph [ref=e347]: Mastering
+          - paragraph [ref=e348]: Shape loudness, tone, and energy for release-ready mixes.
+        - link "Key + BPM Identify musical key and tempo for faster production workflows." [ref=e349] [cursor=pointer]:
+          - /url: /tools/key-bpm
+          - paragraph [ref=e350]: Key + BPM
+          - paragraph [ref=e351]: Identify musical key and tempo for faster production workflows.
+        - link "Loudness Report Measure loudness, true peak, and dynamic range before release." [ref=e352] [cursor=pointer]:
+          - /url: /tools/loudness-report
+          - paragraph [ref=e353]: Loudness Report
+          - paragraph [ref=e354]: Measure loudness, true peak, and dynamic range before release.
+        - link "MIDI Extraction Convert melodic material into editable MIDI for your DAW." [ref=e355] [cursor=pointer]:
+          - /url: /tools/midi-extract
+          - paragraph [ref=e356]: MIDI Extraction
+          - paragraph [ref=e357]: Convert melodic material into editable MIDI for your DAW.

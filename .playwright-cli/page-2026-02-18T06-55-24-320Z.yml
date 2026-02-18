@@ -1,0 +1,43 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - navigation [ref=e3]:
+      - link "SoundMaxx" [ref=e4] [cursor=pointer]:
+        - /url: /
+        - img [ref=e6]
+        - text: SoundMaxx
+      - button "Toggle menu" [ref=e11]:
+        - img [ref=e12]
+  - main [ref=e15]:
+    - generic [ref=e16]:
+      - generic [ref=e17]:
+        - paragraph [ref=e18]: Ops Control
+        - heading "SoundMaxx Ops" [level=1] [ref=e19]
+        - paragraph [ref=e20]: Queue and failure telemetry for worker pipelines.
+      - generic [ref=e21]:
+        - paragraph [ref=e22]:
+          - img [ref=e23]
+          - text: Ops metrics are partially unavailable. Showing fallback values.
+        - generic [ref=e27]:
+          - generic [ref=e28]:
+            - term [ref=e29]:
+              - img [ref=e30]
+              - text: Total sessions
+            - definition [ref=e35]: "0"
+          - generic [ref=e36]:
+            - term [ref=e37]:
+              - img [ref=e38]
+              - text: Active jobs
+            - definition [ref=e42]: "0"
+          - generic [ref=e43]:
+            - term [ref=e44]:
+              - img [ref=e45]
+              - text: Failed jobs (24h)
+            - definition [ref=e47]: "0"
+          - generic [ref=e48]:
+            - term [ref=e49]:
+              - img [ref=e50]
+              - text: Queue depth
+            - definition [ref=e54]: "0"
+  - button "Open Next.js Dev Tools" [ref=e60] [cursor=pointer]:
+    - img [ref=e61]
+  - alert [ref=e65]

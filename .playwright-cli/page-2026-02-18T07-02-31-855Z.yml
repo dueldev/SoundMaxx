@@ -1,0 +1,144 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - navigation [ref=e3]:
+      - link "SoundMaxx" [ref=e4] [cursor=pointer]:
+        - /url: /
+        - img [ref=e6]
+        - text: SoundMaxx
+      - navigation "Main" [ref=e11]:
+        - list [ref=e13]:
+          - listitem [ref=e14]:
+            - link "Home" [ref=e15] [cursor=pointer]:
+              - /url: /
+              - img [ref=e16]
+              - text: Home
+          - listitem [ref=e19]:
+            - button "Tools" [ref=e20]:
+              - img [ref=e21]
+              - text: Tools
+              - img [ref=e23]
+  - main [ref=e25]:
+    - generic [ref=e27]:
+      - generic [ref=e29]:
+        - generic [ref=e30]:
+          - paragraph [ref=e31]:
+            - img [ref=e32]
+            - text: Tool Workspace
+          - heading "Key + BPM Detection" [level=1] [ref=e37]
+          - paragraph [ref=e38]: Identify musical key and tempo for faster production workflows.
+          - generic [ref=e39]:
+            - generic [ref=e40]:
+              - img [ref=e41]
+              - text: Audio In, Artifact Out
+            - generic [ref=e45]:
+              - img [ref=e46]
+              - text: Visible Queue + Progress
+        - complementary [ref=e49]:
+          - paragraph [ref=e50]: Workflow rail
+          - heading "Key + BPM Detection" [level=2] [ref=e51]
+          - paragraph [ref=e52]: Quickly detect harmonic and tempo metadata to organize, DJ, and remix with confidence.
+          - list [ref=e53]:
+            - listitem [ref=e54]:
+              - generic [ref=e55]: Upload source audio
+              - generic [ref=e56]:
+                - text: "01"
+                - img [ref=e57]
+            - listitem [ref=e60]:
+              - generic [ref=e61]: Configure processing settings
+              - generic [ref=e62]:
+                - text: "02"
+                - img [ref=e63]
+            - listitem [ref=e66]:
+              - generic [ref=e67]: Run the job and track progress
+              - generic [ref=e68]:
+                - text: "03"
+                - img [ref=e69]
+            - listitem [ref=e72]:
+              - generic [ref=e73]: Compare outputs and export
+              - generic [ref=e74]:
+                - text: "04"
+                - img [ref=e75]
+      - generic [ref=e78]:
+        - generic [ref=e79]:
+          - generic [ref=e80]:
+            - generic [ref=e81]:
+              - heading "1. Upload" [level=2] [ref=e82]
+              - paragraph [ref=e83]: Stage your source, validate rights, then upload.
+            - generic [ref=e84]: Waiting
+          - generic [ref=e85] [cursor=pointer]:
+            - button "Choose File" [ref=e86]
+            - paragraph [ref=e87]:
+              - img [ref=e88]
+              - text: Drag and drop audio or click to browse
+            - paragraph [ref=e92]: WAV, MP3, FLAC, AAC, OGG, M4A. Max 100MB and 15 minutes.
+          - generic [ref=e93]:
+            - generic [ref=e94]:
+              - checkbox "Rights confirmation I own rights or have permission to process this audio." [ref=e95]
+              - generic [ref=e96]:
+                - generic [ref=e97]:
+                  - img [ref=e98]
+                  - text: Rights confirmation
+                - generic [ref=e101]: I own rights or have permission to process this audio.
+            - generic [ref=e102]:
+              - checkbox "Optional dataset consent Allow this track and outputs in a consented dataset for future model tuning." [ref=e103]
+              - generic [ref=e104]:
+                - generic [ref=e105]:
+                  - img [ref=e106]
+                  - text: Optional dataset consent
+                - generic [ref=e111]: Allow this track and outputs in a consented dataset for future model tuning.
+          - generic [ref=e112]:
+            - button "Upload Audio" [disabled]
+          - paragraph [ref=e113]: Select one audio file to start.
+        - generic [ref=e114]:
+          - generic [ref=e115]:
+            - generic [ref=e116]:
+              - heading "2. Process" [level=2] [ref=e117]
+              - paragraph [ref=e118]: Configure parameters, submit job, monitor status.
+            - generic [ref=e119]:
+              - img [ref=e120]
+              - text: idle
+          - generic [ref=e122]:
+            - paragraph [ref=e123]:
+              - img [ref=e124]
+              - text: Selected tool
+            - paragraph [ref=e127]: Key + BPM Detection
+            - paragraph [ref=e128]: Identify musical key and tempo for faster production workflows.
+          - generic [ref=e130]:
+            - checkbox "Include chord hints" [checked] [ref=e131]
+            - text: Include chord hints
+          - button "Run Key + BPM Detection" [disabled]:
+            - img
+            - text: Run Key + BPM Detection
+          - paragraph [ref=e132]: Upload audio first to enable processing.
+          - generic [ref=e133]:
+            - generic [ref=e134]:
+              - paragraph [ref=e135]:
+                - img [ref=e136]
+                - text: Pipeline status
+              - generic [ref=e145]: idle
+            - generic [ref=e147]:
+              - generic [ref=e148]:
+                - generic [ref=e149]: Progress
+                - generic [ref=e150]: 0%
+              - progressbar [ref=e151]
+            - paragraph [ref=e174]: Awaiting processing telemetry.
+      - generic [ref=e175]:
+        - heading "3. Results and A/B Compare" [level=3] [ref=e176]
+        - paragraph [ref=e177]: Review outputs, compare before/after playback, and export before expiry.
+        - generic [ref=e178]:
+          - generic [ref=e179]:
+            - paragraph [ref=e180]:
+              - img [ref=e181]
+              - text: A/B Playback
+            - generic [ref=e184]:
+              - paragraph [ref=e186]: Original
+              - paragraph [ref=e189]: Processed
+          - generic [ref=e191]:
+            - paragraph [ref=e192]:
+              - img [ref=e193]
+              - text: Artifacts
+            - paragraph [ref=e197]: No artifacts yet. Run a tool to generate outputs.
+      - generic [ref=e198]: "Job ID: not started"
+  - button "Open Next.js Dev Tools" [ref=e204] [cursor=pointer]:
+    - img [ref=e205]
+  - alert [ref=e209]

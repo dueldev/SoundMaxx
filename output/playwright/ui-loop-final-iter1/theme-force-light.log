@@ -1,0 +1,6 @@
+### Result
+undefined
+### Ran Playwright code
+```js
+await page.evaluate('() => { localStorage.setItem(\'soundmaxx-theme\',\'light\'); document.documentElement.dataset.theme=\'light\'; document.documentElement.classList.remove(\'dark\'); }');
+```

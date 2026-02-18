@@ -1,0 +1,134 @@
+- generic [ref=e1]:
+  - link "Skip to main content" [ref=e2] [cursor=pointer]:
+    - /url: "#main-content"
+  - generic [ref=e5]:
+    - link "SoundMaxx home" [ref=e6] [cursor=pointer]:
+      - /url: /
+      - generic [ref=e7]: SM
+      - generic [ref=e8]:
+        - generic [ref=e9]: SoundMaxx
+        - generic [ref=e10]: AI-powered audio processing
+    - navigation "Primary" [ref=e11]:
+      - link "Home" [ref=e12] [cursor=pointer]:
+        - /url: /
+      - button "Tools menu" [ref=e14]: Tools
+    - generic [ref=e15]:
+      - button "Switch to light theme" [ref=e16]:
+        - img [ref=e17]
+        - generic [ref=e27]: Light
+      - button "Utility menu" [ref=e29]: Utility
+      - link "Open Tool" [ref=e30] [cursor=pointer]:
+        - /url: /tools/stem-isolation
+  - main [ref=e31]:
+    - generic [ref=e240]:
+      - generic [ref=e242]:
+        - generic [ref=e243]:
+          - paragraph [ref=e244]:
+            - img [ref=e245]
+            - text: SoundMaxx Tool Page
+          - heading "Stem Isolation" [level=1] [ref=e249]
+          - paragraph [ref=e250]: Separate vocals, drums, bass, and music into clean stems.
+        - generic [ref=e251]:
+          - paragraph [ref=e252]:
+            - img [ref=e253]
+            - text: Workflow
+          - paragraph [ref=e258]: Stem Isolation
+          - paragraph [ref=e259]: Pull apart full mixes into stems for remixing, practice, and arrangement edits.
+          - list [ref=e260]:
+            - listitem [ref=e261]:
+              - generic [ref=e262]: "1"
+              - generic [ref=e263]: Upload source audio
+            - listitem [ref=e264]:
+              - generic [ref=e265]: "2"
+              - generic [ref=e266]: Tune this tool's settings
+            - listitem [ref=e267]:
+              - generic [ref=e268]: "3"
+              - generic [ref=e269]: Run job and track progress
+            - listitem [ref=e270]:
+              - generic [ref=e271]: "4"
+              - generic [ref=e272]: Preview and export results
+      - generic [ref=e273]:
+        - generic [ref=e274]:
+          - generic [ref=e275]:
+            - generic [ref=e276]:
+              - heading "1. Upload" [level=2] [ref=e277]
+              - paragraph [ref=e278]: Audio ingest, rights validation, and consent controls.
+            - generic [ref=e279]: Waiting for File
+          - generic [active] [ref=e280] [cursor=pointer]:
+            - button "Choose File" [ref=e281]
+            - paragraph [ref=e282]:
+              - img [ref=e283]
+              - text: Drag and drop audio or click to browse
+            - paragraph [ref=e287]: WAV, MP3, FLAC, AAC, OGG, M4A. Max 100MB and 15 minutes.
+            - paragraph [ref=e357]:
+              - img [ref=e358]
+              - text: soundmaxx-test.wav · 86.2 KB
+          - generic [ref=e364]:
+            - generic "Waveform preview" [ref=e365]
+            - button "Play Preview" [ref=e369]:
+              - img [ref=e370]
+              - text: Play Preview
+          - generic [ref=e288]:
+            - generic [ref=e289]:
+              - checkbox "Rights confirmation I own rights or have permission to process this audio." [checked] [ref=e290]
+              - generic [ref=e291]:
+                - generic [ref=e292]:
+                  - img [ref=e293]
+                  - text: Rights confirmation
+                - generic [ref=e296]: I own rights or have permission to process this audio.
+            - generic [ref=e297]:
+              - checkbox "Optional dataset consent Allow this track and outputs in a consented dataset for future model tuning." [ref=e298]
+              - generic [ref=e299]:
+                - text: Optional dataset consent
+                - generic [ref=e300]: Allow this track and outputs in a consented dataset for future model tuning.
+          - button "Upload Audio" [ref=e302]:
+            - generic [ref=e303]: Upload Audio
+        - generic [ref=e304]:
+          - generic [ref=e305]:
+            - generic [ref=e306]:
+              - heading "2. Process" [level=2] [ref=e307]
+              - paragraph [ref=e308]: Tool parameters, queueing, and live execution telemetry.
+            - generic [ref=e309]:
+              - img [ref=e310]
+              - text: IDLE
+          - generic [ref=e312]:
+            - generic [ref=e313]:
+              - paragraph [ref=e314]: Selected Tool
+              - paragraph [ref=e315]:
+                - img [ref=e316]
+                - text: Stem Isolation
+              - paragraph [ref=e318]: Separate vocals, drums, bass, and music into clean stems.
+            - generic [ref=e319]:
+              - text: Stem count
+              - combobox "Stem count" [ref=e320]:
+                - option "2 stems (faster)"
+                - option "4 stems (full split)" [selected]
+            - button "Run Stem Isolation" [disabled] [ref=e321]:
+              - generic [ref=e322]:
+                - img [ref=e323]
+                - text: Run Stem Isolation
+            - generic [ref=e325]:
+              - generic [ref=e326]:
+                - generic [ref=e327]:
+                  - img [ref=e328]
+                  - text: Pipeline status
+                - generic [ref=e331]: idle
+              - paragraph [ref=e333]: Awaiting processing telemetry.
+      - generic [ref=e334]:
+        - heading "3. Results and A/B Compare" [level=3] [ref=e335]
+        - paragraph [ref=e336]: Review outputs, compare before/after audio, and export before retention expiry.
+        - generic [ref=e337]:
+          - generic [ref=e338]:
+            - paragraph [ref=e339]:
+              - img [ref=e340]
+              - text: A/B Playback
+            - generic [ref=e343]:
+              - paragraph [ref=e345]: Original
+              - paragraph [ref=e348]: Processed
+          - generic [ref=e350]:
+            - paragraph [ref=e351]:
+              - img [ref=e352]
+              - text: Artifacts
+            - paragraph [ref=e354]: No artifacts yet. Run a tool to generate outputs.
+      - generic [ref=e355]: "Job ID: not started"
+  - alert [ref=e356]: Stem Isolation | SoundMaxx

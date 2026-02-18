@@ -1,0 +1,12 @@
+### Ran Playwright code
+```js
+await page.goto('http://localhost:3000/');
+```
+### Page
+- Page URL: http://localhost:3000/
+- Page Title: SoundMaxx | Audio Tool Studio
+- Console: 1 errors, 0 warnings
+### Snapshot
+- [Snapshot](.playwright-cli/page-2026-02-18T07-31-02-847Z.yml)
+### Events
+- New console entries: .playwright-cli/console-2026-02-18T07-31-02-573Z.log#L1-L142

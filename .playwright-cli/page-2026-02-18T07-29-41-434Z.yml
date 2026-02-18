@@ -1,0 +1,108 @@
+- generic [active] [ref=e1]:
+  - link "Skip to main content" [ref=e2] [cursor=pointer]:
+    - /url: "#main-content"
+  - banner [ref=e3]:
+    - generic [ref=e5]:
+      - link "SoundMaxx home" [ref=e6] [cursor=pointer]:
+        - /url: /
+        - img [ref=e8]
+        - generic [ref=e13]:
+          - generic [ref=e14]: SoundMaxx
+          - generic [ref=e15]: Audio Command Deck
+      - navigation "Main" [ref=e16]:
+        - list [ref=e18]:
+          - listitem [ref=e19]:
+            - link "Home" [ref=e20] [cursor=pointer]:
+              - /url: /
+              - img [ref=e21]
+              - text: Home
+          - listitem [ref=e24]:
+            - link "Ops" [ref=e25] [cursor=pointer]:
+              - /url: /ops
+              - img [ref=e26]
+              - text: Ops
+          - listitem [ref=e28]:
+            - button "Tools" [ref=e29]:
+              - img [ref=e30]
+              - text: Tools
+              - img [ref=e32]
+      - generic [ref=e34]:
+        - button "Switch to light theme" [ref=e35]:
+          - img [ref=e36]
+          - generic [ref=e46]: Light
+        - link "Open Tool" [ref=e47] [cursor=pointer]:
+          - /url: /tools/stem-isolation
+  - main [ref=e48]:
+    - generic [ref=e50]:
+      - generic [ref=e52]:
+        - generic [ref=e53]:
+          - paragraph [ref=e54]:
+            - img [ref=e55]
+            - text: Ops Control
+          - heading "Operational signal, with explicit next action." [level=1] [ref=e58]
+          - paragraph [ref=e59]: Queue pressure, failures, and active jobs are tracked in one place so operators can triage quickly without opening multiple surfaces.
+          - generic [ref=e61]:
+            - img [ref=e62]
+            - text: Syncing
+        - complementary [ref=e65]:
+          - paragraph [ref=e66]: Operator playbook
+          - paragraph [ref=e67]: Refreshing telemetry from queue and job services.
+          - list [ref=e68]:
+            - listitem [ref=e69]: 1. Confirm queue and worker status.
+            - listitem [ref=e70]: 2. Prioritize failed jobs from the last 24h.
+            - listitem [ref=e71]: 3. Route users to a stable workflow if needed.
+          - link "Open Studio" [ref=e72] [cursor=pointer]:
+            - /url: /tools/stem-isolation
+            - text: Open Studio
+            - img [ref=e73]
+      - generic [ref=e76]:
+        - generic [ref=e77]:
+          - generic [ref=e78]:
+            - paragraph [ref=e79]: System posture
+            - heading "What is happening right now." [level=2] [ref=e80]
+          - button "Refresh now" [ref=e81]:
+            - img [ref=e82]
+            - text: Refresh now
+        - generic [ref=e87]:
+          - generic [ref=e88]:
+            - term [ref=e89]:
+              - img [ref=e90]
+              - text: Total sessions
+            - definition [ref=e95]: "0"
+            - paragraph [ref=e96]: Active product usage footprint.
+          - generic [ref=e97]:
+            - term [ref=e98]:
+              - img [ref=e99]
+              - text: Active jobs
+            - definition [ref=e103]: "0"
+            - paragraph [ref=e104]: Jobs currently being processed.
+          - generic [ref=e105]:
+            - term [ref=e106]:
+              - img [ref=e107]
+              - text: Failed jobs (24h)
+            - definition [ref=e109]: "0"
+            - paragraph [ref=e110]: Failure load that requires triage.
+          - generic [ref=e111]:
+            - term [ref=e112]:
+              - img [ref=e113]
+              - text: Queue depth
+            - definition [ref=e116]: "0"
+            - paragraph [ref=e117]: Backlog waiting for workers.
+      - generic [ref=e118]:
+        - article [ref=e119]:
+          - paragraph [ref=e120]: Intervention guide
+          - heading "Next best operator move" [level=3] [ref=e121]
+          - paragraph [ref=e122]: System is stable. Keep sampling telemetry while usage rises.
+        - article [ref=e123]:
+          - paragraph [ref=e124]: Decision thresholds
+          - heading "Signal interpretation" [level=3] [ref=e125]
+          - generic [ref=e126]:
+            - paragraph [ref=e127]:
+              - generic [ref=e128]: Queue depth
+              - generic [ref=e129]: Within range
+            - paragraph [ref=e130]:
+              - generic [ref=e131]: Failed jobs (24h)
+              - generic [ref=e132]: No active failures
+  - button "Open Next.js Dev Tools" [ref=e138] [cursor=pointer]:
+    - img [ref=e139]
+  - alert [ref=e143]

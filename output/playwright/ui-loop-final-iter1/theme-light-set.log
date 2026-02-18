@@ -1,0 +1,6 @@
+### Result
+undefined
+### Ran Playwright code
+```js
+await page.evaluate('() => { document.documentElement.dataset.theme=\'light\'; document.documentElement.classList.remove(\'dark\'); }');
+```

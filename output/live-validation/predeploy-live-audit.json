@@ -1,0 +1,120 @@
+{
+  "startedAt": "2026-02-18T15:14:23.861Z",
+  "baseUrl": "https://soundmaxx.vercel.app",
+  "upload": {
+    "assetId": "jQcFgkcArxh-uWxT-4",
+    "blobKey": "uploads/NLBFjhKovTMDVdCE8JS41/jQcFgkcArxh-uWxT-4/synthetic-tone.wav",
+    "expiresAt": "2026-02-19T15:14:25.468Z",
+    "uploadedBytes": 176444
+  },
+  "checks": {
+    "opsSummary": {
+      "status": 200,
+      "bodyPreview": "{\"totalSessions\":55,\"activeJobs\":4,\"failedJobsLast24h\":10,\"queueDepth\":4}"
+    }
+  },
+  "toolResults": [
+    {
+      "toolType": "stem_isolation",
+      "params": {
+        "stems": 2
+      },
+      "jobId": "jxbMyb8Uhj1rMX85g-",
+      "status": "succeeded",
+      "elapsedMs": 183872,
+      "progressPct": 100,
+      "etaSec": 0,
+      "artifactCount": 3,
+      "artifacts": [
+        {
+          "artifactId": "08pX0JF79CJS5_2Pzj",
+          "downloadUrl": "https://zzxaysps8xemdivq.public.blob.vercel-storage.com/artifacts/jxbMyb8Uhj1rMX85g-/provided-1.wav?download=1",
+          "expiresAt": "2026-02-19T15:17:28.468Z",
+          "downloadCheckStatus": 200
+        },
+        {
+          "artifactId": "fXZzHhn9N9wjI5vcWA",
+          "downloadUrl": "https://zzxaysps8xemdivq.public.blob.vercel-storage.com/artifacts/jxbMyb8Uhj1rMX85g-/provided-2.wav?download=1",
+          "expiresAt": "2026-02-19T15:17:28.468Z",
+          "downloadCheckStatus": 200
+        },
+        {
+          "artifactId": "ab9GYel0TEOVeM1Q8e",
+          "downloadUrl": "https://zzxaysps8xemdivq.public.blob.vercel-storage.com/artifacts/jxbMyb8Uhj1rMX85g-/provided-3.zip?download=1",
+          "expiresAt": "2026-02-19T15:17:28.468Z",
+          "downloadCheckStatus": 200
+        }
+      ]
+    },
+    {
+      "toolType": "mastering",
+      "params": {
+        "preset": "streaming_clean",
+        "intensity": 60
+      },
+      "jobId": "EQxrfl6zeQOflEZ_P0",
+      "status": "succeeded",
+      "elapsedMs": 13321,
+      "progressPct": 100,
+      "etaSec": 0,
+      "artifactCount": 2,
+      "artifacts": [
+        {
+          "artifactId": "4P5xAfc7OfqC0HJnmV",
+          "downloadUrl": "https://zzxaysps8xemdivq.public.blob.vercel-storage.com/artifacts/EQxrfl6zeQOflEZ_P0/provided-1.wav?download=1",
+          "expiresAt": "2026-02-19T15:17:42.041Z",
+          "downloadCheckStatus": 200
+        },
+        {
+          "artifactId": "9yAnWpe79yuzkbKCJA",
+          "downloadUrl": "https://zzxaysps8xemdivq.public.blob.vercel-storage.com/artifacts/EQxrfl6zeQOflEZ_P0/provided-2.json?download=1",
+          "expiresAt": "2026-02-19T15:17:42.041Z",
+          "downloadCheckStatus": 200
+        }
+      ]
+    },
+    {
+      "toolType": "key_bpm",
+      "params": {
+        "includeChordHints": true
+      },
+      "jobId": "UFN84409m9uWd_10yF",
+      "status": "succeeded",
+      "elapsedMs": 9777,
+      "progressPct": 100,
+      "etaSec": 0,
+      "artifactCount": 1,
+      "artifacts": [
+        {
+          "artifactId": "IHMToLt9E0Sot0ppO6",
+          "downloadUrl": "https://zzxaysps8xemdivq.public.blob.vercel-storage.com/artifacts/UFN84409m9uWd_10yF/provided-1.json?download=1",
+          "expiresAt": "2026-02-19T15:17:51.294Z",
+          "downloadCheckStatus": 200
+        }
+      ]
+    },
+    {
+      "toolType": "loudness_report",
+      "params": {
+        "targetLufs": -14
+      },
+      "jobId": "6PrA2sJ75nq2hqNUXY",
+      "status": "succeeded",
+      "elapsedMs": 3768,
+      "progressPct": 100,
+      "etaSec": 0,
+      "artifactCount": 1,
+      "artifacts": [
+        {
+          "artifactId": "vOBLlwhimgQBKjPsvk",
+          "downloadUrl": "https://zzxaysps8xemdivq.public.blob.vercel-storage.com/artifacts/6PrA2sJ75nq2hqNUXY/provided-1.json?download=1",
+          "expiresAt": "2026-02-19T15:17:54.311Z",
+          "downloadCheckStatus": 200
+        }
+      ]
+    }
+  ],
+  "success": false,
+  "failureReason": "job EbuXYP6SSJ6mnz31Vm failed: No module named 'pkg_resources'",
+  "finishedAt": "2026-02-18T15:18:00.431Z"
+}

@@ -1,0 +1,17 @@
+{
+  "/": {
+    "console": [],
+    "non2xx": [],
+    "screenshot": "/Users/charlesshaw/Desktop/Desktop/CodingProjects/SoundMaxx/output/playwright/home-desktop-light.png"
+  },
+  "/tools/stem-isolation": {
+    "console": [],
+    "non2xx": [],
+    "screenshot": "/Users/charlesshaw/Desktop/Desktop/CodingProjects/SoundMaxx/output/playwright/tools_stem-isolation-desktop-light.png"
+  },
+  "/ops": {
+    "console": [],
+    "non2xx": [],
+    "screenshot": "/Users/charlesshaw/Desktop/Desktop/CodingProjects/SoundMaxx/output/playwright/ops-desktop-light.png"
+  }
+}

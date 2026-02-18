@@ -1,0 +1,96 @@
+- generic [ref=e1]:
+  - main [ref=e2]:
+    - generic [ref=e4]:
+      - generic [ref=e6]:
+        - generic [ref=e7]:
+          - paragraph [ref=e8]: SoundMaxx Studio
+          - heading "Production-grade audio tooling with your own open-source model stack." [level=1] [ref=e9]
+          - paragraph [ref=e10]: Upload once, isolate stems, master with your chosen engine, run analysis, and keep ownership of inference infrastructure and training data collection.
+          - generic [ref=e11]:
+            - generic [ref=e12]:
+              - paragraph [ref=e13]: Latency Mode
+              - paragraph [ref=e14]: Quality-first async
+            - generic [ref=e15]:
+              - paragraph [ref=e16]: Retention
+              - paragraph [ref=e17]: 24h auto-expiry
+            - generic [ref=e18]:
+              - paragraph [ref=e19]: Ownership
+              - paragraph [ref=e20]: Self-hosted worker
+        - generic [ref=e21]:
+          - paragraph [ref=e22]: Workflow
+          - list [ref=e23]:
+            - listitem [ref=e24]:
+              - generic [ref=e25]: "1"
+              - generic [ref=e26]: Upload source audio
+            - listitem [ref=e27]:
+              - generic [ref=e28]: "2"
+              - generic [ref=e29]: Choose processing chain
+            - listitem [ref=e30]:
+              - generic [ref=e31]: "3"
+              - generic [ref=e32]: Track status + ETA
+            - listitem [ref=e33]:
+              - generic [ref=e34]: "4"
+              - generic [ref=e35]: A/B compare and export
+      - generic [ref=e36]:
+        - generic [ref=e37]:
+          - generic [ref=e38]:
+            - generic [ref=e39]:
+              - heading "1. Upload" [level=2] [ref=e40]
+              - paragraph [ref=e41]: Audio ingest, rights validation, and consent controls.
+            - generic [ref=e42]: IDLE
+          - generic [ref=e43] [cursor=pointer]:
+            - button "Choose File" [ref=e44]
+            - paragraph [ref=e45]: Drag and drop audio or click to browse
+            - paragraph [ref=e46]: WAV, MP3, FLAC, AAC, OGG, M4A. Max 100MB and 15 minutes.
+            - paragraph [ref=e93]: soundmaxx-test.wav · 86.2 KB
+          - generic [ref=e95]:
+            - generic "Waveform preview" [ref=e96]
+            - button "Play Preview" [ref=e100]
+          - generic [ref=e47]:
+            - generic [ref=e48]:
+              - checkbox "I own rights or have permission to process this audio." [checked] [active] [ref=e49]
+              - generic [ref=e50]: I own rights or have permission to process this audio.
+            - generic [ref=e51]:
+              - checkbox "Allow this track and outputs in a consented dataset for future model tuning." [ref=e52]
+              - generic [ref=e53]: Allow this track and outputs in a consented dataset for future model tuning.
+          - button "Upload Audio" [ref=e55]
+        - generic [ref=e56]:
+          - generic [ref=e57]:
+            - generic [ref=e58]:
+              - heading "2. Process" [level=2] [ref=e59]
+              - paragraph [ref=e60]: Tool selection, parameters, and queued execution.
+            - generic [ref=e61]: IDLE
+          - generic [ref=e62]:
+            - generic [ref=e63]: Tool
+            - combobox "Tool" [ref=e64]:
+              - option "Stem Isolation" [selected]
+              - option "Mastering"
+              - option "Key + BPM Detection"
+              - option "Loudness Report"
+              - option "MIDI Extraction"
+            - paragraph [ref=e65]: Separate vocals, drums, bass, and accompaniment with high-quality source separation.
+            - generic [ref=e66]:
+              - text: Stem count
+              - combobox "Stem count" [ref=e67]:
+                - option "2 stems (faster)"
+                - option "4 stems (full split)" [selected]
+            - button "Run Stem Isolation" [disabled] [ref=e68]
+            - generic [ref=e69]:
+              - generic [ref=e70]:
+                - generic [ref=e71]: Pipeline status
+                - generic [ref=e72]: idle
+              - paragraph [ref=e74]: Awaiting processing telemetry
+      - generic [ref=e75]:
+        - heading "3. Results and A/B Compare" [level=3] [ref=e76]
+        - paragraph [ref=e77]: Review artifacts, preview processed output, and export before auto-expiry.
+        - generic [ref=e78]:
+          - generic [ref=e79]:
+            - paragraph [ref=e80]: A/B Playback
+            - generic [ref=e81]:
+              - paragraph [ref=e83]: Original
+              - paragraph [ref=e86]: Processed
+          - generic [ref=e88]:
+            - paragraph [ref=e89]: Artifacts
+            - paragraph [ref=e90]: No artifacts yet. Run a tool to generate outputs.
+      - generic [ref=e91]: "Job ID: not started"
+  - alert [ref=e92]

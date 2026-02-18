@@ -1,0 +1,136 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - navigation [ref=e3]:
+      - link "SoundMaxx" [ref=e4] [cursor=pointer]:
+        - /url: /
+        - img [ref=e6]
+        - text: SoundMaxx
+      - button "Toggle menu" [ref=e11]:
+        - img [ref=e12]
+  - main [ref=e15]:
+    - generic [ref=e17]:
+      - generic [ref=e19]:
+        - generic [ref=e20]:
+          - paragraph [ref=e21]:
+            - img [ref=e22]
+            - text: Tool Workspace
+          - heading "Stem Isolation" [level=1] [ref=e27]
+          - paragraph [ref=e28]: Separate vocals, drums, bass, and music into clean stems.
+          - generic [ref=e29]:
+            - generic [ref=e30]:
+              - img [ref=e31]
+              - text: Audio In, Artifact Out
+            - generic [ref=e35]:
+              - img [ref=e36]
+              - text: Visible Queue + Progress
+        - complementary [ref=e39]:
+          - paragraph [ref=e40]: Workflow rail
+          - heading "Stem Isolation" [level=2] [ref=e41]
+          - paragraph [ref=e42]: Pull apart full mixes into stems for remixing, practice, and arrangement edits.
+          - list [ref=e43]:
+            - listitem [ref=e44]:
+              - generic [ref=e45]: Upload source audio
+              - generic [ref=e46]:
+                - text: "01"
+                - img [ref=e47]
+            - listitem [ref=e50]:
+              - generic [ref=e51]: Configure processing settings
+              - generic [ref=e52]:
+                - text: "02"
+                - img [ref=e53]
+            - listitem [ref=e56]:
+              - generic [ref=e57]: Run the job and track progress
+              - generic [ref=e58]:
+                - text: "03"
+                - img [ref=e59]
+            - listitem [ref=e62]:
+              - generic [ref=e63]: Compare outputs and export
+              - generic [ref=e64]:
+                - text: "04"
+                - img [ref=e65]
+      - generic [ref=e68]:
+        - generic [ref=e69]:
+          - generic [ref=e70]:
+            - generic [ref=e71]:
+              - heading "1. Upload" [level=2] [ref=e72]
+              - paragraph [ref=e73]: Stage your source, validate rights, then upload.
+            - generic [ref=e74]: Waiting
+          - generic [ref=e75] [cursor=pointer]:
+            - button "Choose File" [ref=e76]
+            - paragraph [ref=e77]:
+              - img [ref=e78]
+              - text: Drag and drop audio or click to browse
+            - paragraph [ref=e82]: WAV, MP3, FLAC, AAC, OGG, M4A. Max 100MB and 15 minutes.
+          - generic [ref=e83]:
+            - generic [ref=e84]:
+              - checkbox "Rights confirmation I own rights or have permission to process this audio." [ref=e85]
+              - generic [ref=e86]:
+                - generic [ref=e87]:
+                  - img [ref=e88]
+                  - text: Rights confirmation
+                - generic [ref=e91]: I own rights or have permission to process this audio.
+            - generic [ref=e92]:
+              - checkbox "Optional dataset consent Allow this track and outputs in a consented dataset for future model tuning." [ref=e93]
+              - generic [ref=e94]:
+                - generic [ref=e95]:
+                  - img [ref=e96]
+                  - text: Optional dataset consent
+                - generic [ref=e101]: Allow this track and outputs in a consented dataset for future model tuning.
+          - generic [ref=e102]:
+            - button "Upload Audio" [disabled]
+        - generic [ref=e103]:
+          - generic [ref=e104]:
+            - generic [ref=e105]:
+              - heading "2. Process" [level=2] [ref=e106]
+              - paragraph [ref=e107]: Configure parameters, submit job, monitor status.
+            - generic [ref=e108]:
+              - img [ref=e109]
+              - text: idle
+          - generic [ref=e111]:
+            - paragraph [ref=e112]:
+              - img [ref=e113]
+              - text: Selected tool
+            - paragraph [ref=e116]: Stem Isolation
+            - paragraph [ref=e117]: Separate vocals, drums, bass, and music into clean stems.
+          - generic [ref=e119]:
+            - generic [ref=e120]:
+              - img [ref=e121]
+              - text: Stem count
+            - combobox "Stem count" [ref=e131]:
+              - option "2 stems (faster)"
+              - option "4 stems (full split)" [selected]
+          - button "Run Stem Isolation" [disabled]:
+            - img
+            - text: Run Stem Isolation
+          - generic [ref=e132]:
+            - generic [ref=e133]:
+              - paragraph [ref=e134]:
+                - img [ref=e135]
+                - text: Pipeline status
+              - generic [ref=e144]: idle
+            - generic [ref=e146]:
+              - generic [ref=e147]:
+                - generic [ref=e148]: Progress
+                - generic [ref=e149]: 0%
+              - progressbar [ref=e150]
+            - paragraph [ref=e173]: Awaiting processing telemetry.
+      - generic [ref=e174]:
+        - heading "3. Results and A/B Compare" [level=3] [ref=e175]
+        - paragraph [ref=e176]: Review outputs, compare before/after playback, and export before expiry.
+        - generic [ref=e177]:
+          - generic [ref=e178]:
+            - paragraph [ref=e179]:
+              - img [ref=e180]
+              - text: A/B Playback
+            - generic [ref=e183]:
+              - paragraph [ref=e185]: Original
+              - paragraph [ref=e188]: Processed
+          - generic [ref=e190]:
+            - paragraph [ref=e191]:
+              - img [ref=e192]
+              - text: Artifacts
+            - paragraph [ref=e196]: No artifacts yet. Run a tool to generate outputs.
+      - generic [ref=e197]: "Job ID: not started"
+  - button "Open Next.js Dev Tools" [ref=e203] [cursor=pointer]:
+    - img [ref=e204]
+  - alert [ref=e208]

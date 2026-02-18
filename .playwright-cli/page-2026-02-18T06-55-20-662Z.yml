@@ -1,0 +1,51 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - navigation [ref=e3]:
+      - link "SoundMaxx" [ref=e4] [cursor=pointer]:
+        - /url: /
+        - img [ref=e6]
+        - text: SoundMaxx
+      - navigation "Main" [ref=e11]:
+        - list [ref=e13]:
+          - listitem [ref=e14]:
+            - link "Home" [ref=e15] [cursor=pointer]:
+              - /url: /
+              - img [ref=e16]
+              - text: Home
+          - listitem [ref=e19]:
+            - button "Tools" [ref=e20]:
+              - img [ref=e21]
+              - text: Tools
+              - img [ref=e23]
+  - main [ref=e25]:
+    - generic [ref=e26]:
+      - generic [ref=e27]:
+        - paragraph [ref=e28]: Ops Control
+        - heading "SoundMaxx Ops" [level=1] [ref=e29]
+        - paragraph [ref=e30]: Queue and failure telemetry for worker pipelines.
+      - generic [ref=e31]:
+        - paragraph [ref=e32]: Loading metrics...
+        - generic [ref=e33]:
+          - generic [ref=e34]:
+            - term [ref=e35]:
+              - img [ref=e36]
+              - text: Total sessions
+            - definition [ref=e41]: "0"
+          - generic [ref=e42]:
+            - term [ref=e43]:
+              - img [ref=e44]
+              - text: Active jobs
+            - definition [ref=e48]: "0"
+          - generic [ref=e49]:
+            - term [ref=e50]:
+              - img [ref=e51]
+              - text: Failed jobs (24h)
+            - definition [ref=e53]: "0"
+          - generic [ref=e54]:
+            - term [ref=e55]:
+              - img [ref=e56]
+              - text: Queue depth
+            - definition [ref=e60]: "0"
+  - button "Open Next.js Dev Tools" [ref=e66] [cursor=pointer]:
+    - img [ref=e67]
+  - alert [ref=e71]
