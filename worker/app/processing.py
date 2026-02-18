@@ -37,6 +37,22 @@ def resolve_output_file(path_or_name: str, output_dir: Path) -> Path:
     return candidate
 
 
+def stem_model_candidates(preferred: str) -> list[str]:
+    demucs_default = os.getenv("STEM_MODEL_DEMUCS_NAME", "htdemucs_ft").strip()
+    roformer_default = os.getenv("STEM_MODEL_ROFORMER_NAME", "mel_band_roformer").strip()
+
+    demucs_variants = [demucs_default, "htdemucs_ft", "htdemucs"]
+    roformer_variants = [roformer_default, "mel_band_roformer"]
+
+    combined = demucs_variants if preferred == "demucs_v4" else [*roformer_variants, *demucs_variants]
+
+    deduped: list[str] = []
+    for name in combined:
+        if name and name not in deduped:
+            deduped.append(name)
+    return deduped
+
+
 def process_stem_isolation(input_file: Path, output_dir: Path, params: dict[str, Any]) -> tuple[str, list[Path]]:
     try:
         from audio_separator.separator import Separator  # type: ignore
@@ -51,15 +67,23 @@ def process_stem_isolation(input_file: Path, output_dir: Path, params: dict[str,
     stems = int(params.get("stems", 4))
     preferred = str(params.get("fallbackModel") or "mel_band_roformer")
 
-    model_name = (
-        os.getenv("STEM_MODEL_DEMUCS_NAME", "htdemucs_ft.yaml")
-        if preferred == "demucs_v4"
-        else os.getenv("STEM_MODEL_ROFORMER_NAME", "mel_band_roformer.ckpt")
-    )
+    output_files: list[str] = []
+    resolved_model = ""
+    last_error: Exception | None = None
 
-    separator = Separator(output_dir=str(output_dir), output_format="WAV")
-    separator.load_model(model_filename=model_name)
-    output_files = separator.separate(str(input_file))
+    for model_name in stem_model_candidates(preferred):
+        separator = Separator(output_dir=str(output_dir), output_format="WAV")
+        try:
+            separator.load_model(model_filename=model_name)
+            output_files = separator.separate(str(input_file))
+            resolved_model = model_name
+            break
+        except Exception as exc:
+            last_error = exc
+
+    if not output_files:
+        suffix = f": {last_error}" if last_error else ""
+        raise RuntimeError(f"Stem isolation model load/separation failed{suffix}")
 
     produced = [resolve_output_file(path, output_dir) for path in output_files]
     if stems == 2 and len(produced) > 2:
@@ -72,7 +96,8 @@ def process_stem_isolation(input_file: Path, output_dir: Path, params: dict[str,
             if file.exists():
                 zipf.write(file, arcname=file.name)
 
-    return "mel_band_roformer" if preferred != "demucs_v4" else "demucs_v4", [*produced, zip_path]
+    model_label = "demucs_v4" if "demucs" in resolved_model.lower() else "mel_band_roformer"
+    return model_label, [*produced, zip_path]
 
 
 def process_mastering(input_file: Path, output_dir: Path, params: dict[str, Any]) -> tuple[str, list[Path]]:

@@ -32,7 +32,7 @@ job_statuses: dict[str, WorkerJobStatus] = {}
 
 def initial_model(tool_type: str) -> str:
     if tool_type == "stem_isolation":
-        return os.getenv("STEM_MODEL_ROFORMER_NAME", "mel_band_roformer.ckpt")
+        return os.getenv("STEM_MODEL_ROFORMER_NAME", "mel_band_roformer")
     if tool_type == "mastering":
         return "matchering_2_0"
     if tool_type == "key_bpm":
