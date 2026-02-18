@@ -1,0 +1,17 @@
+{
+  "brand_name": "SoundMaxx",
+  "website_url": "https://www.soundmaxx.net",
+  "canonical_host": "https://www.soundmaxx.net",
+  "category": "Audio processing software",
+  "short_description": "Producer-focused audio workflows for stem isolation, mastering, key/BPM detection, loudness analysis, and MIDI extraction.",
+  "logo_url": "https://www.soundmaxx.net/favicon.ico",
+  "primary_keywords": [
+    "soundmaxx",
+    "audio stem isolation",
+    "free audio mastering",
+    "key bpm detection",
+    "loudness analysis",
+    "audio to midi converter"
+  ],
+  "same_as": []
+}

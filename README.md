@@ -88,6 +88,7 @@ uvicorn worker.app.main:app --host 0.0.0.0 --port 8000
 npm run test:unit
 npm run test:integration
 npm run test:e2e
+npm run test:seo
 ```
 
 ## Preview Verification Workflow
