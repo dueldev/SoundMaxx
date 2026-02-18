@@ -2,12 +2,13 @@ import { expect, test } from "@playwright/test";
 
 test("home page renders redesigned sections and actions", async ({ page }) => {
   await page.goto("/");
+  const main = page.getByRole("main");
 
-  await expect(page.getByRole("heading", { level: 1, name: /Release-ready audio workflows without hidden states/i })).toBeVisible();
-  await expect(page.getByRole("heading", { level: 2, name: /A control surface built for speed and trust/i })).toBeVisible();
-  await expect(page.getByRole("heading", { level: 2, name: /Pick a workflow and start processing now/i })).toBeVisible();
-  await expect(page.getByRole("link", { name: /^Open Tool$/ }).first()).toBeVisible();
-  await expect(page.getByRole("link", { name: /^View Ops$/ })).toBeVisible();
+  await expect(main.getByRole("heading", { level: 1, name: /Release-ready audio\.\s*Zero hidden states\./i })).toBeVisible();
+  await expect(main.getByRole("heading", { level: 2, name: /Built for speed and trust\./i })).toBeVisible();
+  await expect(main.getByRole("heading", { level: 2, name: /Pick a workflow\.\s*Start processing\./i })).toBeVisible();
+  await expect(main.getByRole("link", { name: /^Open Studio$/ })).toBeVisible();
+  await expect(main.getByRole("link", { name: /^View Ops$/ })).toBeVisible();
 });
 
 test("desktop header exposes tools navigation", async ({ page }) => {

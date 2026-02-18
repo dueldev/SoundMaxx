@@ -280,32 +280,59 @@ def process_loudness_report(input_file: Path, output_dir: Path, params: dict[str
 
 
 def process_midi_extract(input_file: Path, output_dir: Path, params: dict[str, Any]) -> tuple[str, list[Path]]:
-    from basic_pitch.inference import predict  # type: ignore
-
     output_dir.mkdir(parents=True, exist_ok=True)
-    _, midi_data, note_events = predict(str(input_file))
+    try:
+        from basic_pitch.inference import predict  # type: ignore
+
+        _, midi_data, note_events = predict(str(input_file))
+
+        midi_path = output_dir / "extracted.mid"
+        with midi_path.open("wb") as handle:
+            midi_data.writeFile(handle)
+
+        notes_path = output_dir / "notes.json"
+        notes_payload = {
+            "sensitivity": float(params.get("sensitivity", 0.5)),
+            "noteCount": len(note_events),
+            "noteEvents": [
+                {
+                    "start": float(event[0]),
+                    "end": float(event[1]),
+                    "pitch": int(event[2]),
+                    "confidence": float(event[3]),
+                }
+                for event in note_events
+            ],
+        }
+        notes_path.write_text(json.dumps(notes_payload, indent=2), encoding="utf-8")
+
+        return "basic_pitch", [midi_path, notes_path]
+    except Exception as exc:
+        return build_midi_fallback(output_dir, params, str(exc))
+
+
+def build_midi_fallback(output_dir: Path, params: dict[str, Any], reason: str) -> tuple[str, list[Path]]:
+    output_dir.mkdir(parents=True, exist_ok=True)
 
     midi_path = output_dir / "extracted.mid"
-    with midi_path.open("wb") as handle:
-        midi_data.writeFile(handle)
+    midi_path.write_bytes(
+        bytes.fromhex(
+            "4d54686400000006000000010060"
+            "4d54726b0000000400ff2f00"
+        )
+    )
 
     notes_path = output_dir / "notes.json"
     notes_payload = {
         "sensitivity": float(params.get("sensitivity", 0.5)),
-        "noteCount": len(note_events),
-        "noteEvents": [
-            {
-                "start": float(event[0]),
-                "end": float(event[1]),
-                "pitch": int(event[2]),
-                "confidence": float(event[3]),
-            }
-            for event in note_events
-        ],
+        "noteCount": 0,
+        "noteEvents": [],
+        "engine": "fallback_empty_midi",
+        "fallbackReason": reason[:500],
     }
     notes_path.write_text(json.dumps(notes_payload, indent=2), encoding="utf-8")
 
-    return "basic_pitch", [midi_path, notes_path]
+    return "fallback_empty_midi", [midi_path, notes_path]
 
 
 def run_processing(tool_type: str, input_file: Path, output_dir: Path, params: dict[str, Any]) -> tuple[str, list[Path]]:
