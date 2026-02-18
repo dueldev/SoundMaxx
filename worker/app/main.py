@@ -14,7 +14,7 @@ from fastapi.staticfiles import StaticFiles
 
 from .dataset import capture_training_sample
 from .models import ArtifactPayload, JobRequest, WorkerJobStatus
-from .processing import download_source_audio, run_processing
+from .processing import build_stem_fallback, download_source_audio, run_processing
 from .security import assert_bearer_token, sign_payload
 
 OUTPUT_ROOT = Path(os.getenv("OUTPUT_ROOT", "worker/data/outputs")).resolve()
@@ -80,13 +80,35 @@ async def execute_job(job: JobRequest, external_job_id: str) -> None:
         await asyncio.to_thread(download_source_audio, str(job.sourceAsset.blobUrl), input_path)
         status.progressPct = 40
 
-        model_name, produced_files = await asyncio.to_thread(
-            run_processing,
-            job.toolType,
-            input_path,
-            output_dir,
-            job.params,
-        )
+        if job.toolType == "stem_isolation":
+            timeout_sec = max(int(os.getenv("STEM_ISOLATION_TIMEOUT_SEC", "180")), 30)
+            try:
+                model_name, produced_files = await asyncio.wait_for(
+                    asyncio.to_thread(
+                        run_processing,
+                        job.toolType,
+                        input_path,
+                        output_dir,
+                        job.params,
+                    ),
+                    timeout=timeout_sec,
+                )
+            except Exception:
+                requested_stems = int(job.params.get("stems", 4))
+                model_name, produced_files = await asyncio.to_thread(
+                    build_stem_fallback,
+                    input_path,
+                    output_dir,
+                    requested_stems,
+                )
+        else:
+            model_name, produced_files = await asyncio.to_thread(
+                run_processing,
+                job.toolType,
+                input_path,
+                output_dir,
+                job.params,
+            )
 
         artifacts = []
         for file in produced_files:

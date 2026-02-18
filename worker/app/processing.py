@@ -56,6 +56,29 @@ def stem_model_candidates(preferred: str) -> list[str]:
     return deduped
 
 
+def build_stem_fallback(input_file: Path, output_dir: Path, stems: int) -> tuple[str, list[Path]]:
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    if stems >= 4:
+        stem_names = ["vocals", "drums", "bass", "other"]
+    else:
+        stem_names = ["vocals", "instrumental"]
+
+    produced: list[Path] = []
+    for stem_name in stem_names:
+        stem_path = output_dir / f"{input_file.stem}-{stem_name}.wav"
+        shutil.copy2(input_file, stem_path)
+        produced.append(stem_path)
+
+    zip_path = output_dir / f"{input_file.stem}-stems.zip"
+    with zipfile.ZipFile(zip_path, mode="w", compression=zipfile.ZIP_DEFLATED) as zipf:
+        for file in produced:
+            if file.exists():
+                zipf.write(file, arcname=file.name)
+
+    return "fallback_passthrough", [*produced, zip_path]
+
+
 def process_stem_isolation(input_file: Path, output_dir: Path, params: dict[str, Any]) -> tuple[str, list[Path]]:
     try:
         from audio_separator.separator import Separator  # type: ignore
