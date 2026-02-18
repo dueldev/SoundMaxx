@@ -1,14 +1,23 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { put as putBlob } from "@vercel/blob/client";
 import { ProcessPanel } from "@/components/studio/process-panel";
 import { ResultsPanel } from "@/components/studio/results-panel";
 import { StudioPageShell } from "@/components/studio/studio-page-shell";
-import type { ArtifactView, JobState, UploadState } from "@/components/studio/types";
+import type { ArtifactView, JobState, UploadState, WorkflowPhase } from "@/components/studio/types";
 import { UploadPanel } from "@/components/studio/upload-panel";
 import type { ToolConfig } from "@/lib/tool-config";
 import type { UploadInitResponse } from "@/types/api";
 import type { MasteringPreset, ToolType } from "@/types/domain";
+
+function deriveWorkflowPhase(uploadState: UploadState, jobState: JobState, hasArtifacts: boolean): WorkflowPhase {
+  if (hasArtifacts && jobState === "succeeded") return "export";
+  if (jobState === "queued" || jobState === "running") return "process";
+  if (uploadState === "uploaded") return "configure";
+  if (uploadState === "uploading" || uploadState === "preparing") return "upload";
+  return "upload";
+}
 
 async function readAudioDuration(file: File) {
   const fileUrl = URL.createObjectURL(file);
@@ -49,7 +58,9 @@ function isUploadInitResponse(payload: unknown): payload is UploadInitResponse {
     "sessionToken" in payload &&
     typeof payload.sessionToken === "string" &&
     "expiresAt" in payload &&
-    typeof payload.expiresAt === "string"
+    typeof payload.expiresAt === "string" &&
+    "clientUploadToken" in payload &&
+    typeof payload.clientUploadToken === "string"
   );
 }
 
@@ -133,6 +144,7 @@ export function ToolStudioPage({ toolConfig }: { toolConfig: ToolConfig }) {
     setJobProgress(0);
     setJobError(null);
     setJobEtaSec(null);
+    prevJobStateRef.current = "idle";
   }
 
   async function handleUpload() {
@@ -172,17 +184,27 @@ export function ToolStudioPage({ toolConfig }: { toolConfig: ToolConfig }) {
       const initBody = initBodyRaw;
 
       setUploadState("uploading");
-      const form = new FormData();
-      form.set("file", file);
-
-      const contentResponse = await fetch(initBody.uploadUrl, {
-        method: "PUT",
-        body: form,
+      const uploaded = await putBlob(initBody.blobKey, file, {
+        access: "public",
+        token: initBody.clientUploadToken,
+        contentType: file.type || "application/octet-stream",
+        multipart: true,
       });
 
-      const contentBody = await parseJsonResponse<{ error?: string }>(contentResponse);
-      if (!contentResponse.ok) {
-        throw new Error(contentBody?.error ?? "Audio upload failed");
+      const completeResponse = await fetch(`/api/upload/complete/${initBody.assetId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          blobUrl: uploaded.url,
+          uploadedBytes: file.size,
+        }),
+      });
+
+      const completeBody = await parseJsonResponse<{ error?: string }>(completeResponse);
+      if (!completeResponse.ok) {
+        throw new Error(completeBody?.error ?? "Audio upload failed");
       }
 
       setAssetId(initBody.assetId);
@@ -198,6 +220,7 @@ export function ToolStudioPage({ toolConfig }: { toolConfig: ToolConfig }) {
     if (!assetId) return;
 
     try {
+      prevJobStateRef.current = "queued";
       setJobState("queued");
       setJobError(null);
       setJobProgress(5);
@@ -239,6 +262,35 @@ export function ToolStudioPage({ toolConfig }: { toolConfig: ToolConfig }) {
     }
   }
 
+  const prevJobStateRef = useRef<JobState>("idle");
+  const bridgeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const fetchArtifacts = useCallback(async (artifactIds: string[]) => {
+    const ids = artifactIds ?? [];
+    const data = await Promise.all(
+      ids.map(async (id) => {
+        const artifactResponse = await fetch(`/api/artifacts/${id}`, { cache: "no-store" });
+        const artifactPayload = await parseJsonResponse<{
+          downloadUrl?: string;
+          expiresAt?: string;
+          format?: string;
+        }>(artifactResponse);
+
+        if (!artifactResponse.ok || !artifactPayload?.downloadUrl || !artifactPayload.expiresAt) {
+          throw new Error(`Could not retrieve artifact ${id}`);
+        }
+
+        return {
+          id,
+          downloadUrl: artifactPayload.downloadUrl,
+          expiresAt: artifactPayload.expiresAt,
+          format: artifactPayload.format ?? "bin",
+        } satisfies ArtifactView;
+      }),
+    );
+    setArtifacts(data);
+  }, []);
+
   useEffect(() => {
     if (!jobId || (jobState !== "queued" && jobState !== "running")) return;
 
@@ -259,50 +311,63 @@ export function ToolStudioPage({ toolConfig }: { toolConfig: ToolConfig }) {
         return;
       }
 
-      setJobState(payload.status);
-      setJobProgress(payload.progressPct ?? 0);
-      setJobEtaSec(payload.etaSec ?? null);
+      const backendStatus = payload.status;
+      const wasQueued = prevJobStateRef.current === "queued";
 
-      if (payload.status === "failed") {
+      if (backendStatus === "failed") {
+        prevJobStateRef.current = "failed";
+        setJobState("failed");
+        setJobProgress(payload.progressPct ?? 0);
         setJobError(payload.error ?? "Processing failed");
         clearInterval(interval);
         return;
       }
 
-      if (payload.status === "succeeded") {
+      if (backendStatus === "succeeded") {
         clearInterval(interval);
 
-        try {
-          const ids = payload.artifactIds ?? [];
-          const artifactData = await Promise.all(
-            ids.map(async (id) => {
-              const artifactResponse = await fetch(`/api/artifacts/${id}`, { cache: "no-store" });
-              const artifactPayload = await parseJsonResponse<{
-                downloadUrl?: string;
-                expiresAt?: string;
-              }>(artifactResponse);
+        if (wasQueued) {
+          prevJobStateRef.current = "running";
+          setJobState("running");
+          setJobProgress(50);
+          setJobEtaSec(null);
 
-              if (!artifactResponse.ok || !artifactPayload?.downloadUrl || !artifactPayload.expiresAt) {
-                throw new Error(`Could not retrieve artifact ${id}`);
-              }
-
-              return {
-                id,
-                downloadUrl: artifactPayload.downloadUrl,
-                expiresAt: artifactPayload.expiresAt,
-              } satisfies ArtifactView;
-            }),
-          );
-
-          setArtifacts(artifactData);
-        } catch (error) {
-          setJobError(error instanceof Error ? error.message : "Failed to load artifacts");
+          bridgeTimerRef.current = setTimeout(async () => {
+            prevJobStateRef.current = "succeeded";
+            setJobState("succeeded");
+            setJobProgress(100);
+            try {
+              await fetchArtifacts(payload.artifactIds ?? []);
+            } catch (error) {
+              setJobError(error instanceof Error ? error.message : "Failed to load artifacts");
+            }
+          }, 1200);
+        } else {
+          prevJobStateRef.current = "succeeded";
+          setJobState("succeeded");
+          setJobProgress(100);
+          try {
+            await fetchArtifacts(payload.artifactIds ?? []);
+          } catch (error) {
+            setJobError(error instanceof Error ? error.message : "Failed to load artifacts");
+          }
         }
+        return;
       }
-    }, 3000);
 
-    return () => clearInterval(interval);
-  }, [jobId, jobState]);
+      prevJobStateRef.current = backendStatus;
+      setJobState(backendStatus);
+      setJobProgress(payload.progressPct ?? 0);
+      setJobEtaSec(payload.etaSec ?? null);
+    }, 2000);
+
+    return () => {
+      clearInterval(interval);
+      if (bridgeTimerRef.current) clearTimeout(bridgeTimerRef.current);
+    };
+  }, [jobId, jobState, fetchArtifacts]);
+
+  const workflowPhase = deriveWorkflowPhase(uploadState, jobState, artifacts.length > 0);
 
   return (
     <StudioPageShell
@@ -310,6 +375,7 @@ export function ToolStudioPage({ toolConfig }: { toolConfig: ToolConfig }) {
       description={toolConfig.description}
       workflowTitle={toolConfig.label}
       workflowDescription={toolConfig.marketingBlurb}
+      workflowPhase={workflowPhase}
       uploadPanel={
         <UploadPanel
           file={file}
@@ -351,7 +417,14 @@ export function ToolStudioPage({ toolConfig }: { toolConfig: ToolConfig }) {
           onMidiSensitivityChange={setMidiSensitivity}
         />
       }
-      resultsPanel={<ResultsPanel filePreviewUrl={filePreviewUrl} artifacts={artifacts} />}
+      resultsPanel={
+        <ResultsPanel
+          toolType={toolConfig.toolType}
+          filePreviewUrl={filePreviewUrl}
+          artifacts={artifacts}
+          stemCount={stems}
+        />
+      }
       footer={
         <>
           Job ID: <span className="font-mono">{jobId ?? "not started"}</span>

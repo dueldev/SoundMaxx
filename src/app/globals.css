@@ -417,9 +417,9 @@ input[type="number"]:focus {
 /* ─── Progress bar ────────────────────────────────────────────────────────── */
 .brutal-progress-track {
   width: 100%;
-  height: 4px;
+  height: 10px;
   background: var(--muted);
-  border: 1px solid var(--foreground);
+  border: 1.5px solid var(--foreground);
   position: relative;
   overflow: hidden;
 }
@@ -427,11 +427,154 @@ input[type="number"]:focus {
 .brutal-progress-fill {
   height: 100%;
   background: var(--foreground);
-  transition: width 400ms ease;
+  transition: width 600ms cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
 }
 
 .brutal-progress-fill.active {
   background: var(--accent);
+}
+
+.brutal-progress-fill.active::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.3) 50%,
+    transparent 100%
+  );
+  animation: smx-shimmer 1.8s ease-in-out infinite;
+}
+
+.brutal-progress-track:has(.brutal-progress-fill.active)::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 59, 0, 0.08) 50%,
+    transparent 100%
+  );
+  animation: smx-shimmer 2.4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* ─── Processing animations ──────────────────────────────────────────────── */
+@keyframes smx-shimmer {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(200%); }
+}
+
+@keyframes smx-pulse-border {
+  0%, 100% { border-color: var(--accent); box-shadow: 0 0 0 0 rgba(255, 59, 0, 0); }
+  50%      { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(255, 59, 0, 0.1); }
+}
+
+@keyframes smx-processing-bar {
+  0%   { transform: scaleY(0.4); }
+  50%  { transform: scaleY(1); }
+  100% { transform: scaleY(0.4); }
+}
+
+@keyframes smx-dot-pulse {
+  0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); }
+  40% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes smx-elapsed-tick {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.processing-pulse {
+  animation: smx-pulse-border 2s ease-in-out infinite;
+}
+
+.processing-waveform-bar {
+  width: 3px;
+  background: var(--accent);
+  transform-origin: bottom;
+  animation: smx-processing-bar 1.2s ease-in-out infinite;
+}
+
+.elapsed-colon {
+  animation: smx-elapsed-tick 1s steps(1) infinite;
+}
+
+.processing-dot {
+  display: inline-block;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: smx-dot-pulse 1.4s ease-in-out infinite;
+}
+
+.processing-dot:nth-child(2) { animation-delay: 0.2s; }
+.processing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+/* ─── Pipeline stage indicator ───────────────────────────────────────────── */
+.pipeline-stage {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+  transition: color 300ms ease;
+}
+
+.pipeline-stage.completed { color: var(--foreground); }
+.pipeline-stage.active { color: var(--accent); }
+
+.pipeline-stage-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 1.5px solid var(--muted-foreground);
+  background: transparent;
+  transition: all 300ms ease;
+  flex-shrink: 0;
+}
+
+.pipeline-stage.completed .pipeline-stage-dot {
+  background: var(--foreground);
+  border-color: var(--foreground);
+}
+
+.pipeline-stage.active .pipeline-stage-dot {
+  background: var(--accent);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(255, 59, 0, 0.2);
+}
+
+.pipeline-connector {
+  flex: 1;
+  height: 1.5px;
+  background: var(--muted);
+  position: relative;
+  overflow: hidden;
+  min-width: 12px;
+}
+
+.pipeline-connector.filled {
+  background: var(--foreground);
+}
+
+.pipeline-connector.filling::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--accent);
+  animation: smx-shimmer 1.5s ease-in-out infinite;
 }
 
 /* ─── Ticker / marquee ────────────────────────────────────────────────────── */
@@ -448,7 +591,8 @@ input[type="number"]:focus {
 .ticker-inner {
   display: inline-flex;
   gap: 0;
-  animation: ticker-scroll 28s linear infinite;
+  animation: ticker-scroll 22s linear infinite reverse;
+  will-change: transform;
 }
 
 .ticker-item {
@@ -511,6 +655,376 @@ input[type="number"]:focus {
 
 .skip-link:focus-visible {
   transform: translateY(0);
+}
+
+/* ─── Dark stripe (inverted section) ─────────────────────────────────────── */
+.smx-dark-stripe {
+  background: var(--foreground);
+  color: var(--background);
+  width: 100%;
+}
+
+/* ─── Bento grid ──────────────────────────────────────────────────────────── */
+.smx-bento {
+  display: grid;
+  gap: 1.25rem;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 768px) {
+  .smx-bento {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .smx-bento-featured {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (min-width: 1280px) {
+  .smx-bento {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .smx-bento-featured {
+    grid-column: span 2;
+  }
+}
+
+/* ─── Hero section layout ────────────────────────────────────────────────── */
+.smx-hero-section {
+  min-height: clamp(420px, 60vh, 640px);
+}
+
+.smx-hero-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  min-height: clamp(420px, 60vh, 640px);
+}
+
+@media (min-width: 1024px) {
+  .smx-hero-grid {
+    grid-template-columns: 3fr 2fr;
+  }
+}
+
+.smx-hero-text {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* ─── Hero studio panel (right column) ──────────────────────────────────── */
+.smx-hero-visual {
+  display: none;
+  flex-direction: column;
+  background: var(--foreground);
+  color: var(--background);
+  padding: 2rem 1.75rem;
+  border-left: 1.5px solid var(--foreground);
+  overflow: hidden;
+  position: relative;
+  z-index: 10;
+}
+
+@media (min-width: 1024px) {
+  .smx-hero-visual {
+    display: flex;
+  }
+}
+
+.smx-hero-panel-kicker {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(245, 243, 238, 0.4);
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(245, 243, 238, 0.1);
+}
+
+.smx-hero-panel-item {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid rgba(245, 243, 238, 0.08);
+}
+
+.smx-hero-panel-item:last-child {
+  border-bottom: none;
+}
+
+.smx-hero-panel-num {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--accent);
+  flex-shrink: 0;
+  width: 1.5rem;
+}
+
+.smx-hero-panel-label {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  flex: 1;
+  color: rgba(245, 243, 238, 0.85);
+}
+
+.smx-hero-panel-readiness {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: rgba(245, 243, 238, 0.4);
+  flex-shrink: 0;
+}
+
+/* Override waveform bar color inside the dark panel */
+.smx-panel-bar {
+  background: var(--background) !important;
+}
+
+/* ─── Hero dot-grid background (infinite canvas) ─────────────────────────── */
+.smx-hero-dot-grid {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle, rgba(12,12,10,0.14) 1px, transparent 1px);
+  background-size: 28px 28px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ─── Feature highlights row ─────────────────────────────────────────────── */
+.smx-feature-highlights {
+  display: grid;
+  gap: 0;
+  grid-template-columns: 1fr;
+  border: 1.5px solid var(--foreground);
+}
+
+@media (min-width: 768px) {
+  .smx-feature-highlights {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 768px) {
+  .smx-feature-highlight-item {
+    border-bottom: none;
+    border-right: 1.5px solid var(--foreground);
+  }
+
+  .smx-feature-highlight-item:last-child {
+    border-right: none;
+  }
+}
+
+/* ─── Featured bento card — inverted dark treatment ─────────────────────── */
+.smx-bento-featured-dark {
+  background: var(--foreground) !important;
+  color: var(--background) !important;
+  border-color: var(--foreground) !important;
+  box-shadow: 4px 4px 0 rgba(255, 59, 0, 0.4) !important;
+}
+
+.smx-bento-featured-dark:hover {
+  box-shadow: 6px 6px 0 var(--accent) !important;
+  border-color: var(--accent) !important;
+}
+
+.smx-bento-featured-tag {
+  border-color: rgba(245, 243, 238, 0.3) !important;
+  color: rgba(245, 243, 238, 0.6) !important;
+}
+
+/* ─── Dark footer CTA ────────────────────────────────────────────────────── */
+.smx-dark-footer-cta {
+  background: var(--foreground);
+  color: var(--background);
+  width: 100%;
+}
+
+/* ─── Hero waveform decoration ────────────────────────────────────────────── */
+.smx-waveform {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 3px;
+  width: auto;
+  height: 100%;
+  opacity: 0.11;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+@keyframes smx-bar-breathe {
+  from { transform: scaleY(0.55); }
+  to   { transform: scaleY(1); }
+}
+
+.smx-waveform-bar {
+  width: 5px;
+  background: var(--foreground);
+  transform-origin: top;
+  animation: smx-bar-breathe 1.8s ease-in-out infinite alternate;
+}
+
+/* ─── Mini waveform (featured card) ──────────────────────────────────────── */
+.smx-mini-waveform {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 50px;
+  opacity: 0.45;
+}
+
+.smx-mini-waveform-bar {
+  width: 3px;
+  background: var(--accent);
+  transform-origin: bottom;
+  animation: smx-bar-breathe 1.4s ease-in-out infinite alternate;
+}
+
+/* ─── Kicker accent rule (inline horizontal bar) ─────────────────────────── */
+.accent-rule-h {
+  display: inline-block;
+  width: 2rem;
+  height: 2px;
+  background: var(--accent);
+  flex-shrink: 0;
+}
+
+/* ─── How-it-works steps ─────────────────────────────────────────────────── */
+.smx-steps {
+  display: grid;
+  gap: 2.5rem;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 768px) {
+  .smx-steps {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.smx-step {
+  position: relative;
+  padding-top: 2rem;
+}
+
+.smx-step-watermark {
+  font-family: var(--font-mono);
+  font-size: 6.5rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--foreground);
+  opacity: 0.05;
+  position: absolute;
+  top: -1.2rem;
+  left: -0.4rem;
+  pointer-events: none;
+  -webkit-user-select: none;
+  user-select: none;
+  z-index: 0;
+}
+
+.smx-step-content {
+  position: relative;
+  z-index: 1;
+  border-left: 2px solid var(--foreground);
+  padding-left: 1.75rem;
+}
+
+/* ─── Hero per-element stagger (page load, time-based) ───────────────────── */
+@keyframes smx-hero-rise {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.animate-hero-0 { animation: smx-hero-rise 520ms cubic-bezier(0.16,1,0.3,1) both; animation-delay: 0ms; }
+.animate-hero-1 { animation: smx-hero-rise 520ms cubic-bezier(0.16,1,0.3,1) both; animation-delay: 80ms; }
+.animate-hero-2 { animation: smx-hero-rise 520ms cubic-bezier(0.16,1,0.3,1) both; animation-delay: 175ms; }
+.animate-hero-3 { animation: smx-hero-rise 520ms cubic-bezier(0.16,1,0.3,1) both; animation-delay: 280ms; }
+.animate-hero-4 { animation: smx-hero-rise 520ms cubic-bezier(0.16,1,0.3,1) both; animation-delay: 400ms; }
+.animate-hero-5 { animation: smx-hero-rise 520ms cubic-bezier(0.16,1,0.3,1) both; animation-delay: 510ms; }
+
+/* ─── Scroll-driven reveal (CSS animation-timeline) ──────────────────────── */
+@keyframes smx-fade-up {
+  from { opacity: 0; transform: translateY(22px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes smx-scale-in-x {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+
+/* Stats items: slide up as dark stripe enters view */
+.smx-stat-reveal {
+  animation: smx-fade-up 580ms ease both;
+  animation-timeline: view(block);
+  animation-range: entry 0% entry 45%;
+}
+
+/* Feature highlight items */
+.smx-feature-highlight-item {
+  padding: 1.75rem 1.5rem;
+  border-bottom: 1.5px solid var(--foreground);
+  background: var(--card);
+  animation: smx-fade-up 500ms ease both;
+  animation-timeline: view(block);
+  animation-range: entry 0% entry 40%;
+  transition: transform 200ms ease, box-shadow 200ms ease;
+}
+
+.smx-feature-highlight-item:hover {
+  transform: translateY(-3px);
+}
+
+/* Tool bento cards: scroll-triggered stagger via row position */
+.smx-bento > * {
+  animation: smx-fade-up 480ms ease both;
+  animation-timeline: view(block);
+  animation-range: entry 0% entry 32%;
+}
+
+/* Accent rule: draw itself from left as section scrolls in */
+.accent-rule {
+  border: none;
+  border-top: 2px solid var(--accent);
+  margin: 0;
+  width: 3rem;
+  transform-origin: left center;
+  animation: smx-scale-in-x 400ms ease both;
+  animation-timeline: view(block);
+  animation-range: entry 0% entry 20%;
+}
+
+/* How-it-works steps: staggered entry via offset ranges */
+.smx-step:nth-child(1) {
+  animation: smx-fade-up 520ms ease both;
+  animation-timeline: view(block);
+  animation-range: entry 0% entry 38%;
+}
+
+.smx-step:nth-child(2) {
+  animation: smx-fade-up 520ms ease both;
+  animation-timeline: view(block);
+  animation-range: entry 8% entry 46%;
+}
+
+.smx-step:nth-child(3) {
+  animation: smx-fade-up 520ms ease both;
+  animation-timeline: view(block);
+  animation-range: entry 16% entry 54%;
 }
 
 /* ─── Animations ──────────────────────────────────────────────────────────── */

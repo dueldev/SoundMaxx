@@ -38,9 +38,10 @@ function extractSignature(request: NextRequest) {
   );
 }
 
-function statusFromReplicate(status: string): "succeeded" | "failed" | "ignored" {
+function statusFromReplicate(status: string): "succeeded" | "failed" | "running" | "ignored" {
   if (status === "succeeded") return "succeeded";
   if (status === "failed" || status === "canceled") return "failed";
+  if (status === "processing" || status === "starting") return "running";
   return "ignored";
 }
 
@@ -126,6 +127,16 @@ export async function POST(request: NextRequest, context: { params: Promise<{ pr
       return jsonError(404, "Unknown external job id");
     }
 
+    if (mappedStatus === "running") {
+      await store.updateJob({
+        jobId: job.id,
+        status: "running",
+        progressPct: 35,
+        etaSec: job.etaSec ?? 120,
+      });
+      return NextResponse.json({ ok: true, status: "running" });
+    }
+
     if (mappedStatus === "failed") {
       await store.updateJob({
         jobId: job.id,
@@ -176,6 +187,16 @@ export async function POST(request: NextRequest, context: { params: Promise<{ pr
   const job = await store.getJobByExternalId(parsed.data.externalJobId);
   if (!job) {
     return jsonError(404, "Unknown external job id");
+  }
+
+  if (parsed.data.status === "running") {
+    await store.updateJob({
+      jobId: job.id,
+      status: "running",
+      progressPct: parsed.data.progressPct ?? 20,
+      etaSec: job.etaSec ?? 120,
+    });
+    return NextResponse.json({ ok: true, status: "running" });
   }
 
   if (parsed.data.status === "failed") {

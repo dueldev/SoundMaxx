@@ -22,6 +22,7 @@ export type UploadInitResponse = {
   assetId: string;
   sessionToken: string;
   expiresAt: string;
+  clientUploadToken: string;
 };
 
 export type CreateJobRequest = {
@@ -47,6 +48,7 @@ export type JobStatusResponse = {
 export type ArtifactResponse = {
   downloadUrl: string;
   expiresAt: string;
+  format: string;
 };
 
 export type RecentSessionItem = {

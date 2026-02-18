@@ -66,6 +66,15 @@ async def execute_job(job: JobRequest, external_job_id: str) -> None:
     status.status = "running"
     status.progressPct = 20
 
+    try:
+        await asyncio.to_thread(post_callback, job, {
+            "externalJobId": external_job_id,
+            "status": "running",
+            "progressPct": 20,
+        })
+    except Exception:
+        pass
+
     workspace = TMP_ROOT / external_job_id
     output_dir = OUTPUT_ROOT / external_job_id
 

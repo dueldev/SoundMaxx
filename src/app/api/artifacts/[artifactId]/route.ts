@@ -27,6 +27,7 @@ export async function GET(request: NextRequest, context: { params: Promise<{ art
     {
       downloadUrl: artifact.blobUrl,
       expiresAt: artifact.expiresAt,
+      format: artifact.format,
     },
     {
       headers: noStoreHeaders(),

@@ -16,7 +16,7 @@ function modelForTool(toolType: ToolType) {
 function statusFromReplicate(status: string): ProviderSubmitResult["status"] {
   if (status === "succeeded") return "succeeded";
   if (status === "failed" || status === "canceled") return "failed";
-  if (status === "processing") return "running";
+  if (status === "processing" || status === "starting") return "running";
   return "queued";
 }
 
@@ -118,8 +118,8 @@ export const replicateAdapter: InferenceProviderAdapter = {
       provider: "replicate",
       model,
       status: statusFromReplicate(prediction.status),
-      progressPct: prediction.status === "succeeded" ? 100 : prediction.status === "processing" ? 35 : 5,
-      etaSec: prediction.status === "succeeded" ? 0 : 180,
+      progressPct: prediction.status === "succeeded" ? 100 : (prediction.status === "processing" || prediction.status === "starting") ? 20 : 5,
+      etaSec: prediction.status === "succeeded" ? 0 : 120,
       errorCode: prediction.error ? "replicate_prediction_failed" : undefined,
     };
   },

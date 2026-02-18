@@ -1,7 +1,8 @@
 "use client";
 
 import { useDropzone } from "react-dropzone";
-import { CheckIcon, FileAudioIcon, ShieldCheckIcon, SparklesIcon, UploadIcon } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { CheckCircleIcon, CheckIcon, FileAudioIcon, ShieldCheckIcon, SparklesIcon, UploadIcon } from "lucide-react";
 import { WaveformPlayer } from "@/components/waveform-player";
 import { Button } from "@/components/ui/button";
 import type { UploadState } from "@/components/studio/types";
@@ -87,9 +88,18 @@ export function UploadPanel({
           <span className="step-num">STEP 01</span>
           <h2 className="mt-1 text-2xl font-bold">Upload</h2>
         </div>
-        <span className={stateTagClass(uploadState)}>
-          {uploadStateLabel(uploadState)}
-        </span>
+        <AnimatePresence mode="wait">
+          <motion.span
+            key={uploadState}
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 4 }}
+            transition={{ duration: 0.2 }}
+            className={stateTagClass(uploadState)}
+          >
+            {uploadStateLabel(uploadState)}
+          </motion.span>
+        </AnimatePresence>
       </div>
 
       <hr className="section-rule mt-4 mb-4" />
@@ -98,13 +108,53 @@ export function UploadPanel({
       <div
         {...getRootProps()}
         className={cn(
-          "cursor-pointer border-2 border-dashed p-8 text-center transition-colors duration-150",
+          "relative cursor-pointer border-2 border-dashed p-8 text-center transition-all duration-200",
           isDragActive
             ? "border-[var(--accent)] bg-[var(--muted)]"
             : "border-[var(--foreground)] hover:border-[var(--accent)] hover:bg-[var(--muted)]",
+          busy && "pointer-events-none",
         )}
       >
         <input {...getInputProps()} />
+
+        {/* Upload progress overlay */}
+        <AnimatePresence>
+          {busy && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-[var(--background)]/90 z-10"
+            >
+              <div className="relative size-12">
+                <svg className="size-12 -rotate-90" viewBox="0 0 48 48">
+                  <circle
+                    cx="24" cy="24" r="20"
+                    fill="none"
+                    stroke="var(--muted)"
+                    strokeWidth="3"
+                  />
+                  <circle
+                    cx="24" cy="24" r="20"
+                    fill="none"
+                    stroke="var(--accent)"
+                    strokeWidth="3"
+                    strokeLinecap="square"
+                    strokeDasharray={`${2 * Math.PI * 20}`}
+                    strokeDashoffset={`${2 * Math.PI * 20 * 0.25}`}
+                    className="animate-spin origin-center"
+                    style={{ animationDuration: "1.5s" }}
+                  />
+                </svg>
+              </div>
+              <p className="font-mono text-xs font-bold uppercase tracking-wider" style={{ color: "var(--accent)" }}>
+                {uploadState === "preparing" ? "Preparing upload..." : "Uploading audio..."}
+              </p>
+              <span className="processing-dot" /><span className="processing-dot" /><span className="processing-dot" />
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         <UploadIcon
           className="mx-auto mb-3 size-7"
           style={{ color: isDragActive ? "var(--accent)" : "var(--muted-foreground)" }}
@@ -116,23 +166,37 @@ export function UploadPanel({
           WAV · MP3 · FLAC · AAC · OGG · M4A · Max 100 MB · 15 min
         </p>
 
-        {file ? (
-          <span
-            className="mt-4 inline-flex items-center gap-2 border px-3 py-1.5 font-mono text-xs font-semibold"
-            style={{ borderColor: "var(--foreground)" }}
-          >
-            <FileAudioIcon className="size-3.5" />
-            {file.name} · {readableSize(file.size)}
-          </span>
-        ) : null}
+        <AnimatePresence>
+          {file && (
+            <motion.span
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -6 }}
+              transition={{ duration: 0.25 }}
+              className="mt-4 inline-flex items-center gap-2 border px-3 py-1.5 font-mono text-xs font-semibold"
+              style={{ borderColor: "var(--foreground)" }}
+            >
+              <FileAudioIcon className="size-3.5" />
+              {file.name} · {readableSize(file.size)}
+            </motion.span>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* Waveform */}
-      {filePreviewUrl ? (
-        <div className="mt-4">
-          <WaveformPlayer src={filePreviewUrl} />
-        </div>
-      ) : null}
+      <AnimatePresence>
+        {filePreviewUrl && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+            className="mt-4 overflow-hidden"
+          >
+            <WaveformPlayer src={filePreviewUrl} />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Consent */}
       <div className="mt-4 flex flex-col gap-2">
@@ -189,29 +253,67 @@ export function UploadPanel({
 
       {/* Upload button */}
       <div className="mt-5">
-        <Button
-          onClick={onUpload}
-          disabled={!canUpload}
-          className="brutal-button-primary w-full justify-center py-3.5 text-xs"
-          style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}
-        >
+        <AnimatePresence mode="wait">
           {busy ? (
-            <>
-              <span className="inline-block size-3.5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-              {uploadState === "preparing" ? "Preparing…" : "Uploading…"}
-            </>
+            <motion.div
+              key="busy"
+              initial={{ opacity: 0, scale: 0.97 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.97 }}
+              transition={{ duration: 0.2 }}
+            >
+              <Button
+                disabled
+                className="brutal-button-primary w-full justify-center py-3.5 text-xs"
+                style={{ display: "flex", gap: "0.5rem", alignItems: "center", background: "var(--foreground)", borderColor: "var(--foreground)" }}
+              >
+                <span className="inline-block size-3.5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                {uploadState === "preparing" ? "Preparing..." : "Uploading..."}
+              </Button>
+            </motion.div>
           ) : uploadState === "uploaded" ? (
-            <>
-              <CheckIcon className="size-3.5" />
-              Uploaded
-            </>
+            <motion.div
+              key="uploaded"
+              initial={{ opacity: 0, scale: 0.97 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.97 }}
+              transition={{ duration: 0.2 }}
+            >
+              <Button
+                disabled
+                className="brutal-button-primary w-full justify-center py-3.5 text-xs"
+                style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}
+              >
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 12, delay: 0.1 }}
+                >
+                  <CheckCircleIcon className="size-3.5" />
+                </motion.div>
+                Uploaded Successfully
+              </Button>
+            </motion.div>
           ) : (
-            <>
-              <UploadIcon className="size-3.5" />
-              Upload Audio
-            </>
+            <motion.div
+              key="idle"
+              initial={{ opacity: 0, scale: 0.97 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.97 }}
+              transition={{ duration: 0.2 }}
+            >
+              <Button
+                onClick={onUpload}
+                disabled={!canUpload}
+                className="brutal-button-primary w-full justify-center py-3.5 text-xs"
+                style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}
+              >
+                <UploadIcon className="size-3.5" />
+                Upload Audio
+              </Button>
+            </motion.div>
           )}
-        </Button>
+        </AnimatePresence>
       </div>
 
       {uploadExpiry ? (
@@ -224,14 +326,19 @@ export function UploadPanel({
         {nextStep({ file, rightsConfirmed, uploadState })}
       </p>
 
-      {uploadError ? (
-        <p
-          className="mt-3 font-mono text-xs font-bold uppercase tracking-wide"
-          style={{ color: "var(--destructive)" }}
-        >
-          ⚠ {uploadError}
-        </p>
-      ) : null}
+      <AnimatePresence>
+        {uploadError && (
+          <motion.p
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -4 }}
+            className="mt-3 font-mono text-xs font-bold uppercase tracking-wide"
+            style={{ color: "var(--destructive)" }}
+          >
+            {uploadError}
+          </motion.p>
+        )}
+      </AnimatePresence>
     </section>
   );
 }

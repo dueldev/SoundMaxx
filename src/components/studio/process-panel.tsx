@@ -1,6 +1,8 @@
 "use client";
 
-import { PlayIcon } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { CheckIcon, LoaderIcon, PlayIcon, ZapIcon } from "lucide-react";
 import { MASTERING_PRESETS, type MasteringPreset, type ToolType } from "@/types/domain";
 import type { JobState } from "@/components/studio/types";
 import { Button } from "@/components/ui/button";
@@ -30,15 +32,31 @@ type ProcessPanelProps = {
   onMidiSensitivityChange: (value: number) => void;
 };
 
-function statusText(state: JobState, progress: number, etaSec: number | null): string {
-  if (state === "queued") return "QUEUED";
+const PIPELINE_STAGES = ["Queued", "Processing", "Complete"] as const;
+
+function getStageFromState(state: JobState): number {
+  if (state === "queued") return 0;
+  if (state === "running") return 1;
+  if (state === "succeeded") return 2;
+  return -1;
+}
+
+function getStatusMessage(state: JobState, toolLabel: string, progress: number, etaSec: number | null): string {
+  if (state === "queued") return "Queued — waiting for a worker to pick up the job";
   if (state === "running") {
-    const eta = etaSec !== null ? ` — ETA ${etaSec}s` : "";
-    return `RUNNING ${progress}%${eta}`;
+    const pct = progress > 0 ? ` — ${progress}% reported` : "";
+    const eta = etaSec !== null ? ` · ETA ${etaSec}s` : "";
+    return `Processing ${toolLabel.toLowerCase()}${pct}${eta}`;
   }
-  if (state === "succeeded") return "DONE";
-  if (state === "failed") return "FAILED";
-  return "IDLE";
+  if (state === "succeeded") return "Processing complete — artifacts ready";
+  if (state === "failed") return "Processing failed";
+  return "Ready to process";
+}
+
+function formatElapsed(seconds: number): string {
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  return `${m}:${s.toString().padStart(2, "0")}`;
 }
 
 function stateTagClass(state: JobState) {
@@ -57,6 +75,62 @@ function ControlLabel({ htmlFor, label }: { htmlFor: string; label: string }) {
     >
       {label}
     </label>
+  );
+}
+
+function ProcessingWaveform() {
+  const bars = 12;
+  return (
+    <div className="flex items-end gap-[3px]" style={{ height: 24 }}>
+      {Array.from({ length: bars }).map((_, i) => (
+        <div
+          key={i}
+          className="processing-waveform-bar"
+          style={{
+            height: `${40 + Math.sin(i * 0.8) * 40 + 20}%`,
+            animationDelay: `${i * 0.1}s`,
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
+function PipelineTimeline({ activeIndex }: { activeIndex: number }) {
+  return (
+    <div className="flex items-center gap-0 w-full">
+      {PIPELINE_STAGES.map((stage, i) => {
+        const isCompleted = activeIndex >= 0 && i < activeIndex;
+        const isActive = i === activeIndex;
+        return (
+          <div key={stage} className="flex items-center" style={{ flex: i < PIPELINE_STAGES.length - 1 ? 1 : 0 }}>
+            <div
+              className={cn(
+                "pipeline-stage",
+                isCompleted && "completed",
+                isActive && "active",
+              )}
+            >
+              <div className="pipeline-stage-dot">
+                {isCompleted && (
+                  <CheckIcon className="size-[6px] text-background" style={{ margin: "auto", display: "block", marginTop: 0.5 }} />
+                )}
+              </div>
+              <span className="whitespace-nowrap">{stage}</span>
+            </div>
+            {i < PIPELINE_STAGES.length - 1 && (
+              <div
+                className={cn(
+                  "pipeline-connector",
+                  isCompleted && "filled",
+                  isActive && "filling",
+                )}
+              />
+            )}
+          </div>
+        );
+      })}
+    </div>
   );
 }
 
@@ -85,9 +159,41 @@ export function ProcessPanel({
 }: ProcessPanelProps) {
   const isWorking = jobState === "queued" || jobState === "running";
   const clampedProgress = Math.max(0, Math.min(100, jobProgress));
+  const activeStageIndex = getStageFromState(jobState);
+  const statusMessage = getStatusMessage(jobState, toolLabel, clampedProgress, jobEtaSec);
+
+  const [elapsed, setElapsed] = useState(0);
+  const startTimeRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (!isWorking) {
+      startTimeRef.current = null;
+      setElapsed(0);
+      return;
+    }
+
+    if (!startTimeRef.current) {
+      startTimeRef.current = Date.now();
+    }
+
+    const timer = setInterval(() => {
+      if (startTimeRef.current) {
+        setElapsed(Math.floor((Date.now() - startTimeRef.current) / 1000));
+      }
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [isWorking]);
+
+  const showStatus = isWorking || jobState === "succeeded" || jobState === "failed";
 
   return (
-    <section className="brutal-card flex flex-col p-5 md:p-6">
+    <section
+      className={cn(
+        "brutal-card flex flex-col p-5 md:p-6 transition-all duration-500",
+        isWorking && "processing-pulse",
+      )}
+    >
       {/* Header */}
       <div className="flex items-start justify-between gap-3">
         <div>
@@ -111,7 +217,6 @@ export function ProcessPanel({
 
       {/* Controls */}
       <div className="flex flex-col gap-5 flex-1">
-
         {toolType === "stem_isolation" && (
           <div>
             <ControlLabel htmlFor="stem-count" label="Stem Count" />
@@ -215,26 +320,72 @@ export function ProcessPanel({
 
       {/* Run button */}
       <div className="mt-6">
-        <Button
-          onClick={onRunTool}
-          disabled={!canRunTool || isWorking}
-          className={cn(
-            "brutal-button-primary w-full justify-center py-3.5 text-xs",
-            isWorking && "opacity-80",
+        <AnimatePresence mode="wait">
+          {isWorking ? (
+            <motion.div
+              key="working"
+              initial={{ opacity: 0, scale: 0.97 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.97 }}
+              transition={{ duration: 0.25 }}
+            >
+              <Button
+                disabled
+                className={cn(
+                  "brutal-button-primary w-full justify-center py-4 text-xs",
+                )}
+                style={{
+                  display: "flex",
+                  gap: "0.625rem",
+                  alignItems: "center",
+                  background: "var(--foreground)",
+                  borderColor: "var(--foreground)",
+                }}
+              >
+                <LoaderIcon className="size-3.5 animate-spin" />
+                Processing...
+              </Button>
+            </motion.div>
+          ) : jobState === "succeeded" ? (
+            <motion.div
+              key="done"
+              initial={{ opacity: 0, scale: 0.97 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.97 }}
+              transition={{ duration: 0.25 }}
+            >
+              <Button
+                onClick={onRunTool}
+                disabled={!canRunTool}
+                className="brutal-button-primary w-full justify-center py-4 text-xs"
+                style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}
+              >
+                <CheckIcon className="size-3.5" />
+                Done — Run Again
+              </Button>
+            </motion.div>
+          ) : (
+            <motion.div
+              key="idle"
+              initial={{ opacity: 0, scale: 0.97 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.97 }}
+              transition={{ duration: 0.25 }}
+            >
+              <Button
+                onClick={onRunTool}
+                disabled={!canRunTool}
+                className="brutal-button-primary w-full justify-center py-4 text-xs"
+                style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}
+              >
+                <PlayIcon className="size-3.5" />
+                Run {toolLabel}
+              </Button>
+            </motion.div>
           )}
-          style={{
-            display: "flex",
-            gap: "0.5rem",
-            alignItems: "center",
-            background: isWorking ? "var(--foreground)" : undefined,
-            borderColor: isWorking ? "var(--foreground)" : undefined,
-          }}
-        >
-          <PlayIcon className="size-3.5" />
-          {isWorking ? `Running…` : `Run ${toolLabel}`}
-        </Button>
+        </AnimatePresence>
 
-        {!canRunTool && !isWorking ? (
+        {!canRunTool && !isWorking && jobState !== "succeeded" ? (
           <p className="mt-2 font-mono text-xs" style={{ color: "var(--muted-foreground)" }}>
             Upload audio first to enable processing.
           </p>
@@ -242,42 +393,101 @@ export function ProcessPanel({
       </div>
 
       {/* Pipeline status */}
-      <div
-        className="mt-5 border p-4"
-        aria-live="polite"
-        style={{ borderColor: "var(--muted)" }}
-      >
-        <div className="mb-3 flex items-center justify-between">
-          <p
-            className="font-mono text-[11px] font-bold uppercase tracking-[0.16em]"
-            style={{ color: "var(--muted-foreground)" }}
+      <AnimatePresence>
+        {showStatus && (
+          <motion.div
+            initial={{ opacity: 0, height: 0, marginTop: 0 }}
+            animate={{ opacity: 1, height: "auto", marginTop: 20 }}
+            exit={{ opacity: 0, height: 0, marginTop: 0 }}
+            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+            className="overflow-hidden"
           >
-            Pipeline status
-          </p>
-          <span
-            className="font-mono text-xs font-bold"
-            style={{ color: isWorking ? "var(--accent)" : "var(--muted-foreground)" }}
-          >
-            {statusText(jobState, clampedProgress, jobEtaSec)}
-          </span>
-        </div>
+            <div
+              className={cn("border p-4 transition-colors duration-300")}
+              style={{
+                borderColor: isWorking
+                  ? "var(--accent)"
+                  : jobState === "succeeded"
+                    ? "var(--foreground)"
+                    : jobState === "failed"
+                      ? "var(--destructive)"
+                      : "var(--muted)",
+              }}
+              aria-live="polite"
+            >
+              {/* Pipeline stage timeline */}
+              <div className="mb-4">
+                <PipelineTimeline activeIndex={activeStageIndex} />
+              </div>
 
-        <div className="brutal-progress-track">
-          <div
-            className={cn("brutal-progress-fill", isWorking && "active")}
-            style={{ width: `${clampedProgress}%` }}
-          />
-        </div>
+              {/* Progress bar — actual backend value, CSS-transitioned */}
+              <div className="brutal-progress-track">
+                <div
+                  className={cn(
+                    "brutal-progress-fill",
+                    isWorking && "active",
+                  )}
+                  style={{ width: `${clampedProgress}%` }}
+                />
+              </div>
 
-        {jobError ? (
-          <p
-            className="mt-3 font-mono text-xs font-bold uppercase tracking-wide"
-            style={{ color: "var(--destructive)" }}
-          >
-            ⚠ {jobError}
-          </p>
-        ) : null}
-      </div>
+              {/* Status row */}
+              <div className="mt-3 flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  {isWorking && <ProcessingWaveform />}
+                  {jobState === "succeeded" && (
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ type: "spring", stiffness: 400, damping: 15 }}
+                    >
+                      <ZapIcon className="size-4" style={{ color: "var(--accent)" }} />
+                    </motion.div>
+                  )}
+                  <div className="min-w-0">
+                    <AnimatePresence mode="wait">
+                      <motion.p
+                        key={statusMessage}
+                        initial={{ opacity: 0, y: 4 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -4 }}
+                        transition={{ duration: 0.2 }}
+                        className="font-mono text-xs font-bold truncate"
+                        style={{ color: isWorking ? "var(--accent)" : "var(--foreground)" }}
+                      >
+                        {statusMessage}
+                      </motion.p>
+                    </AnimatePresence>
+                  </div>
+                </div>
+
+                {/* Elapsed timer */}
+                {isWorking && (
+                  <div className="flex-shrink-0 text-right">
+                    <p className="font-mono text-[10px] font-bold uppercase tracking-wider" style={{ color: "var(--muted-foreground)" }}>
+                      Elapsed
+                    </p>
+                    <p className="font-mono text-sm font-bold tabular-nums" style={{ color: "var(--foreground)" }}>
+                      {formatElapsed(elapsed)}
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {jobError ? (
+                <motion.p
+                  initial={{ opacity: 0, y: -4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mt-3 font-mono text-xs font-bold uppercase tracking-wide"
+                  style={{ color: "var(--destructive)" }}
+                >
+                  {jobError}
+                </motion.p>
+              ) : null}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </section>
   );
 }

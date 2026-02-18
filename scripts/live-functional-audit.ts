@@ -1,6 +1,7 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
+import { put as putBlob } from "@vercel/blob/client";
 
 type ToolType = "stem_isolation" | "mastering" | "key_bpm" | "loudness_report" | "midi_extract";
 type JobStatus = "queued" | "running" | "succeeded" | "failed" | "expired";
@@ -11,6 +12,7 @@ type UploadInitResponse = {
   assetId: string;
   sessionToken: string;
   expiresAt: string;
+  clientUploadToken: string;
 };
 
 type CreateJobResponse = {
@@ -30,6 +32,13 @@ type JobStatusResponse = {
 type ArtifactResponse = {
   downloadUrl: string;
   expiresAt: string;
+};
+
+type UploadCompleteResponse = {
+  assetId: string;
+  blobKey: string;
+  blobUrl: string;
+  uploadedBytes: number;
 };
 
 type ToolAuditResult = {
@@ -415,15 +424,33 @@ async function run() {
       uploadedBytes: tone.buffer.byteLength,
     };
 
-    const uploadForm = new FormData();
-    uploadForm.set("file", new Blob([tone.buffer], { type: "audio/wav" }), "synthetic-tone.wav");
+    if (!uploadInit.clientUploadToken) {
+      throw new Error("Upload init response missing clientUploadToken");
+    }
 
-    const contentResult = await client.requestJson<{ uploadedBytes?: number; error?: string }>(uploadInit.uploadUrl, {
-      method: "PUT",
-      body: uploadForm,
+    const uploaded = await putBlob(uploadInit.blobKey, tone.buffer, {
+      access: "public",
+      token: uploadInit.clientUploadToken,
+      contentType: "audio/wav",
+      multipart: true,
     });
-    if (!contentResult.response.ok) {
-      throw new Error(`upload content failed (${contentResult.response.status})`);
+
+    const finalize = await client.requestJson<UploadCompleteResponse | { error?: string }>(
+      `/api/upload/complete/${uploadInit.assetId}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          blobUrl: uploaded.url,
+          uploadedBytes: tone.buffer.byteLength,
+        }),
+      },
+    );
+
+    if (!finalize.response.ok) {
+      throw new Error(`upload finalize failed (${finalize.response.status})`);
     }
 
     if (options.opsSecret) {

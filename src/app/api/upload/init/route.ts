@@ -1,10 +1,11 @@
 import { nanoid } from "nanoid";
 import { NextRequest, NextResponse } from "next/server";
+import { generateClientTokenFromReadWriteToken } from "@vercel/blob/client";
 import { buildShortLivedSessionToken } from "@/lib/session";
 import { jsonError, noStoreHeaders } from "@/lib/http";
 import { resolveRequestContext, withSessionCookie } from "@/lib/request-context";
 import { canUpload } from "@/lib/quota/check";
-import { limits } from "@/lib/config";
+import { allowedMimeTypes, limits } from "@/lib/config";
 import { uploadInitSchema } from "@/lib/validators";
 import { store } from "@/lib/store";
 import { hoursFromNow, normalizeDurationSec } from "@/lib/utils";
@@ -14,6 +15,17 @@ export const runtime = "nodejs";
 
 function safeFileName(name: string) {
   return name.replace(/[^a-zA-Z0-9._-]/g, "-").slice(0, 120);
+}
+
+async function createDirectUploadToken(pathname: string) {
+  return generateClientTokenFromReadWriteToken({
+    pathname,
+    addRandomSuffix: false,
+    allowOverwrite: true,
+    maximumSizeInBytes: limits.maxUploadBytes,
+    allowedContentTypes: Array.from(allowedMimeTypes),
+    validUntil: Date.now() + limits.sessionTokenTtlMinutes * 60 * 1000,
+  });
 }
 
 export async function POST(request: NextRequest) {
@@ -53,6 +65,15 @@ export async function POST(request: NextRequest) {
       expiresAt,
     });
 
+    let clientUploadToken: string;
+    try {
+      clientUploadToken = await createDirectUploadToken(blobKey);
+    } catch (error) {
+      return jsonError(500, "Unable to initialize direct upload token", {
+        message: error instanceof Error ? error.message : "unknown error",
+      });
+    }
+
     const response = NextResponse.json<UploadInitResponse>(
       {
         uploadUrl: `/api/upload/content/${assetId}`,
@@ -60,6 +81,7 @@ export async function POST(request: NextRequest) {
         assetId,
         sessionToken: buildShortLivedSessionToken(context.sessionId),
         expiresAt,
+        clientUploadToken,
       },
       {
         headers: noStoreHeaders(),

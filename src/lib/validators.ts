@@ -98,7 +98,7 @@ export const createJobSchema = z.discriminatedUnion("toolType", [
 
 export const providerWebhookSchema = z.object({
   externalJobId: z.string().min(8),
-  status: z.union([z.literal("succeeded"), z.literal("failed")]),
+  status: z.union([z.literal("succeeded"), z.literal("failed"), z.literal("running")]),
   progressPct: z.number().min(0).max(100).optional(),
   errorCode: z.string().max(120).optional(),
   artifacts: z
