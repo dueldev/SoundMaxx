@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
-import { IBM_Plex_Mono, Space_Grotesk } from "next/font/google";
+import { Chakra_Petch, IBM_Plex_Mono } from "next/font/google";
+import { Header } from "@/components/ui/header-3";
 import "./globals.css";
 
-const spaceGrotesk = Space_Grotesk({
-  variable: "--font-space-grotesk",
+const chakraPetch = Chakra_Petch({
+  variable: "--font-chakra-petch",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
 });
 
 const ibmPlexMono = IBM_Plex_Mono({
@@ -14,9 +16,9 @@ const ibmPlexMono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "SoundMaxx | AI Audio Production Suite",
+  title: "SoundMaxx | Audio Tool Studio",
   description:
-    "Upload tracks, isolate stems, master audio, analyze loudness, extract MIDI, and iterate with self-hosted open-source models.",
+    "Command-deck audio workflows for stem isolation, mastering, key/BPM detection, loudness analysis, and MIDI extraction.",
 };
 
 export default function RootLayout({
@@ -25,8 +27,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`${spaceGrotesk.variable} ${ibmPlexMono.variable} antialiased`}>{children}</body>
+    <html lang="en" suppressHydrationWarning>
+      <body className={`${chakraPetch.variable} ${ibmPlexMono.variable} bg-background text-foreground antialiased`}>
+        <Header />
+        <main id="main-content" className="pb-16">
+          {children}
+        </main>
+      </body>
     </html>
   );
 }

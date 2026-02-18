@@ -1,10 +1,11 @@
-import { and, eq, gte, lte, or, sql } from "drizzle-orm";
+import { and, desc, eq, gte, lte, or, sql } from "drizzle-orm";
 import type {
   ArtifactRecord,
   AssetRecord,
   JobRecord,
   OpsSummary,
   QuotaUsageRecord,
+  RecentSessionRun,
   SessionRecord,
 } from "@/types/domain";
 import { getDb } from "@/lib/db/client";
@@ -406,5 +407,35 @@ export class DbStore implements SoundmaxxStore {
       failedJobsLast24h,
       queueDepth,
     };
+  }
+
+  async listRecentSessionRuns(sessionId: string, limit: number): Promise<RecentSessionRun[]> {
+    const db = getDb();
+    const boundedLimit = Math.max(1, Math.min(limit, 20));
+
+    const rows = await db
+      .select({
+        jobId: jobs.id,
+        toolType: jobs.toolType,
+        status: jobs.status,
+        createdAt: jobs.createdAt,
+        artifactCount: sql<number>`count(${artifacts.id})`,
+        expiresAt: sql<Date | null>`max(${artifacts.expiresAt})`,
+      })
+      .from(jobs)
+      .leftJoin(artifacts, eq(artifacts.jobId, jobs.id))
+      .where(eq(jobs.sessionId, sessionId))
+      .groupBy(jobs.id)
+      .orderBy(desc(jobs.createdAt))
+      .limit(boundedLimit);
+
+    return rows.map((row) => ({
+      jobId: row.jobId,
+      toolType: row.toolType as RecentSessionRun["toolType"],
+      status: row.status as RecentSessionRun["status"],
+      createdAt: row.createdAt.toISOString(),
+      artifactCount: Number(row.artifactCount ?? 0),
+      expiresAt: row.expiresAt ? row.expiresAt.toISOString() : null,
+    }));
   }
 }

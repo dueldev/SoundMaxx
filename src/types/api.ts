@@ -1,5 +1,6 @@
 import type {
   ArtifactRecord,
+  DegradedState,
   JobRecord,
   JobStatus,
   ToolParamsMap,
@@ -46,6 +47,21 @@ export type JobStatusResponse = {
 export type ArtifactResponse = {
   downloadUrl: string;
   expiresAt: string;
+};
+
+export type RecentSessionItem = {
+  jobId: string;
+  toolType: ToolType;
+  toolLabel: string;
+  status: JobStatus;
+  createdAt: string;
+  artifactCount: number;
+  expiresAt: string | null;
+};
+
+export type RecentSessionsResponse = {
+  sessions: RecentSessionItem[];
+  degraded?: DegradedState;
 };
 
 export type ProviderWebhookPayload = {

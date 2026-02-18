@@ -2,7 +2,8 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 import { nanoid } from "nanoid";
 import { NextRequest, NextResponse } from "next/server";
 import { env, limits } from "@/lib/config";
-import { dayKeyUtc, sha256 } from "@/lib/utils";
+import { sha256 } from "@/lib/hash";
+import { dayKeyUtc } from "@/lib/utils";
 
 const SESSION_COOKIE = "smx_session";
 

@@ -5,6 +5,7 @@ import type {
   JobStatus,
   OpsSummary,
   QuotaUsageRecord,
+  RecentSessionRun,
   SessionRecord,
   ToolType,
 } from "@/types/domain";
@@ -106,4 +107,5 @@ export interface SoundmaxxStore {
 
   listExpiredResources(nowIso: string): Promise<ExpiredResources>;
   getOpsSummary(nowIso: string): Promise<OpsSummary>;
+  listRecentSessionRuns(sessionId: string, limit: number): Promise<RecentSessionRun[]>;
 }

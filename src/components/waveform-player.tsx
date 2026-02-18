@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { PauseIcon, PlayIcon } from "lucide-react";
 import WaveSurfer from "wavesurfer.js";
 
 type WaveformPlayerProps = {
@@ -17,10 +18,10 @@ export function WaveformPlayer({ src }: WaveformPlayerProps) {
 
     const wave = WaveSurfer.create({
       container: containerRef.current,
-      waveColor: "#9bd8ff",
-      progressColor: "#0d6db8",
-      cursorColor: "#083866",
-      height: 84,
+      waveColor: "#7f6a63",
+      progressColor: "#ff5600",
+      cursorColor: "#000ce1",
+      height: 72,
       barWidth: 2,
       barGap: 1,
       normalize: true,
@@ -48,14 +49,15 @@ export function WaveformPlayer({ src }: WaveformPlayerProps) {
   };
 
   return (
-    <div className="rounded-2xl border border-[#c6e0f1] bg-[#f7fcff] p-4 shadow-[0_18px_50px_-36px_rgba(16,81,124,0.9)]">
+    <div className="smx-subframe p-3">
       <div ref={containerRef} aria-label="Waveform preview" className="mb-3" />
       <button
         type="button"
         onClick={togglePlayback}
-        className="rounded-full bg-[#0f628f] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0b5377] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0f628f]"
+        className="inline-flex items-center gap-2 rounded-md bg-primary px-3 py-2 text-xs font-semibold uppercase tracking-[0.1em] text-primary-foreground transition hover:brightness-110"
       >
-        {isPlaying ? "Pause Preview" : "Play Preview"}
+        {isPlaying ? <PauseIcon className="size-3.5" /> : <PlayIcon className="size-3.5" />}
+        {isPlaying ? "Pause" : "Play Preview"}
       </button>
     </div>
   );

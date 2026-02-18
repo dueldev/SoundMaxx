@@ -18,6 +18,14 @@ The web app runs on Vercel (Hobby), while heavy inference runs on a separate sel
 - **Vercel Blob**: uploaded sources + output artifacts
 - **SoundMaxx Worker (`worker/`)**: executes open-source audio models and posts signed webhooks
 
+## Redesigned UI Surfaces
+
+- **Design language**: Minimal Brutal (Ink + Acid Mint), condensed display typography, mono telemetry text
+- **Home (`/`)**: asymmetrical command-deck hero, signal-stack proof cards, split featured rails, dense tool matrix, timeline-style recent sessions
+- **Tool pages (`/tools/[slug]`)**: mission panel + sticky workflow rail + hard-edged upload/process/results surfaces
+- **Ops (`/ops`)**: industrial telemetry board with explicit degraded-state warnings
+- **Global nav**: command-bar layout, theme toggle persistence, one dominant `Open Tool` action
+
 ## Quick Start
 
 1. Install Node dependencies:
@@ -65,6 +73,7 @@ uvicorn worker.app.main:app --host 0.0.0.0 --port 8000
 - `POST /api/provider/webhook/:provider`
 - `GET /api/cron/cleanup`
 - `GET /api/ops/summary`
+- `GET /api/sessions/recent?limit=8`
 
 ## Data Retention and Consent
 
@@ -80,6 +89,20 @@ npm run test:unit
 npm run test:integration
 npm run test:e2e
 ```
+
+## Preview Verification Workflow
+
+1. Start the app: `npm run dev`
+2. Visit:
+- `http://127.0.0.1:3000/`
+- `http://127.0.0.1:3000/tools/stem-isolation`
+- `http://127.0.0.1:3000/ops`
+3. Confirm:
+- no console errors
+- no non-2xx network failures for core UI requests
+- theme toggle persists after reload
+- recent sessions panel handles populated, empty, and degraded responses
+- desktop and mobile hierarchy remains clear (no repetitive card wall)
 
 ## Vercel Production Preflight
 

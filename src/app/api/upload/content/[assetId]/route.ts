@@ -33,42 +33,47 @@ async function readFileBody(request: NextRequest): Promise<{ body: Blob | Buffer
 }
 
 export async function PUT(request: NextRequest, context: { params: Promise<{ assetId: string }> }) {
-  const reqContext = await resolveRequestContext(request);
-  if (reqContext instanceof NextResponse) {
-    return reqContext;
-  }
+  try {
+    const reqContext = await resolveRequestContext(request);
+    if (reqContext instanceof NextResponse) {
+      return reqContext;
+    }
 
-  const { assetId } = await context.params;
-  const asset = await store.getSessionAsset(assetId, reqContext.sessionId);
-  if (!asset) {
-    return jsonError(404, "Asset not found");
-  }
+    const { assetId } = await context.params;
+    const asset = await store.getSessionAsset(assetId, reqContext.sessionId);
+    if (!asset) {
+      return jsonError(404, "Asset not found");
+    }
 
-  const parsedBody = await readFileBody(request);
-  if (!parsedBody) {
-    return jsonError(400, "No audio payload found. Send multipart form field named 'file'.");
-  }
+    const parsedBody = await readFileBody(request);
+    if (!parsedBody) {
+      return jsonError(400, "No audio payload found. Send multipart form field named 'file'.");
+    }
 
-  const uploaded = await uploadBlob(asset.blobKey, parsedBody.body, parsedBody.contentType);
+    const uploaded = await uploadBlob(asset.blobKey, parsedBody.body, parsedBody.contentType);
 
-  await store.updateAssetBlob({
-    assetId: asset.id,
-    blobUrl: uploaded.url,
-  });
-
-  await incrementUploadUsage(asset.sessionId, parsedBody.size);
-
-  const response = NextResponse.json(
-    {
+    await store.updateAssetBlob({
       assetId: asset.id,
-      blobKey: asset.blobKey,
-      blobUrl: uploaded.downloadUrl,
-      uploadedBytes: parsedBody.size,
-    },
-    {
-      headers: noStoreHeaders(),
-    },
-  );
+      blobUrl: uploaded.url,
+    });
 
-  return withSessionCookie(response, reqContext);
+    await incrementUploadUsage(asset.sessionId, parsedBody.size);
+
+    const response = NextResponse.json(
+      {
+        assetId: asset.id,
+        blobKey: asset.blobKey,
+        blobUrl: uploaded.downloadUrl,
+        uploadedBytes: parsedBody.size,
+      },
+      {
+        headers: noStoreHeaders(),
+      },
+    );
+
+    return withSessionCookie(response, reqContext);
+  } catch (error) {
+    console.error("Failed to upload audio content", error);
+    return jsonError(500, "Audio upload failed");
+  }
 }

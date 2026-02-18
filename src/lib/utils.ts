@@ -1,13 +1,8 @@
-import { createHash } from "node:crypto";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
-}
-
-export function sha256(input: string) {
-  return createHash("sha256").update(input).digest("hex");
 }
 
 export function nowIso() {
@@ -28,4 +23,12 @@ export function safeJsonParse<T>(json: string, fallback: T): T {
   } catch {
     return fallback;
   }
+}
+
+export function normalizeDurationSec(durationSec: number) {
+  if (!Number.isFinite(durationSec) || durationSec <= 0) {
+    return 1;
+  }
+
+  return Math.max(1, Math.ceil(durationSec));
 }

@@ -130,9 +130,24 @@ export type JobProgressPayload = {
   artifactIds: string[];
 };
 
+export type DegradedState = {
+  reason: string;
+  message: string;
+};
+
+export type RecentSessionRun = {
+  jobId: string;
+  toolType: ToolType;
+  status: JobStatus;
+  createdAt: string;
+  artifactCount: number;
+  expiresAt: string | null;
+};
+
 export type OpsSummary = {
   totalSessions: number;
   activeJobs: number;
   failedJobsLast24h: number;
   queueDepth: number;
+  degraded?: DegradedState;
 };
