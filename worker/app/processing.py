@@ -2,10 +2,12 @@ from __future__ import annotations
 
 import json
 import math
+import multiprocessing
 import os
 import shutil
 import subprocess
 import zipfile
+from queue import Empty
 from pathlib import Path
 from typing import Any
 
@@ -295,6 +297,66 @@ def run_processing(tool_type: str, input_file: Path, output_dir: Path, params: d
         return process_midi_extract(input_file, output_dir, params)
 
     raise ValueError(f"Unsupported tool type: {tool_type}")
+
+
+def _run_processing_worker(
+    output: multiprocessing.queues.Queue,
+    tool_type: str,
+    input_file: str,
+    output_dir: str,
+    params: dict[str, Any],
+) -> None:
+    try:
+        model, produced = run_processing(tool_type, Path(input_file), Path(output_dir), params)
+        output.put(
+            {
+                "ok": True,
+                "model": model,
+                "files": [str(path) for path in produced],
+            }
+        )
+    except Exception as exc:
+        output.put(
+            {
+                "ok": False,
+                "error": str(exc),
+            }
+        )
+
+
+def run_processing_with_hard_timeout(
+    tool_type: str,
+    input_file: Path,
+    output_dir: Path,
+    params: dict[str, Any],
+    timeout_sec: int,
+) -> tuple[str, list[Path]]:
+    ctx = multiprocessing.get_context("spawn")
+    output: multiprocessing.queues.Queue = ctx.Queue(maxsize=1)
+    process = ctx.Process(
+        target=_run_processing_worker,
+        args=(output, tool_type, str(input_file), str(output_dir), params),
+    )
+
+    process.start()
+    process.join(timeout_sec)
+
+    if process.is_alive():
+        process.terminate()
+        process.join(timeout=10)
+        raise TimeoutError(f"processing_timeout_after_{timeout_sec}s")
+
+    try:
+        result = output.get_nowait()
+    except Empty as exc:
+        raise RuntimeError(f"processing_worker_exited_without_result (exitcode={process.exitcode})") from exc
+
+    if not result.get("ok"):
+        raise RuntimeError(result.get("error") or "processing_worker_failed")
+
+    model = str(result.get("model") or "unknown")
+    files = [Path(path) for path in result.get("files", [])]
+    return model, files
 
 
 def clear_output_directory(job_id: str, output_root: Path) -> None:
