@@ -1,26 +1,80 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #e8f4fb;
+  --foreground: #0f2838;
+  --muted: #4d6678;
+  --panel: #f7fbff;
+  --panel-border: #b9d3e6;
+  --focus: #0f628f;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-space-grotesk);
+  --font-mono: var(--font-ibm-plex-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
 }
 
 body {
-  background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background:
+    radial-gradient(circle at 8% -12%, rgba(66, 170, 225, 0.42), transparent 36%),
+    radial-gradient(circle at 97% 18%, rgba(89, 136, 219, 0.23), transparent 30%),
+    linear-gradient(165deg, #f7fcff 0%, #e8f3fb 56%, #edf6fe 100%);
+  font-family: var(--font-space-grotesk), sans-serif;
+}
+
+.studio-shell {
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.92), rgba(248, 253, 255, 0.86)),
+    radial-gradient(circle at 15% 10%, rgba(103, 183, 229, 0.12), transparent 40%);
+  backdrop-filter: blur(7px);
+}
+
+.studio-panel {
+  background:
+    linear-gradient(160deg, rgba(255, 255, 255, 0.92), rgba(247, 252, 255, 0.82));
+  box-shadow: 0 20px 80px -50px rgba(17, 54, 85, 0.76);
+}
+
+.animate-rise {
+  animation: rise-in 0.45s ease-out both;
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+a {
+  color: inherit;
+}
+
+audio {
+  accent-color: #0f628f;
+}
+
+input:focus-visible,
+select:focus-visible,
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
 }
