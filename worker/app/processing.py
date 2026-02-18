@@ -38,7 +38,14 @@ def resolve_output_file(path_or_name: str, output_dir: Path) -> Path:
 
 
 def process_stem_isolation(input_file: Path, output_dir: Path, params: dict[str, Any]) -> tuple[str, list[Path]]:
-    from audio_separator.separator import Separator  # type: ignore
+    try:
+        from audio_separator.separator import Separator  # type: ignore
+    except ModuleNotFoundError as exc:
+        if exc.name == "onnxruntime":
+            raise RuntimeError(
+                "Stem isolation dependency missing: install 'onnxruntime' in the worker environment."
+            ) from exc
+        raise
 
     output_dir.mkdir(parents=True, exist_ok=True)
     stems = int(params.get("stems", 4))
