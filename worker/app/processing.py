@@ -131,10 +131,38 @@ def process_mastering(input_file: Path, output_dir: Path, params: dict[str, Any]
     output_dir.mkdir(parents=True, exist_ok=True)
     engine = os.getenv("MASTERING_ENGINE", "matchering_2_0").strip().lower()
 
-    if engine == "sonicmaster":
-        return process_mastering_sonicmaster(input_file, output_dir, params)
+    try:
+        if engine == "sonicmaster":
+            return process_mastering_sonicmaster(input_file, output_dir, params)
 
-    return process_mastering_matchering(input_file, output_dir, params)
+        return process_mastering_matchering(input_file, output_dir, params)
+    except Exception as exc:
+        return build_mastering_fallback(input_file, output_dir, params, engine, str(exc))
+
+
+def build_mastering_fallback(
+    input_file: Path,
+    output_dir: Path,
+    params: dict[str, Any],
+    requested_engine: str,
+    reason: str,
+) -> tuple[str, list[Path]]:
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    mastered_path = output_dir / f"{input_file.stem}-mastered.wav"
+    shutil.copy2(input_file, mastered_path)
+
+    report_path = output_dir / "mastering-report.json"
+    report_payload = {
+        "preset": params.get("preset", "streaming_clean"),
+        "intensity": params.get("intensity", 50),
+        "requestedEngine": requested_engine,
+        "engine": "fallback_passthrough",
+        "fallbackReason": reason[:500],
+    }
+    report_path.write_text(json.dumps(report_payload, indent=2), encoding="utf-8")
+
+    return "fallback_passthrough", [mastered_path, report_path]
 
 
 def process_mastering_matchering(input_file: Path, output_dir: Path, params: dict[str, Any]) -> tuple[str, list[Path]]:
