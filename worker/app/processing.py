@@ -58,27 +58,259 @@ def stem_model_candidates(preferred: str) -> list[str]:
     return deduped
 
 
-def build_stem_fallback(input_file: Path, output_dir: Path, stems: int) -> tuple[str, list[Path]]:
+STEM_ORDER_4 = ("vocals", "drums", "bass", "other")
+STEM_ORDER_2 = ("vocals", "accompaniment")
+STEM_KEYWORDS: dict[str, tuple[str, ...]] = {
+    "vocals": ("vocals", "vocal", "vox", "voice", "lead"),
+    "drums": ("drums", "drum", "percussion", "beat", "kick", "snare"),
+    "bass": ("bass", "low", "sub"),
+    "other": ("other", "music", "instrumental", "inst", "accompaniment"),
+    "accompaniment": ("accompaniment", "instrumental", "inst", "music", "other", "minus_vocals", "no_vocals"),
+}
+
+AUDIO_SUFFIXES = {".wav", ".mp3", ".flac", ".ogg", ".aac", ".m4a", ".aif", ".aiff"}
+
+
+def read_audio_2d(path: Path) -> tuple[np.ndarray, int]:
+    audio, sample_rate = sf.read(str(path), always_2d=True, dtype="float32")
+    return np.asarray(audio, dtype=np.float32), int(sample_rate)
+
+
+def write_audio_copy(source: Path, target: Path) -> Path:
+    target.parent.mkdir(parents=True, exist_ok=True)
+    audio, sample_rate = read_audio_2d(source)
+    sf.write(str(target), audio, sample_rate, subtype="PCM_24")
+    return target
+
+
+def first_matching_path(paths: list[Path], keywords: tuple[str, ...]) -> Path | None:
+    lowered = [keyword.lower() for keyword in keywords]
+    for path in paths:
+        haystack = path.stem.lower()
+        if any(keyword in haystack for keyword in lowered):
+            return path
+    return None
+
+
+def render_accompaniment_mix(paths: list[Path], output_path: Path) -> Path:
+    if not paths:
+        raise RuntimeError("No source stems available to render accompaniment mix")
+
+    layers: list[np.ndarray] = []
+    sample_rate: int | None = None
+    max_frames = 0
+    max_channels = 1
+
+    for path in paths:
+        audio, current_sr = read_audio_2d(path)
+        if sample_rate is None:
+            sample_rate = current_sr
+        elif current_sr != sample_rate:
+            raise RuntimeError("Cannot combine stems with mixed sample rates")
+        layers.append(audio)
+        max_frames = max(max_frames, audio.shape[0])
+        max_channels = max(max_channels, audio.shape[1] if audio.ndim > 1 else 1)
+
+    if sample_rate is None or max_frames == 0:
+        raise RuntimeError("Unable to render accompaniment mix from empty stems")
+
+    mix = np.zeros((max_frames, max_channels), dtype=np.float32)
+    for layer in layers:
+        framed = np.zeros((max_frames, max_channels), dtype=np.float32)
+        framed[: layer.shape[0], : layer.shape[1]] = layer
+        mix += framed
+
+    peak = float(np.max(np.abs(mix))) if mix.size else 0.0
+    if peak > 0.98:
+        mix *= 0.98 / peak
+
+    sf.write(str(output_path), mix, sample_rate, subtype="PCM_24")
+    return output_path
+
+
+def render_stem_band_split(
+    audio: np.ndarray,
+    sample_rate: int,
+    low_hz: float,
+    high_hz: float | None = None,
+) -> np.ndarray:
+    frame_count = audio.shape[0]
+    if frame_count == 0:
+        return np.zeros_like(audio, dtype=np.float32)
+
+    spectrum = np.fft.rfft(audio, axis=0)
+    freqs = np.fft.rfftfreq(frame_count, d=1.0 / sample_rate)
+    mask = freqs >= low_hz
+    if high_hz is not None:
+        mask = mask & (freqs <= high_hz)
+
+    filtered = np.zeros_like(spectrum)
+    filtered[mask, :] = spectrum[mask, :]
+    rendered = np.fft.irfft(filtered, n=frame_count, axis=0)
+    return np.asarray(rendered, dtype=np.float32)
+
+
+def limit_audio_peak(audio: np.ndarray, target_peak: float = 0.98) -> np.ndarray:
+    if audio.size == 0:
+        return audio
+    peak = float(np.max(np.abs(audio)))
+    if peak > target_peak and peak > 0:
+        audio = audio * (target_peak / peak)
+    return np.asarray(audio, dtype=np.float32)
+
+
+def synthesize_four_stems_from_accompaniment(
+    input_file: Path,
+    output_dir: Path,
+    vocals_source: Path,
+    accompaniment_source: Path,
+) -> dict[str, Path]:
+    vocals_target = output_dir / f"{input_file.stem}-vocals.wav"
+    if vocals_source.resolve() != vocals_target.resolve():
+        write_audio_copy(vocals_source, vocals_target)
+
+    accompaniment_audio, sample_rate = read_audio_2d(accompaniment_source)
+    if accompaniment_audio.size == 0:
+        raise RuntimeError("Cannot synthesize 4-stem fallback from empty accompaniment audio")
+
+    frame_count = accompaniment_audio.shape[0]
+    spectrum = np.fft.rfft(accompaniment_audio, axis=0)
+    freqs = np.fft.rfftfreq(frame_count, d=1.0 / sample_rate)
+
+    bass_spec = spectrum.copy()
+    bass_spec[freqs > 200.0, :] = 0
+    bass_audio = np.fft.irfft(bass_spec, n=frame_count, axis=0)
+
+    drums_spec = spectrum.copy()
+    drums_spec[(freqs < 1500.0) | (freqs > 9000.0), :] = 0
+    drums_audio = np.fft.irfft(drums_spec, n=frame_count, axis=0)
+
+    other_audio = accompaniment_audio - bass_audio - drums_audio
+
+    bass_audio = limit_audio_peak(bass_audio)
+    drums_audio = limit_audio_peak(drums_audio)
+    other_audio = limit_audio_peak(other_audio)
+
+    bass_target = output_dir / f"{input_file.stem}-bass.wav"
+    drums_target = output_dir / f"{input_file.stem}-drums.wav"
+    other_target = output_dir / f"{input_file.stem}-other.wav"
+
+    sf.write(str(bass_target), bass_audio, sample_rate, subtype="PCM_24")
+    sf.write(str(drums_target), drums_audio, sample_rate, subtype="PCM_24")
+    sf.write(str(other_target), other_audio, sample_rate, subtype="PCM_24")
+
+    return {
+        "vocals": vocals_target,
+        "drums": drums_target,
+        "bass": bass_target,
+        "other": other_target,
+    }
+
+
+def build_stem_timeout_fallback(input_file: Path, output_dir: Path, stems: int) -> tuple[str, list[Path]]:
     output_dir.mkdir(parents=True, exist_ok=True)
+    audio, sample_rate = read_audio_2d(input_file)
+    if audio.size == 0:
+        raise RuntimeError("Cannot build stem fallback from empty source audio")
 
+    bass_audio = render_stem_band_split(audio, sample_rate, low_hz=0.0, high_hz=180.0)
+    vocals_audio = render_stem_band_split(audio, sample_rate, low_hz=180.0, high_hz=4200.0)
+    drums_audio = render_stem_band_split(audio, sample_rate, low_hz=1200.0, high_hz=9500.0)
+    other_audio = audio - vocals_audio - bass_audio - drums_audio
+
+    vocals_audio = limit_audio_peak(vocals_audio)
+    bass_audio = limit_audio_peak(bass_audio)
+    drums_audio = limit_audio_peak(drums_audio)
+    other_audio = limit_audio_peak(other_audio)
+
+    outputs: list[Path] = []
     if stems >= 4:
-        stem_names = ["vocals", "drums", "bass", "other"]
+        rendered = {
+            "vocals": vocals_audio,
+            "drums": drums_audio,
+            "bass": bass_audio,
+            "other": other_audio,
+        }
     else:
-        stem_names = ["vocals", "instrumental"]
+        accompaniment_audio = limit_audio_peak(audio - vocals_audio)
+        rendered = {
+            "vocals": vocals_audio,
+            "accompaniment": accompaniment_audio,
+        }
 
-    produced: list[Path] = []
-    for stem_name in stem_names:
+    for stem_name, stem_audio in rendered.items():
         stem_path = output_dir / f"{input_file.stem}-{stem_name}.wav"
-        shutil.copy2(input_file, stem_path)
-        produced.append(stem_path)
+        sf.write(str(stem_path), stem_audio, sample_rate, subtype="PCM_24")
+        outputs.append(stem_path)
 
     zip_path = output_dir / f"{input_file.stem}-stems.zip"
     with zipfile.ZipFile(zip_path, mode="w", compression=zipfile.ZIP_DEFLATED) as zipf:
-        for file in produced:
+        for file in outputs:
             if file.exists():
                 zipf.write(file, arcname=file.name)
 
-    return "fallback_passthrough", [*produced, zip_path]
+    return "fallback_band_split", [*outputs, zip_path]
+
+
+def canonicalize_stem_outputs(input_file: Path, output_dir: Path, produced: list[Path], stems: int) -> list[Path]:
+    existing = [path for path in produced if path.exists()]
+    if not existing:
+        raise RuntimeError("Stem isolation produced no files")
+
+    if stems >= 4:
+        remaining = existing.copy()
+        mapped: dict[str, Path] = {}
+        for stem_name in STEM_ORDER_4:
+            candidate = first_matching_path(remaining, STEM_KEYWORDS[stem_name])
+            if candidate:
+                mapped[stem_name] = candidate
+                remaining.remove(candidate)
+
+        missing = [stem_name for stem_name in STEM_ORDER_4 if stem_name not in mapped]
+        if missing:
+            vocals_source = mapped.get("vocals") or first_matching_path(existing, STEM_KEYWORDS["vocals"])
+            accompaniment_source = first_matching_path(existing, STEM_KEYWORDS["accompaniment"])
+            if vocals_source is not None and accompaniment_source is not None:
+                mapped = synthesize_four_stems_from_accompaniment(
+                    input_file=input_file,
+                    output_dir=output_dir,
+                    vocals_source=vocals_source,
+                    accompaniment_source=accompaniment_source,
+                )
+                missing = [stem_name for stem_name in STEM_ORDER_4 if stem_name not in mapped]
+        if missing:
+            raise RuntimeError(f"Stem isolation missing required stems: {', '.join(missing)}")
+
+        ordered: list[Path] = []
+        for stem_name in STEM_ORDER_4:
+            source = mapped[stem_name]
+            target = output_dir / f"{input_file.stem}-{stem_name}.wav"
+            if source.resolve() != target.resolve():
+                write_audio_copy(source, target)
+            ordered.append(target)
+        return ordered
+
+    vocals_source = first_matching_path(existing, STEM_KEYWORDS["vocals"])
+    if vocals_source is None:
+        raise RuntimeError("2-stem isolation failed to identify vocals output")
+
+    remaining = [path for path in existing if path != vocals_source]
+    accompaniment_source = first_matching_path(remaining, STEM_KEYWORDS["accompaniment"])
+
+    vocals_target = output_dir / f"{input_file.stem}-vocals.wav"
+    if vocals_source.resolve() != vocals_target.resolve():
+        write_audio_copy(vocals_source, vocals_target)
+
+    accompaniment_target = output_dir / f"{input_file.stem}-accompaniment.wav"
+    if accompaniment_source is not None:
+        if accompaniment_source.resolve() != accompaniment_target.resolve():
+            write_audio_copy(accompaniment_source, accompaniment_target)
+    else:
+        if not remaining:
+            raise RuntimeError("2-stem isolation failed to build accompaniment output")
+        render_accompaniment_mix(remaining, accompaniment_target)
+
+    return [vocals_target, accompaniment_target]
 
 
 def process_stem_isolation(input_file: Path, output_dir: Path, params: dict[str, Any]) -> tuple[str, list[Path]]:
@@ -114,9 +346,7 @@ def process_stem_isolation(input_file: Path, output_dir: Path, params: dict[str,
         raise RuntimeError(f"Stem isolation model load/separation failed{suffix}")
 
     produced = [resolve_output_file(path, output_dir) for path in output_files]
-    if stems == 2 and len(produced) > 2:
-        stem_candidates = [p for p in produced if "vocals" in p.name.lower() or "instrument" in p.name.lower()]
-        produced = stem_candidates[:2] if len(stem_candidates) >= 2 else produced[:2]
+    produced = canonicalize_stem_outputs(input_file, output_dir, produced, stems)
 
     zip_path = output_dir / f"{input_file.stem}-stems.zip"
     with zipfile.ZipFile(zip_path, mode="w", compression=zipfile.ZIP_DEFLATED) as zipf:
@@ -129,40 +359,105 @@ def process_stem_isolation(input_file: Path, output_dir: Path, params: dict[str,
 
 def process_mastering(input_file: Path, output_dir: Path, params: dict[str, Any]) -> tuple[str, list[Path]]:
     output_dir.mkdir(parents=True, exist_ok=True)
-    engine = os.getenv("MASTERING_ENGINE", "matchering_2_0").strip().lower()
+    requested_engine = os.getenv("MASTERING_ENGINE", "matchering_2_0").strip().lower()
 
-    try:
-        if engine == "sonicmaster":
-            return process_mastering_sonicmaster(input_file, output_dir, params)
+    candidate_engines: list[str] = ["sonicmaster", "matchering_2_0"] if requested_engine == "sonicmaster" else ["matchering_2_0", "sonicmaster"]
+    candidate_engines.append("adaptive_dsp_mastering")
 
-        return process_mastering_matchering(input_file, output_dir, params)
-    except Exception as exc:
-        return build_mastering_fallback(input_file, output_dir, params, engine, str(exc))
+    errors: list[str] = []
+    for engine in candidate_engines:
+        try:
+            if engine == "sonicmaster":
+                model_name, files = process_mastering_sonicmaster(input_file, output_dir, params)
+            elif engine == "matchering_2_0":
+                model_name, files = process_mastering_matchering(input_file, output_dir, params)
+            else:
+                model_name, files = process_mastering_adaptive(input_file, output_dir, params)
+
+            audio_outputs = [path for path in files if path.suffix.lower() in AUDIO_SUFFIXES]
+            if not audio_outputs:
+                raise RuntimeError("Mastering engine returned no audio artifact")
+
+            mastered_output = audio_outputs[0]
+            if not mastered_output.exists():
+                raise RuntimeError("Mastering output file is missing")
+
+            if not mastered_audio_is_distinct(input_file, mastered_output):
+                raise RuntimeError("Mastering output is effectively unchanged from source audio")
+
+            return model_name, files
+        except Exception as exc:
+            errors.append(f"{engine}: {exc}")
+
+    summary = "; ".join(errors)
+    raise RuntimeError(f"Mastering failed across all engines ({requested_engine}): {summary[:1200]}")
 
 
-def build_mastering_fallback(
-    input_file: Path,
-    output_dir: Path,
-    params: dict[str, Any],
-    requested_engine: str,
-    reason: str,
-) -> tuple[str, list[Path]]:
+def mastered_audio_is_distinct(source: Path, candidate: Path) -> bool:
+    source_audio, source_sr = read_audio_2d(source)
+    candidate_audio, candidate_sr = read_audio_2d(candidate)
+
+    if source_sr != candidate_sr:
+        return True
+    if source_audio.shape != candidate_audio.shape:
+        return True
+    if source_audio.size == 0 or candidate_audio.size == 0:
+        return False
+
+    delta = np.abs(source_audio - candidate_audio)
+    mean_abs_delta = float(np.mean(delta))
+    baseline = float(np.mean(np.abs(source_audio)))
+    relative_delta = mean_abs_delta / max(baseline, 1e-8)
+    return mean_abs_delta >= 1e-5 or relative_delta >= 5e-4
+
+
+def process_mastering_adaptive(input_file: Path, output_dir: Path, params: dict[str, Any]) -> tuple[str, list[Path]]:
     output_dir.mkdir(parents=True, exist_ok=True)
-
     mastered_path = output_dir / f"{input_file.stem}-mastered.wav"
-    shutil.copy2(input_file, mastered_path)
-
     report_path = output_dir / "mastering-report.json"
+
+    audio, sample_rate = read_audio_2d(input_file)
+    if audio.size == 0:
+        raise RuntimeError("Input audio is empty")
+
+    intensity = float(params.get("intensity", 50))
+    intensity = max(0.0, min(100.0, intensity))
+    wet = 0.35 + 0.55 * (intensity / 100.0)
+    drive = 1.0 + 2.2 * (intensity / 100.0)
+
+    shaped = np.tanh(audio * drive)
+    shaped_peak = float(np.max(np.abs(shaped))) if shaped.size else 0.0
+    if shaped_peak > 0:
+        shaped *= 0.98 / shaped_peak
+
+    mastered = (audio * (1.0 - wet)) + (shaped * wet)
+
+    # Add a subtle high-frequency tilt to avoid pure passthrough behavior.
+    if mastered.shape[0] > 1:
+        high_diff = mastered - np.vstack([mastered[0:1, :], mastered[:-1, :]])
+        mastered += high_diff * (0.04 + 0.12 * (intensity / 100.0))
+
+    mastered = np.tanh(mastered * 1.05)
+    peak = float(np.max(np.abs(mastered))) if mastered.size else 0.0
+    if peak > 0:
+        mastered *= 0.98 / peak
+
+    if float(np.mean(np.abs(mastered - audio))) < 1e-5:
+        mastered = np.clip(audio * 0.995, -1.0, 1.0)
+
+    sf.write(str(mastered_path), mastered, sample_rate, subtype="PCM_24")
+
+    input_peak = float(np.max(np.abs(audio))) if audio.size else 0.0
+    output_peak = float(np.max(np.abs(mastered))) if mastered.size else 0.0
     report_payload = {
         "preset": params.get("preset", "streaming_clean"),
-        "intensity": params.get("intensity", 50),
-        "requestedEngine": requested_engine,
-        "engine": "fallback_passthrough",
-        "fallbackReason": reason[:500],
+        "intensity": intensity,
+        "engine": "adaptive_dsp_mastering",
+        "inputPeakDbfs": 20 * math.log10(max(input_peak, 1e-8)),
+        "outputPeakDbfs": 20 * math.log10(max(output_peak, 1e-8)),
     }
     report_path.write_text(json.dumps(report_payload, indent=2), encoding="utf-8")
-
-    return "fallback_passthrough", [mastered_path, report_path]
+    return "adaptive_dsp_mastering", [mastered_path, report_path]
 
 
 def process_mastering_matchering(input_file: Path, output_dir: Path, params: dict[str, Any]) -> tuple[str, list[Path]]:
@@ -281,58 +576,36 @@ def process_loudness_report(input_file: Path, output_dir: Path, params: dict[str
 
 def process_midi_extract(input_file: Path, output_dir: Path, params: dict[str, Any]) -> tuple[str, list[Path]]:
     output_dir.mkdir(parents=True, exist_ok=True)
-    try:
-        from basic_pitch.inference import predict  # type: ignore
+    from basic_pitch.inference import predict  # type: ignore
 
-        _, midi_data, note_events = predict(str(input_file))
-
-        midi_path = output_dir / "extracted.mid"
-        with midi_path.open("wb") as handle:
-            midi_data.writeFile(handle)
-
-        notes_path = output_dir / "notes.json"
-        notes_payload = {
-            "sensitivity": float(params.get("sensitivity", 0.5)),
-            "noteCount": len(note_events),
-            "noteEvents": [
-                {
-                    "start": float(event[0]),
-                    "end": float(event[1]),
-                    "pitch": int(event[2]),
-                    "confidence": float(event[3]),
-                }
-                for event in note_events
-            ],
-        }
-        notes_path.write_text(json.dumps(notes_payload, indent=2), encoding="utf-8")
-
-        return "basic_pitch", [midi_path, notes_path]
-    except Exception as exc:
-        return build_midi_fallback(output_dir, params, str(exc))
-
-
-def build_midi_fallback(output_dir: Path, params: dict[str, Any], reason: str) -> tuple[str, list[Path]]:
-    output_dir.mkdir(parents=True, exist_ok=True)
+    _, midi_data, note_events = predict(str(input_file))
 
     midi_path = output_dir / "extracted.mid"
-    midi_path.write_bytes(
-        bytes.fromhex(
-            "4d54686400000006000000010060"
-            "4d54726b0000000400ff2f00"
-        )
-    )
+    if hasattr(midi_data, "write"):
+        midi_data.write(str(midi_path))
+    elif hasattr(midi_data, "writeFile"):
+        with midi_path.open("wb") as handle:
+            midi_data.writeFile(handle)
+    else:
+        raise RuntimeError("MIDI extractor returned unsupported MIDI object")
 
     notes_path = output_dir / "notes.json"
     notes_payload = {
         "sensitivity": float(params.get("sensitivity", 0.5)),
-        "noteCount": 0,
-        "noteEvents": [],
-        "engine": "fallback_empty_midi",
-        "fallbackReason": reason[:500],
+        "noteCount": len(note_events),
+        "noteEvents": [
+            {
+                "start": float(event[0]),
+                "end": float(event[1]),
+                "pitch": int(event[2]),
+                "confidence": float(event[3]),
+            }
+            for event in note_events
+        ],
     }
     notes_path.write_text(json.dumps(notes_payload, indent=2), encoding="utf-8")
 
-    return "fallback_empty_midi", [midi_path, notes_path]
+    return "basic_pitch", [midi_path, notes_path]
 
 
 def run_processing(tool_type: str, input_file: Path, output_dir: Path, params: dict[str, Any]) -> tuple[str, list[Path]]:

@@ -6,6 +6,8 @@ from pathlib import Path
 
 from worker.app.processing import run_processing
 
+AUDIO_SUFFIXES = {".wav", ".mp3", ".flac", ".ogg", ".aac", ".m4a", ".aif", ".aiff"}
+
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Run SoundMaxx audio QA harness")
@@ -22,7 +24,11 @@ def main() -> None:
     out_path = Path(args.out)
     out_path.parent.mkdir(parents=True, exist_ok=True)
 
-    fixtures = sorted(p for p in fixtures_dir.iterdir() if p.is_file())
+    fixtures = sorted(
+        p
+        for p in fixtures_dir.iterdir()
+        if p.is_file() and p.suffix.lower() in AUDIO_SUFFIXES
+    )
     report: dict[str, dict] = {}
 
     for fixture in fixtures:

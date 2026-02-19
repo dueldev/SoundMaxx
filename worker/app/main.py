@@ -14,7 +14,7 @@ from fastapi.staticfiles import StaticFiles
 
 from .dataset import capture_training_sample
 from .models import ArtifactPayload, JobRequest, WorkerJobStatus
-from .processing import build_stem_fallback, download_source_audio, run_processing, run_processing_with_hard_timeout
+from .processing import build_stem_timeout_fallback, download_source_audio, run_processing, run_processing_with_hard_timeout
 from .security import assert_bearer_token, sign_payload
 
 OUTPUT_ROOT = Path(os.getenv("OUTPUT_ROOT", "worker/data/outputs")).resolve()
@@ -90,7 +90,7 @@ async def execute_job(job: JobRequest, external_job_id: str) -> None:
         status.progressPct = 40
 
         if job.toolType == "stem_isolation":
-            timeout_sec = max(int(os.getenv("STEM_ISOLATION_TIMEOUT_SEC", "180")), 30)
+            timeout_sec = max(int(os.getenv("STEM_ISOLATION_TIMEOUT_SEC", "120")), 30)
             try:
                 model_name, produced_files = await asyncio.to_thread(
                     run_processing_with_hard_timeout,
@@ -100,13 +100,12 @@ async def execute_job(job: JobRequest, external_job_id: str) -> None:
                     job.params,
                     timeout_sec,
                 )
-            except Exception:
-                requested_stems = int(job.params.get("stems", 4))
+            except TimeoutError:
                 model_name, produced_files = await asyncio.to_thread(
-                    build_stem_fallback,
+                    build_stem_timeout_fallback,
                     input_path,
                     output_dir,
-                    requested_stems,
+                    int(job.params.get("stems", 4)),
                 )
         else:
             model_name, produced_files = await asyncio.to_thread(
