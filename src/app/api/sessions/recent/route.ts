@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { noStoreHeaders } from "@/lib/http";
+import { privateSWRHeaders } from "@/lib/http";
 import { getToolConfigByType } from "@/lib/tool-config";
 import { resolveRequestContext, withSessionCookie, type RequestContext } from "@/lib/request-context";
 import { store } from "@/lib/store";
@@ -49,7 +49,7 @@ export async function GET(request: NextRequest) {
     logRecentSessionsFailure("Unable to resolve session for recent runs", error);
     return NextResponse.json<RecentSessionsResponse>(
       degradedPayload("Recent sessions are temporarily unavailable."),
-      { headers: noStoreHeaders() },
+      { headers: privateSWRHeaders() },
     );
   }
 
@@ -69,7 +69,7 @@ export async function GET(request: NextRequest) {
       {
         sessions,
       },
-      { headers: noStoreHeaders() },
+      { headers: privateSWRHeaders() },
     );
 
     return withSessionCookie(response, context);
@@ -77,7 +77,7 @@ export async function GET(request: NextRequest) {
     logRecentSessionsFailure("Unable to load recent sessions", error);
     const response = NextResponse.json<RecentSessionsResponse>(
       degradedPayload("Recent sessions are temporarily unavailable."),
-      { headers: noStoreHeaders() },
+      { headers: privateSWRHeaders() },
     );
 
     return withSessionCookie(response, context);

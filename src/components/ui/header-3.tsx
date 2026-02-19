@@ -125,6 +125,7 @@ function ToolsDropdown({ pathname }: { pathname: string }) {
             <Link
               key={tool.slug}
               href={tool.href}
+              prefetch={false}
               onClick={() => setOpen(false)}
               role="menuitem"
               className={cn(
@@ -194,6 +195,7 @@ function MobileMenu({ open, pathname, onClose }: { open: boolean; pathname: stri
           <Link
             key={tool.slug}
             href={tool.href}
+            prefetch={false}
             onClick={onClose}
             className={cn(
               "flex items-baseline gap-3 border-b py-4 transition-colors",

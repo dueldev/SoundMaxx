@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { env } from "@/lib/config";
-import { jsonError, noStoreHeaders } from "@/lib/http";
+import { jsonError, privateSWRHeaders } from "@/lib/http";
 import { queueDepth } from "@/lib/redis";
 import { store } from "@/lib/store";
 import type { OpsSummary } from "@/types/domain";
@@ -61,5 +61,5 @@ export async function GET(request: NextRequest) {
       : {}),
   };
 
-  return NextResponse.json(payload, { headers: noStoreHeaders() });
+  return NextResponse.json(payload, { headers: privateSWRHeaders() });
 }

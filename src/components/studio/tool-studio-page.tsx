@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { put as putBlob } from "@vercel/blob/client";
 import { ProcessPanel } from "@/components/studio/process-panel";
 import { ResultsPanel } from "@/components/studio/results-panel";
 import { StudioPageShell } from "@/components/studio/studio-page-shell";
@@ -182,6 +181,7 @@ export function ToolStudioPage({ toolConfig }: { toolConfig: ToolConfig }) {
       }
 
       const initBody = initBodyRaw;
+      const { put: putBlob } = await import("@vercel/blob/client");
 
       setUploadState("uploading");
       const uploaded = await putBlob(initBody.blobKey, file, {
@@ -294,45 +294,83 @@ export function ToolStudioPage({ toolConfig }: { toolConfig: ToolConfig }) {
   useEffect(() => {
     if (!jobId || (jobState !== "queued" && jobState !== "running")) return;
 
-    const interval = setInterval(async () => {
-      const response = await fetch(`/api/jobs/${jobId}`, { cache: "no-store" });
-      const payload = await parseJsonResponse<{
-        status?: JobState;
-        progressPct?: number;
-        etaSec?: number;
-        error?: string;
-        artifactIds?: string[];
-      }>(response);
+    let cancelled = false;
+    let shouldPoll = true;
+    let pollTimer: ReturnType<typeof setTimeout> | null = null;
+    let pollAbort: AbortController | null = null;
 
-      if (!response.ok || !payload?.status) {
-        setJobState("failed");
-        setJobError(payload?.error ?? "Polling failed");
-        clearInterval(interval);
-        return;
-      }
+    const clearPollTimer = () => {
+      if (!pollTimer) return;
+      clearTimeout(pollTimer);
+      pollTimer = null;
+    };
 
-      const backendStatus = payload.status;
-      const wasQueued = prevJobStateRef.current === "queued";
+    const scheduleNextPoll = () => {
+      clearPollTimer();
+      pollTimer = setTimeout(() => {
+        void pollOnce();
+      }, 2000);
+    };
 
-      if (backendStatus === "failed") {
-        prevJobStateRef.current = "failed";
-        setJobState("failed");
-        setJobProgress(payload.progressPct ?? 0);
-        setJobError(payload.error ?? "Processing failed");
-        clearInterval(interval);
-        return;
-      }
+    const pollOnce = async () => {
+      if (cancelled || !shouldPoll) return;
 
-      if (backendStatus === "succeeded") {
-        clearInterval(interval);
+      pollAbort = new AbortController();
 
-        if (wasQueued) {
-          prevJobStateRef.current = "running";
-          setJobState("running");
-          setJobProgress(50);
-          setJobEtaSec(null);
+      try {
+        const response = await fetch(`/api/jobs/${jobId}`, {
+          cache: "no-store",
+          signal: pollAbort.signal,
+        });
+        const payload = await parseJsonResponse<{
+          status?: JobState;
+          progressPct?: number;
+          etaSec?: number;
+          error?: string;
+          artifactIds?: string[];
+        }>(response);
 
-          bridgeTimerRef.current = setTimeout(async () => {
+        if (!response.ok || !payload?.status) {
+          shouldPoll = false;
+          prevJobStateRef.current = "failed";
+          setJobState("failed");
+          setJobError(payload?.error ?? "Polling failed");
+          return;
+        }
+
+        const backendStatus = payload.status;
+        const wasQueued = prevJobStateRef.current === "queued";
+
+        if (backendStatus === "failed") {
+          shouldPoll = false;
+          prevJobStateRef.current = "failed";
+          setJobState("failed");
+          setJobProgress(payload.progressPct ?? 0);
+          setJobError(payload.error ?? "Processing failed");
+          return;
+        }
+
+        if (backendStatus === "succeeded") {
+          shouldPoll = false;
+
+          if (wasQueued) {
+            prevJobStateRef.current = "running";
+            setJobState("running");
+            setJobProgress(50);
+            setJobEtaSec(null);
+
+            bridgeTimerRef.current = setTimeout(async () => {
+              if (cancelled) return;
+              prevJobStateRef.current = "succeeded";
+              setJobState("succeeded");
+              setJobProgress(100);
+              try {
+                await fetchArtifacts(payload.artifactIds ?? []);
+              } catch (error) {
+                setJobError(error instanceof Error ? error.message : "Failed to load artifacts");
+              }
+            }, 1200);
+          } else {
             prevJobStateRef.current = "succeeded";
             setJobState("succeeded");
             setJobProgress(100);
@@ -341,28 +379,39 @@ export function ToolStudioPage({ toolConfig }: { toolConfig: ToolConfig }) {
             } catch (error) {
               setJobError(error instanceof Error ? error.message : "Failed to load artifacts");
             }
-          }, 1200);
-        } else {
-          prevJobStateRef.current = "succeeded";
-          setJobState("succeeded");
-          setJobProgress(100);
-          try {
-            await fetchArtifacts(payload.artifactIds ?? []);
-          } catch (error) {
-            setJobError(error instanceof Error ? error.message : "Failed to load artifacts");
           }
+          return;
         }
-        return;
-      }
 
-      prevJobStateRef.current = backendStatus;
-      setJobState(backendStatus);
-      setJobProgress(payload.progressPct ?? 0);
-      setJobEtaSec(payload.etaSec ?? null);
-    }, 2000);
+        prevJobStateRef.current = backendStatus;
+        setJobState(backendStatus);
+        setJobProgress(payload.progressPct ?? 0);
+        setJobEtaSec(payload.etaSec ?? null);
+      } catch (error) {
+        if (cancelled) return;
+        if (error instanceof DOMException && error.name === "AbortError") {
+          return;
+        }
+
+        shouldPoll = false;
+        prevJobStateRef.current = "failed";
+        setJobState("failed");
+        setJobError("Polling failed");
+      } finally {
+        pollAbort = null;
+        if (!cancelled && shouldPoll) {
+          scheduleNextPoll();
+        }
+      }
+    };
+
+    void pollOnce();
 
     return () => {
-      clearInterval(interval);
+      cancelled = true;
+      shouldPoll = false;
+      clearPollTimer();
+      pollAbort?.abort();
       if (bridgeTimerRef.current) clearTimeout(bridgeTimerRef.current);
     };
   }, [jobId, jobState, fetchArtifacts]);

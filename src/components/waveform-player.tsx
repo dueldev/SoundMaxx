@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { PauseIcon, PlayIcon } from "lucide-react";
-import WaveSurfer from "wavesurfer.js";
+import type WaveSurfer from "wavesurfer.js";
 
 type WaveformPlayerProps = {
   src: string;
@@ -14,28 +14,40 @@ export function WaveformPlayer({ src }: WaveformPlayerProps) {
   const [isPlaying, setIsPlaying] = useState(false);
 
   useEffect(() => {
-    if (!containerRef.current) return;
-
-    const wave = WaveSurfer.create({
-      container: containerRef.current,
-      waveColor: "#c0b8a8",
-      progressColor: "#ff3b00",
-      cursorColor: "#0c0c0a",
-      height: 72,
-      barWidth: 2,
-      barGap: 1,
-      normalize: true,
-      dragToSeek: true,
-      mediaControls: false,
-    });
-
-    waveRef.current = wave;
-    wave.load(src);
-
+    let cancelled = false;
+    let wave: WaveSurfer | null = null;
     const onFinish = () => setIsPlaying(false);
-    wave.on("finish", onFinish);
+
+    setIsPlaying(false);
+
+    const initWaveform = async () => {
+      if (!containerRef.current) return;
+      const { default: WaveSurfer } = await import("wavesurfer.js");
+      if (cancelled || !containerRef.current) return;
+
+      wave = WaveSurfer.create({
+        container: containerRef.current,
+        waveColor: "#c0b8a8",
+        progressColor: "#ff3b00",
+        cursorColor: "#0c0c0a",
+        height: 72,
+        barWidth: 2,
+        barGap: 1,
+        normalize: true,
+        dragToSeek: true,
+        mediaControls: false,
+      });
+
+      waveRef.current = wave;
+      wave.load(src);
+      wave.on("finish", onFinish);
+    };
+
+    void initWaveform();
 
     return () => {
+      cancelled = true;
+      if (!wave) return;
       wave.un("finish", onFinish);
       wave.destroy();
       waveRef.current = null;

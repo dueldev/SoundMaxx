@@ -23,9 +23,7 @@ export function useRecentSessions(limit = 8): RecentSessionsState {
 
     const load = async () => {
       try {
-        const response = await fetch(`/api/sessions/recent?limit=${limit}`, {
-          cache: "no-store",
-        });
+        const response = await fetch(`/api/sessions/recent?limit=${limit}`);
         const payload = (await response.json()) as RecentSessionsResponse;
 
         if (!active) return;

@@ -70,7 +70,7 @@ export default function Home() {
             </p>
 
             <div className="mt-10 flex flex-wrap gap-3 animate-hero-5">
-              <Link href="/tools/stem-isolation" className="brutal-button-primary">
+              <Link href="/tools/stem-isolation" prefetch={false} className="brutal-button-primary">
                 Open Studio
                 <ArrowRightIcon className="size-3.5" />
               </Link>
@@ -214,6 +214,7 @@ export default function Home() {
                   <Link
                     key={tool.slug}
                     href={tool.href}
+                    prefetch={false}
                     className="group flex flex-col smx-bento-featured"
                     style={{
                       padding: "2rem",
@@ -278,6 +279,7 @@ export default function Home() {
                 <Link
                   key={tool.slug}
                   href={tool.href}
+                  prefetch={false}
                   className="brutal-card-interactive group flex flex-col"
                   style={{ padding: "1.5rem" }}
                 >
@@ -392,7 +394,7 @@ export default function Home() {
                 No account required. Sessions last 24 hours.
               </p>
             </div>
-            <Link href="/tools/stem-isolation" className="brutal-button-primary whitespace-nowrap">
+            <Link href="/tools/stem-isolation" prefetch={false} className="brutal-button-primary whitespace-nowrap">
               Open Studio
               <ArrowRightIcon className="size-3.5" />
             </Link>

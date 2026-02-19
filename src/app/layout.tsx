@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Chakra_Petch, IBM_Plex_Mono } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 import { Header } from "@/components/ui/header-3";
 import { env } from "@/lib/config";
 import {
@@ -112,6 +113,7 @@ export default function RootLayout({
         <main id="main-content" className="pb-16">
           {children}
         </main>
+        <Analytics />
       </body>
     </html>
   );

@@ -1,0 +1,134 @@
+{
+  "startedAt": "2026-02-19T00:00:50.523Z",
+  "baseUrl": "https://soundmaxx.vercel.app",
+  "upload": {
+    "assetId": "cChKpWNluhVTPRHPo2",
+    "blobKey": "uploads/09YsFJPVz8mAWqMYK3xKS/cChKpWNluhVTPRHPo2/synthetic-tone.wav",
+    "expiresAt": "2026-02-20T00:00:51.754Z",
+    "uploadedBytes": 176444
+  },
+  "checks": {},
+  "toolResults": [
+    {
+      "toolType": "stem_isolation",
+      "params": {
+        "stems": 2
+      },
+      "jobId": "auj0ZCrkYpxMkZDnBv",
+      "status": "succeeded",
+      "elapsedMs": 211568,
+      "progressPct": 100,
+      "etaSec": 0,
+      "artifactCount": 2,
+      "artifacts": [
+        {
+          "artifactId": "-ariluJ1IP0I6-KTsQ",
+          "downloadUrl": "https://zzxaysps8xemdivq.public.blob.vercel-storage.com/uploads/09YsFJPVz8mAWqMYK3xKS/cChKpWNluhVTPRHPo2/synthetic-tone.wav",
+          "expiresAt": "2026-02-20T00:04:24.076Z",
+          "downloadCheckStatus": 200
+        },
+        {
+          "artifactId": "mPlc_YyFpAVx4BDEkz",
+          "downloadUrl": "https://zzxaysps8xemdivq.public.blob.vercel-storage.com/uploads/09YsFJPVz8mAWqMYK3xKS/cChKpWNluhVTPRHPo2/synthetic-tone.wav",
+          "expiresAt": "2026-02-20T00:04:24.076Z",
+          "downloadCheckStatus": 200
+        }
+      ]
+    },
+    {
+      "toolType": "mastering",
+      "params": {
+        "preset": "streaming_clean",
+        "intensity": 60
+      },
+      "jobId": "XuZyHh-HtQ2i3Y4SjO",
+      "status": "succeeded",
+      "elapsedMs": 13520,
+      "progressPct": 100,
+      "etaSec": 0,
+      "artifactCount": 2,
+      "artifacts": [
+        {
+          "artifactId": "Z3Hj9aSvL8RA88tZ4d",
+          "downloadUrl": "https://zzxaysps8xemdivq.public.blob.vercel-storage.com/artifacts/XuZyHh-HtQ2i3Y4SjO/provided-1.wav?download=1",
+          "expiresAt": "2026-02-20T00:04:35.904Z",
+          "downloadCheckStatus": 200
+        },
+        {
+          "artifactId": "R7J46_igB880bNbbLk",
+          "downloadUrl": "https://zzxaysps8xemdivq.public.blob.vercel-storage.com/artifacts/XuZyHh-HtQ2i3Y4SjO/provided-2.json?download=1",
+          "expiresAt": "2026-02-20T00:04:35.904Z",
+          "downloadCheckStatus": 200
+        }
+      ]
+    },
+    {
+      "toolType": "key_bpm",
+      "params": {
+        "includeChordHints": true
+      },
+      "jobId": "pumzcch_jYODMVxxN1",
+      "status": "succeeded",
+      "elapsedMs": 9913,
+      "progressPct": 100,
+      "etaSec": 0,
+      "artifactCount": 1,
+      "artifacts": [
+        {
+          "artifactId": "yu66_I3XVMBVgSI2yM",
+          "downloadUrl": "https://zzxaysps8xemdivq.public.blob.vercel-storage.com/artifacts/pumzcch_jYODMVxxN1/provided-1.json?download=1",
+          "expiresAt": "2026-02-20T00:04:46.424Z",
+          "downloadCheckStatus": 200
+        }
+      ]
+    },
+    {
+      "toolType": "loudness_report",
+      "params": {
+        "targetLufs": -14
+      },
+      "jobId": "zqFy7CNP_X66cmJIEK",
+      "status": "succeeded",
+      "elapsedMs": 3849,
+      "progressPct": 100,
+      "etaSec": 0,
+      "artifactCount": 1,
+      "artifacts": [
+        {
+          "artifactId": "31b8fcMZJ1RAIrtMQg",
+          "downloadUrl": "https://zzxaysps8xemdivq.public.blob.vercel-storage.com/artifacts/zqFy7CNP_X66cmJIEK/provided-1.json?download=1",
+          "expiresAt": "2026-02-20T00:04:49.166Z",
+          "downloadCheckStatus": 200
+        }
+      ]
+    },
+    {
+      "toolType": "midi_extract",
+      "params": {
+        "sensitivity": 0.5
+      },
+      "jobId": "De3NHNsVRsC0XJhDtk",
+      "status": "succeeded",
+      "elapsedMs": 3775,
+      "progressPct": 100,
+      "etaSec": 0,
+      "artifactCount": 2,
+      "artifacts": [
+        {
+          "artifactId": "FT2Qk-XGT1kdQ5Bqdq",
+          "downloadUrl": "https://zzxaysps8xemdivq.public.blob.vercel-storage.com/artifacts/De3NHNsVRsC0XJhDtk/provided-1.mid?download=1",
+          "expiresAt": "2026-02-20T00:04:53.852Z",
+          "downloadCheckStatus": 200
+        },
+        {
+          "artifactId": "0vd9RG51jTDCJP2mE_",
+          "downloadUrl": "https://zzxaysps8xemdivq.public.blob.vercel-storage.com/artifacts/De3NHNsVRsC0XJhDtk/provided-2.json?download=1",
+          "expiresAt": "2026-02-20T00:04:53.852Z",
+          "downloadCheckStatus": 200
+        }
+      ]
+    }
+  ],
+  "success": true,
+  "finishedAt": "2026-02-19T00:04:55.771Z"
+}

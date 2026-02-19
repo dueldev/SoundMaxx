@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ArrowRightIcon, RefreshCwIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { OpsSummary } from "@/types/domain";
@@ -31,11 +31,19 @@ export default function OpsPage() {
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [updatedAt, setUpdatedAt] = useState<string | null>(null);
+  const [isPageVisible, setIsPageVisible] = useState(
+    () => (typeof document === "undefined" ? true : document.visibilityState === "visible"),
+  );
+  const requestInFlightRef = useRef(false);
 
-  const fetchSummary = useCallback(async (manual = false) => {
+  const fetchSummary = useCallback(async (options: { manual?: boolean; signal?: AbortSignal } = {}) => {
+    const { manual = false, signal } = options;
+    if (requestInFlightRef.current) return;
+    requestInFlightRef.current = true;
     if (manual) setRefreshing(true);
+
     try {
-      const response = await fetch("/api/ops/summary", { cache: "no-store" });
+      const response = await fetch("/api/ops/summary", { signal });
       const payload = (await response.json()) as OpsSummary | { error?: string };
       if (!response.ok) {
         throw new Error("error" in payload && payload.error ? payload.error : "Unable to load summary");
@@ -44,20 +52,61 @@ export default function OpsPage() {
       setError(null);
       setUpdatedAt(new Date().toISOString());
     } catch (err) {
+      if (err instanceof DOMException && err.name === "AbortError") {
+        return;
+      }
       setError(err instanceof Error ? err.message : "Unable to load summary");
       setSummary(EMPTY_SUMMARY);
       setUpdatedAt(new Date().toISOString());
     } finally {
+      requestInFlightRef.current = false;
       setLoading(false);
-      setRefreshing(false);
+      if (manual) setRefreshing(false);
     }
   }, []);
 
   useEffect(() => {
-    void fetchSummary();
-    const timer = setInterval(() => void fetchSummary(), 5000);
-    return () => clearInterval(timer);
-  }, [fetchSummary]);
+    const onVisibilityChange = () => {
+      setIsPageVisible(document.visibilityState === "visible");
+    };
+
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    return () => document.removeEventListener("visibilitychange", onVisibilityChange);
+  }, []);
+
+  useEffect(() => {
+    if (!isPageVisible) return;
+
+    let cancelled = false;
+    let pollTimer: ReturnType<typeof setTimeout> | null = null;
+    let pollAbort: AbortController | null = null;
+
+    const clearPollTimer = () => {
+      if (!pollTimer) return;
+      clearTimeout(pollTimer);
+      pollTimer = null;
+    };
+
+    const poll = async () => {
+      if (cancelled) return;
+      pollAbort = new AbortController();
+      await fetchSummary({ signal: pollAbort.signal });
+      pollAbort = null;
+      if (cancelled) return;
+      clearPollTimer();
+      pollTimer = setTimeout(() => {
+        void poll();
+      }, 5000);
+    };
+
+    void poll();
+
+    return () => {
+      cancelled = true;
+      clearPollTimer();
+      pollAbort?.abort();
+    };
+  }, [fetchSummary, isPageVisible]);
 
   const health = useMemo(() => deriveHealth(summary, error, loading), [summary, error, loading]);
 
@@ -112,7 +161,7 @@ export default function OpsPage() {
               ) : null}
               <button
                 type="button"
-                onClick={() => void fetchSummary(true)}
+                onClick={() => void fetchSummary({ manual: true })}
                 className="brutal-button-ghost px-3 py-2 text-xs"
               >
                 <RefreshCwIcon className={cn("size-3.5", refreshing && "animate-spin")} />
