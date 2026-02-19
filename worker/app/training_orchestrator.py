@@ -4,7 +4,7 @@ import json
 import os
 from collections import Counter
 from dataclasses import dataclass
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
@@ -138,7 +138,7 @@ def _train_lightweight_recommenders(rows: list[dict[str, Any]]) -> dict[str, Any
 
 
 def run_training_cycle(window_hours: int = 48) -> dict[str, Any]:
-    end = datetime.now(UTC)
+    end = datetime.now(timezone.utc)
     start = end - timedelta(hours=max(1, window_hours))
     window = TrainingWindow(start=start, end=end)
 

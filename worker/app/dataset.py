@@ -4,7 +4,7 @@ import hashlib
 import json
 import os
 import shutil
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Iterable
 from uuid import uuid4
@@ -54,7 +54,7 @@ def capture_training_sample(
     policy_version: str,
 ) -> None:
     root = dataset_root()
-    captured_at = datetime.now(UTC)
+    captured_at = datetime.now(timezone.utc)
     raw_retention_days = max(1, int(os.getenv("DATASET_RAW_RETENTION_DAYS", "90")))
     derived_retention_days = max(raw_retention_days, int(os.getenv("DATASET_DERIVED_RETENTION_DAYS", "365")))
 
