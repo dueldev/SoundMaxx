@@ -6,6 +6,7 @@ import multiprocessing
 import os
 import shutil
 import subprocess
+import threading
 import zipfile
 from queue import Empty
 from pathlib import Path
@@ -14,6 +15,10 @@ from typing import Any
 import numpy as np
 import requests
 import soundfile as sf
+
+THREAD_LOCAL = threading.local()
+_BASIC_PITCH_MODEL: Any | None = None
+_BASIC_PITCH_MODEL_LOCK = threading.Lock()
 
 
 def download_source_audio(source_url: str, target_path: Path) -> None:
@@ -37,6 +42,13 @@ def resolve_output_file(path_or_name: str, output_dir: Path) -> Path:
         return resolved
 
     return candidate
+
+
+def stem_zip_compression_mode() -> int:
+    compression = os.getenv("STEM_ZIP_COMPRESSION", "stored").strip().lower()
+    if compression in {"deflate", "zip_deflated", "compressed"}:
+        return zipfile.ZIP_DEFLATED
+    return zipfile.ZIP_STORED
 
 
 def stem_model_candidates(preferred: str) -> list[str]:
@@ -244,7 +256,7 @@ def build_stem_timeout_fallback(input_file: Path, output_dir: Path, stems: int) 
         outputs.append(stem_path)
 
     zip_path = output_dir / f"{input_file.stem}-stems.zip"
-    with zipfile.ZipFile(zip_path, mode="w", compression=zipfile.ZIP_DEFLATED) as zipf:
+    with zipfile.ZipFile(zip_path, mode="w", compression=stem_zip_compression_mode()) as zipf:
         for file in outputs:
             if file.exists():
                 zipf.write(file, arcname=file.name)
@@ -349,7 +361,7 @@ def process_stem_isolation(input_file: Path, output_dir: Path, params: dict[str,
     produced = canonicalize_stem_outputs(input_file, output_dir, produced, stems)
 
     zip_path = output_dir / f"{input_file.stem}-stems.zip"
-    with zipfile.ZipFile(zip_path, mode="w", compression=zipfile.ZIP_DEFLATED) as zipf:
+    with zipfile.ZipFile(zip_path, mode="w", compression=stem_zip_compression_mode()) as zipf:
         for file in produced:
             if file.exists():
                 zipf.write(file, arcname=file.name)
@@ -394,6 +406,12 @@ def process_mastering(input_file: Path, output_dir: Path, params: dict[str, Any]
 
 
 def mastered_audio_is_distinct(source: Path, candidate: Path) -> bool:
+    try:
+        if source.stat().st_size != candidate.stat().st_size:
+            return True
+    except OSError:
+        pass
+
     source_audio, source_sr = read_audio_2d(source)
     candidate_audio, candidate_sr = read_audio_2d(candidate)
 
@@ -409,6 +427,67 @@ def mastered_audio_is_distinct(source: Path, candidate: Path) -> bool:
     baseline = float(np.mean(np.abs(source_audio)))
     relative_delta = mean_abs_delta / max(baseline, 1e-8)
     return mean_abs_delta >= 1e-5 or relative_delta >= 5e-4
+
+
+def _essentia_module():
+    module = getattr(THREAD_LOCAL, "essentia_module", None)
+    if module is None:
+        import essentia.standard as es  # type: ignore
+
+        setattr(THREAD_LOCAL, "essentia_module", es)
+        module = es
+    return module
+
+
+def _essentia_extractors():
+    extractors = getattr(THREAD_LOCAL, "essentia_extractors", None)
+    if extractors is None:
+        es = _essentia_module()
+        extractors = (
+            es.RhythmExtractor2013(method="multifeature"),
+            es.KeyExtractor(),
+        )
+        setattr(THREAD_LOCAL, "essentia_extractors", extractors)
+    return extractors
+
+
+def _loudness_meter(sample_rate: int):
+    meters = getattr(THREAD_LOCAL, "loudness_meters", None)
+    if meters is None:
+        meters = {}
+        setattr(THREAD_LOCAL, "loudness_meters", meters)
+
+    meter = meters.get(sample_rate)
+    if meter is None:
+        import pyloudnorm as pyln  # type: ignore
+
+        meter = pyln.Meter(sample_rate)
+        meters[sample_rate] = meter
+    return meter
+
+
+def _basic_pitch_model():
+    global _BASIC_PITCH_MODEL
+    model = _BASIC_PITCH_MODEL
+    if model is not None:
+        return model
+
+    with _BASIC_PITCH_MODEL_LOCK:
+        model = _BASIC_PITCH_MODEL
+        if model is None:
+            from basic_pitch import ICASSP_2022_MODEL_PATH  # type: ignore
+            from basic_pitch.inference import Model  # type: ignore
+
+            model = Model(ICASSP_2022_MODEL_PATH)
+            _BASIC_PITCH_MODEL = model
+    return model
+
+
+def midi_thresholds_from_sensitivity(value: float) -> tuple[float, float]:
+    sensitivity = max(0.0, min(1.0, float(value)))
+    onset_threshold = 0.7 - (0.4 * sensitivity)
+    frame_threshold = 0.5 - (0.35 * sensitivity)
+    return onset_threshold, frame_threshold
 
 
 def process_mastering_adaptive(input_file: Path, output_dir: Path, params: dict[str, Any]) -> tuple[str, list[Path]]:
@@ -522,12 +601,12 @@ def process_mastering_sonicmaster(input_file: Path, output_dir: Path, params: di
 
 
 def process_key_bpm(input_file: Path, output_dir: Path, params: dict[str, Any]) -> tuple[str, list[Path]]:
-    import essentia.standard as es  # type: ignore
-
     output_dir.mkdir(parents=True, exist_ok=True)
+    es = _essentia_module()
+    rhythm_extractor, key_extractor = _essentia_extractors()
     audio = es.MonoLoader(filename=str(input_file), sampleRate=44100)()
-    bpm, _, _, _, _ = es.RhythmExtractor2013(method="multifeature")(audio)
-    key, scale, strength = es.KeyExtractor()(audio)
+    bpm, _, _, _, _ = rhythm_extractor(audio)
+    key, scale, strength = key_extractor(audio)
 
     result = {
         "key": f"{key} {scale}",
@@ -542,17 +621,15 @@ def process_key_bpm(input_file: Path, output_dir: Path, params: dict[str, Any]) 
 
 
 def process_loudness_report(input_file: Path, output_dir: Path, params: dict[str, Any]) -> tuple[str, list[Path]]:
-    import pyloudnorm as pyln  # type: ignore
-
     output_dir.mkdir(parents=True, exist_ok=True)
-    data, sample_rate = sf.read(str(input_file))
+    data, sample_rate = sf.read(str(input_file), dtype="float32")
 
     if data.ndim > 1:
         mono = np.mean(data, axis=1)
     else:
-        mono = data
+        mono = np.asarray(data, dtype=np.float32)
 
-    meter = pyln.Meter(sample_rate)
+    meter = _loudness_meter(int(sample_rate))
     integrated_lufs = float(meter.integrated_loudness(mono))
     peak_amplitude = float(np.max(np.abs(mono)))
     true_peak_dbtp = 20 * math.log10(max(peak_amplitude, 1e-8))
@@ -578,7 +655,14 @@ def process_midi_extract(input_file: Path, output_dir: Path, params: dict[str, A
     output_dir.mkdir(parents=True, exist_ok=True)
     from basic_pitch.inference import predict  # type: ignore
 
-    _, midi_data, note_events = predict(str(input_file))
+    sensitivity = float(params.get("sensitivity", 0.5))
+    onset_threshold, frame_threshold = midi_thresholds_from_sensitivity(sensitivity)
+    _, midi_data, note_events = predict(
+        str(input_file),
+        model_or_model_path=_basic_pitch_model(),
+        onset_threshold=onset_threshold,
+        frame_threshold=frame_threshold,
+    )
 
     midi_path = output_dir / "extracted.mid"
     if hasattr(midi_data, "write"):
@@ -591,7 +675,9 @@ def process_midi_extract(input_file: Path, output_dir: Path, params: dict[str, A
 
     notes_path = output_dir / "notes.json"
     notes_payload = {
-        "sensitivity": float(params.get("sensitivity", 0.5)),
+        "sensitivity": sensitivity,
+        "onsetThreshold": onset_threshold,
+        "frameThreshold": frame_threshold,
         "noteCount": len(note_events),
         "noteEvents": [
             {

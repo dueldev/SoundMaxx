@@ -1,11 +1,14 @@
 from __future__ import annotations
 
 import asyncio
+import hashlib
 import json
 import os
 import shutil
+import uuid
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlparse
 
 import requests
 from fastapi import FastAPI, Header, HTTPException
@@ -19,10 +22,13 @@ from .security import assert_bearer_token, sign_payload
 
 OUTPUT_ROOT = Path(os.getenv("OUTPUT_ROOT", "worker/data/outputs")).resolve()
 TMP_ROOT = Path(os.getenv("TMP_ROOT", "worker/data/tmp")).resolve()
+SOURCE_CACHE_ROOT = Path(os.getenv("SOURCE_CACHE_ROOT", str(TMP_ROOT / "source-cache"))).resolve()
 PUBLIC_BASE_URL = os.getenv("WORKER_PUBLIC_BASE_URL", "http://localhost:8000").rstrip("/")
+AUDIO_SUFFIXES = {".wav", ".mp3", ".flac", ".ogg", ".aac", ".m4a", ".aif", ".aiff"}
 
 OUTPUT_ROOT.mkdir(parents=True, exist_ok=True)
 TMP_ROOT.mkdir(parents=True, exist_ok=True)
+SOURCE_CACHE_ROOT.mkdir(parents=True, exist_ok=True)
 
 app = FastAPI(title="SoundMaxx Worker", version="1.0.0")
 app.mount("/outputs", StaticFiles(directory=str(OUTPUT_ROOT)), name="outputs")
@@ -44,6 +50,50 @@ def initial_model(tool_type: str) -> str:
 
 def output_url(job_id: str, filename: str) -> str:
     return f"{PUBLIC_BASE_URL}/outputs/{job_id}/{filename}"
+
+
+def source_audio_suffix(source_url: str) -> str:
+    parsed = urlparse(source_url)
+    suffix = Path(parsed.path).suffix.lower()
+    return suffix if suffix in AUDIO_SUFFIXES else ".wav"
+
+
+def source_cache_path(source_url: str) -> Path:
+    parsed = urlparse(source_url)
+    identity = f"{parsed.scheme}://{parsed.netloc}{parsed.path}"
+    suffix = source_audio_suffix(source_url)
+    cache_key = hashlib.sha256(identity.encode("utf-8")).hexdigest()
+    return SOURCE_CACHE_ROOT / f"{cache_key}{suffix}"
+
+
+def link_or_copy(source: Path, target: Path) -> None:
+    target.parent.mkdir(parents=True, exist_ok=True)
+    if target.exists():
+        target.unlink()
+
+    try:
+        os.link(source, target)
+    except OSError:
+        shutil.copy2(source, target)
+
+
+def stage_source_audio(source_url: str, target_path: Path) -> None:
+    cached_path = source_cache_path(source_url)
+    if cached_path.exists() and cached_path.stat().st_size > 0:
+        link_or_copy(cached_path, target_path)
+        return
+
+    temp_path = SOURCE_CACHE_ROOT / f"{cached_path.name}.tmp-{os.getpid()}-{uuid.uuid4().hex}"
+    if temp_path.exists():
+        temp_path.unlink()
+
+    download_source_audio(source_url, temp_path)
+    if temp_path.stat().st_size <= 0:
+        temp_path.unlink(missing_ok=True)
+        raise RuntimeError("Downloaded source audio is empty")
+
+    os.replace(temp_path, cached_path)
+    link_or_copy(cached_path, target_path)
 
 
 def post_callback(job: JobRequest, payload: dict[str, Any]) -> None:
@@ -83,10 +133,11 @@ async def execute_job(job: JobRequest, external_job_id: str) -> None:
     workspace.mkdir(parents=True, exist_ok=True)
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    input_path = workspace / "input.wav"
+    source_url = str(job.sourceAsset.blobUrl)
+    input_path = workspace / f"input{source_audio_suffix(source_url)}"
 
     try:
-        await asyncio.to_thread(download_source_audio, str(job.sourceAsset.blobUrl), input_path)
+        await asyncio.to_thread(stage_source_audio, source_url, input_path)
         status.progressPct = 40
 
         if job.toolType == "stem_isolation":
