@@ -1,24 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
-import { env } from "@/lib/config";
-import { jsonError, privateSWRHeaders } from "@/lib/http";
+import { jsonError, noStoreHeaders } from "@/lib/http";
+import { hasOpsApiAccess } from "@/lib/ops-access";
 import { queueDepth } from "@/lib/redis";
 import { store } from "@/lib/store";
 import type { OpsSummary } from "@/types/domain";
 
 export const runtime = "nodejs";
 
-function hasAccess(request: NextRequest) {
-  if (!env.OPS_SECRET) return true;
-  const auth = request.headers.get("authorization") ?? "";
-  return auth === `Bearer ${env.OPS_SECRET}`;
-}
-
 function isMissingDatabaseConfig(error: unknown) {
   return error instanceof Error && /DATABASE_URL is not configured/i.test(error.message);
 }
 
 export async function GET(request: NextRequest) {
-  if (!hasAccess(request)) {
+  if (!hasOpsApiAccess(request)) {
     return jsonError(401, "Unauthorized");
   }
 
@@ -61,5 +55,5 @@ export async function GET(request: NextRequest) {
       : {}),
   };
 
-  return NextResponse.json(payload, { headers: privateSWRHeaders() });
+  return NextResponse.json(payload, { headers: noStoreHeaders() });
 }

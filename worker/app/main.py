@@ -136,7 +136,7 @@ async def execute_job(job: JobRequest, external_job_id: str) -> None:
         status.etaSec = 0
         status.artifacts = artifacts
 
-        if job.dataset.captureConsent:
+        if job.dataset.captureMode == "implied_use":
             await asyncio.to_thread(
                 capture_training_sample,
                 source_session_id=job.dataset.sourceSessionId,
@@ -145,12 +145,15 @@ async def execute_job(job: JobRequest, external_job_id: str) -> None:
                 input_file=input_path,
                 output_files=produced_files,
                 params=job.params,
+                policy_version=job.dataset.policyVersion,
             )
 
         payload = {
             "externalJobId": external_job_id,
             "status": "succeeded",
             "progressPct": 100,
+            "model": model_name,
+            "qualityFlags": ["fallback_passthrough_output"] if model_name.startswith("fallback_") else [],
             "artifacts": [artifact.model_dump(mode="json") for artifact in artifacts],
         }
         await asyncio.to_thread(post_callback, job, payload)

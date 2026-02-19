@@ -401,7 +401,8 @@ async function run() {
       sizeBytes: tone.buffer.byteLength,
       durationSec: tone.durationSec,
       rightsConfirmed: true,
-      trainingConsent: false,
+      ageConfirmed: true,
+      policyVersion: process.env.POLICY_VERSION ?? "2026-02-19",
     };
 
     const initResult = await client.requestJson<UploadInitResponse | { error?: string }>("/api/upload/init", {

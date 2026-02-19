@@ -39,6 +39,7 @@ export async function GET(request: NextRequest) {
       status: "expired",
       progressPct: staleJob.progressPct,
       etaSec: 0,
+      recoveryState: staleJob.recoveryState === "retrying" ? "failed_after_retry" : staleJob.recoveryState,
       finishedAt: new Date().toISOString(),
       errorCode: staleJob.errorCode ?? "job_timed_out",
     });

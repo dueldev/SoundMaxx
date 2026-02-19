@@ -25,7 +25,8 @@ class CallbackConfig(BaseModel):
 
 
 class DatasetConfig(BaseModel):
-    captureConsent: bool = False
+    captureMode: Literal["implied_use"] = "implied_use"
+    policyVersion: str = Field(min_length=1, max_length=64)
     sourceSessionId: str
 
 

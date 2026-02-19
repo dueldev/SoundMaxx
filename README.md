@@ -72,15 +72,20 @@ uvicorn worker.app.main:app --host 0.0.0.0 --port 8000
 - `GET /api/artifacts/:artifactId`
 - `POST /api/provider/webhook/:provider`
 - `GET /api/cron/cleanup`
+- `POST /api/cron/training/run`
 - `GET /api/ops/summary`
+- `GET /api/ops/training`
 - `GET /api/sessions/recent?limit=8`
+- `GET|PUT /api/privacy/preferences`
+- `GET /api/partner/analytics/export`
 
 ## Data Retention and Consent
 
 - Uploaded files and artifacts expire after **24 hours**.
 - Cleanup endpoint removes expired assets/artifacts and marks stale jobs as expired.
-- Optional training data capture is enabled only when user checks training consent at upload time.
-- Consented samples are saved by the worker under `worker/data/consented` and indexed in `manifest.jsonl`.
+- Training/data capture is implied by service use and policy acceptance.
+- Training samples are written to worker dataset storage and indexed in both `worker/data/consented/manifest.jsonl` and database tables.
+- Raw training sample retention defaults to **90 days**; derived metadata retention defaults to **365 days**.
 
 ## Running Tests
 
@@ -125,4 +130,6 @@ The check validates:
 4. Ensure worker is deployed and publicly reachable.
 5. Set `APP_BASE_URL` to your Vercel URL and align webhook secret with worker callback signing.
 
-`vercel.json` includes a daily cleanup cron at `0 3 * * *` calling `/api/cron/cleanup`.
+`vercel.json` includes:
+- daily cleanup cron at `0 3 * * *` calling `/api/cron/cleanup`
+- autonomous training cron at `0 4 */2 * *` calling `/api/cron/training/run`

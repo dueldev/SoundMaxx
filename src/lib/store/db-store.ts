@@ -29,6 +29,10 @@ function mapSession(row: typeof sessions.$inferSelect): SessionRecord {
     lastSeenAt: row.lastSeenAt.toISOString(),
     ipHash: row.ipHash,
     userAgentHash: row.userAgentHash,
+    policyVersion: row.policyVersion,
+    policySeenAt: row.policySeenAt?.toISOString() ?? null,
+    adPersonalizationOptIn: row.adPersonalizationOptIn,
+    doNotSellOrShare: row.doNotSellOrShare,
   };
 }
 
@@ -39,6 +43,10 @@ function mapAsset(row: typeof assets.$inferSelect): AssetRecord {
     blobKey: row.blobKey,
     blobUrl: row.blobUrl,
     trainingConsent: row.trainingConsent,
+    policyVersion: row.policyVersion,
+    ageConfirmed: row.ageConfirmed,
+    rightsConfirmed: row.rightsConfirmed,
+    trainingCaptureMode: row.trainingCaptureMode as AssetRecord["trainingCaptureMode"],
     durationSec: row.durationSec,
     sampleRate: row.sampleRate,
     channels: row.channels,
@@ -48,6 +56,7 @@ function mapAsset(row: typeof assets.$inferSelect): AssetRecord {
 }
 
 function mapJob(row: typeof jobs.$inferSelect): JobRecord {
+  const qualityFlags = Array.isArray(row.qualityFlags) ? row.qualityFlags.filter((value): value is string => typeof value === "string") : [];
   return {
     id: row.id,
     sessionId: row.sessionId,
@@ -61,6 +70,10 @@ function mapJob(row: typeof jobs.$inferSelect): JobRecord {
     paramsJson: JSON.stringify(row.paramsJson),
     errorCode: row.errorCode,
     externalJobId: row.externalJobId,
+    recoveryState: (row.recoveryState as JobRecord["recoveryState"]) ?? "none",
+    attemptCount: row.attemptCount ?? 1,
+    qualityFlags,
+    lastRecoveryAt: row.lastRecoveryAt?.toISOString() ?? null,
     createdAt: row.createdAt.toISOString(),
     finishedAt: row.finishedAt?.toISOString() ?? null,
   };
@@ -94,6 +107,24 @@ export class DbStore implements SoundmaxxStore {
   async createOrTouchSession(input: CreateSessionInput) {
     const db = getDb();
     const now = new Date();
+    const updateSet: Partial<typeof sessions.$inferInsert> = {
+      lastSeenAt: now,
+      ipHash: input.ipHash,
+      userAgentHash: input.userAgentHash,
+    };
+
+    if (input.policyVersion !== undefined) {
+      updateSet.policyVersion = input.policyVersion;
+    }
+    if (input.policySeenAt !== undefined) {
+      updateSet.policySeenAt = input.policySeenAt ? new Date(input.policySeenAt) : null;
+    }
+    if (input.adPersonalizationOptIn !== undefined) {
+      updateSet.adPersonalizationOptIn = input.adPersonalizationOptIn;
+    }
+    if (input.doNotSellOrShare !== undefined) {
+      updateSet.doNotSellOrShare = input.doNotSellOrShare;
+    }
 
     const [upserted] = await db
       .insert(sessions)
@@ -103,14 +134,14 @@ export class DbStore implements SoundmaxxStore {
         lastSeenAt: now,
         ipHash: input.ipHash,
         userAgentHash: input.userAgentHash,
+        policyVersion: input.policyVersion ?? "2026-02-19",
+        policySeenAt: input.policySeenAt ? new Date(input.policySeenAt) : null,
+        adPersonalizationOptIn: input.adPersonalizationOptIn ?? false,
+        doNotSellOrShare: input.doNotSellOrShare ?? true,
       })
       .onConflictDoUpdate({
         target: sessions.id,
-        set: {
-          lastSeenAt: now,
-          ipHash: input.ipHash,
-          userAgentHash: input.userAgentHash,
-        },
+        set: updateSet,
       })
       .returning();
 
@@ -135,6 +166,10 @@ export class DbStore implements SoundmaxxStore {
         blobKey: input.blobKey,
         blobUrl: null,
         trainingConsent: input.trainingConsent,
+        policyVersion: input.policyVersion,
+        ageConfirmed: input.ageConfirmed,
+        rightsConfirmed: input.rightsConfirmed,
+        trainingCaptureMode: input.trainingCaptureMode,
         durationSec: input.durationSec,
         sampleRate: null,
         channels: null,
@@ -199,6 +234,10 @@ export class DbStore implements SoundmaxxStore {
         paramsJson: JSON.parse(input.paramsJson),
         errorCode: null,
         externalJobId: input.externalJobId ?? null,
+        recoveryState: input.recoveryState ?? "none",
+        attemptCount: input.attemptCount ?? 1,
+        qualityFlags: input.qualityFlags ?? [],
+        lastRecoveryAt: input.lastRecoveryAt ? new Date(input.lastRecoveryAt) : null,
         createdAt: new Date(),
         finishedAt: null,
       })
@@ -226,11 +265,16 @@ export class DbStore implements SoundmaxxStore {
   async updateJob(input: UpdateJobInput) {
     const db = getDb();
     const payload: Partial<typeof jobs.$inferInsert> = {};
+    if (input.model !== undefined) payload.model = input.model;
     if (input.status !== undefined) payload.status = input.status;
     if (input.progressPct !== undefined) payload.progressPct = input.progressPct;
     if (input.etaSec !== undefined) payload.etaSec = input.etaSec;
     if (input.errorCode !== undefined) payload.errorCode = input.errorCode;
     if (input.externalJobId !== undefined) payload.externalJobId = input.externalJobId;
+    if (input.recoveryState !== undefined) payload.recoveryState = input.recoveryState;
+    if (input.attemptCount !== undefined) payload.attemptCount = input.attemptCount;
+    if (input.qualityFlags !== undefined) payload.qualityFlags = input.qualityFlags;
+    if (input.lastRecoveryAt !== undefined) payload.lastRecoveryAt = input.lastRecoveryAt ? new Date(input.lastRecoveryAt) : null;
     if (input.finishedAt !== undefined) payload.finishedAt = input.finishedAt ? new Date(input.finishedAt) : null;
 
     const [row] = await db.update(jobs).set(payload).where(eq(jobs.id, input.jobId)).returning();
@@ -418,6 +462,11 @@ export class DbStore implements SoundmaxxStore {
         jobId: jobs.id,
         toolType: jobs.toolType,
         status: jobs.status,
+        recoveryState: jobs.recoveryState,
+        attemptCount: jobs.attemptCount,
+        qualityFlags: jobs.qualityFlags,
+        paramsJson: jobs.paramsJson,
+        errorCode: jobs.errorCode,
         createdAt: jobs.createdAt,
         artifactCount: sql<number>`count(${artifacts.id})`,
         expiresAt: sql<Date | null>`max(${artifacts.expiresAt})`,
@@ -433,6 +482,11 @@ export class DbStore implements SoundmaxxStore {
       jobId: row.jobId,
       toolType: row.toolType as RecentSessionRun["toolType"],
       status: row.status as RecentSessionRun["status"],
+      recoveryState: (row.recoveryState as RecentSessionRun["recoveryState"]) ?? "none",
+      attemptCount: Number(row.attemptCount ?? 1),
+      qualityFlags: Array.isArray(row.qualityFlags) ? row.qualityFlags.filter((value): value is string => typeof value === "string") : [],
+      paramsJson: JSON.stringify(row.paramsJson ?? {}),
+      errorCode: row.errorCode ?? null,
       createdAt: row.createdAt.toISOString(),
       artifactCount: Number(row.artifactCount ?? 0),
       expiresAt: row.expiresAt ? row.expiresAt.toISOString() : null,

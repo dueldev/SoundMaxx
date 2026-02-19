@@ -209,6 +209,18 @@ function MobileMenu({ open, pathname, onClose }: { open: boolean; pathname: stri
             <span className="text-lg font-semibold">{tool.navLabel}</span>
           </Link>
         ))}
+
+        <Link
+          href="/privacy/preferences"
+          onClick={onClose}
+          className={cn(
+            "border-b py-4 text-lg font-semibold transition-colors",
+            pathname === "/privacy/preferences" ? "text-[var(--accent)]" : "hover:text-[var(--accent)]",
+          )}
+          style={{ borderColor: "var(--muted)" }}
+        >
+          Privacy Preferences
+        </Link>
       </div>
     </div>,
     document.body,
@@ -251,6 +263,7 @@ export function Header() {
           <nav className="hidden items-center gap-8 md:flex" aria-label="Main navigation">
             <NavLink href="/" label="Home" active={pathname === "/"} />
             <ToolsDropdown pathname={pathname} />
+            <NavLink href="/privacy/preferences" label="Privacy" active={pathname === "/privacy/preferences"} />
           </nav>
 
           {/* Mobile hamburger */}

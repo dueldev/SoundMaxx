@@ -43,6 +43,10 @@ const baseJob: JobRecord = {
   paramsJson: JSON.stringify({ stems: 2 }),
   errorCode: null,
   externalJobId: "external_12345678",
+  recoveryState: "none",
+  attemptCount: 1,
+  qualityFlags: [],
+  lastRecoveryAt: null,
   createdAt: new Date(now.getTime() - 15 * 60 * 1000).toISOString(),
   finishedAt: null,
 };
@@ -75,8 +79,8 @@ const fallbackArtifacts: ArtifactRecord[] = [
 async function loadGetRoute() {
   vi.resetModules();
   process.env.CUSTOM_STEM_STALE_TIMEOUT_SEC = "60";
-  const module = await import("@/app/api/jobs/[jobId]/route");
-  return module.GET;
+  const routeModule = await import("@/app/api/jobs/[jobId]/route");
+  return routeModule.GET;
 }
 
 describe("GET /api/jobs/[jobId]", () => {
@@ -90,7 +94,10 @@ describe("GET /api/jobs/[jobId]", () => {
   });
 
   it("auto-completes stale custom stem jobs with fallback artifacts", async () => {
-    mocks.store.getSessionJob.mockResolvedValue(baseJob);
+    mocks.store.getSessionJob.mockResolvedValue({
+      ...baseJob,
+      attemptCount: 2,
+    });
     mocks.store.listArtifactsForJob.mockResolvedValueOnce([]).mockResolvedValueOnce(fallbackArtifacts);
     mocks.store.getSessionAsset.mockResolvedValue({
       id: baseJob.assetId,
@@ -103,6 +110,8 @@ describe("GET /api/jobs/[jobId]", () => {
       status: "succeeded",
       progressPct: 100,
       etaSec: 0,
+      recoveryState: "degraded_fallback",
+      qualityFlags: ["fallback_passthrough_output"],
       finishedAt: now.toISOString(),
     });
 

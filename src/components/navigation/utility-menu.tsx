@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import type { KeyboardEvent as ReactKeyboardEvent } from "react";
-import { IconActivity } from "@tabler/icons-react";
+import { IconActivity, IconShieldCheck } from "@tabler/icons-react";
 
 type UtilityMenuProps = {
   pathname: string;
@@ -65,7 +65,7 @@ export function UtilityMenu({ pathname }: UtilityMenuProps) {
       </button>
 
       {open ? (
-        <div id={MENU_ID} role="menu" aria-label="Utility" className="menu-surface signal-spine-x absolute right-0 z-50 mt-2 w-52 rounded-md p-2">
+        <div id={MENU_ID} role="menu" aria-label="Utility" className="menu-surface signal-spine-x absolute right-0 z-50 mt-2 w-56 rounded-md p-2">
           <Link
             ref={itemRef}
             role="menuitem"
@@ -77,6 +77,16 @@ export function UtilityMenu({ pathname }: UtilityMenuProps) {
           >
             <IconActivity size={14} />
             Ops Dashboard
+          </Link>
+          <Link
+            role="menuitem"
+            tabIndex={-1}
+            href="/privacy/preferences"
+            onClick={() => setOpen(false)}
+            className="menu-item signal-spine-y inline-flex w-full items-center gap-2 rounded-sm px-3 py-2 text-xs font-semibold uppercase tracking-[0.09em] transition"
+          >
+            <IconShieldCheck size={14} />
+            Privacy Preferences
           </Link>
         </div>
       ) : null}

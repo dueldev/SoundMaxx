@@ -12,6 +12,7 @@ import {
   SparklesIcon,
 } from "lucide-react";
 import type { ArtifactView } from "@/components/studio/types";
+import type { RecoveryState } from "@/components/studio/types";
 import type { ToolType } from "@/types/domain";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -20,6 +21,9 @@ type ResultsPanelProps = {
   toolType: ToolType;
   filePreviewUrl: string | null;
   artifacts: ArtifactView[];
+  jobId: string | null;
+  recoveryState: RecoveryState;
+  qualityFlags: string[];
   stemCount?: 2 | 4;
 };
 
@@ -494,9 +498,44 @@ function MidiResults({
   );
 }
 
-export function ResultsPanel({ toolType, filePreviewUrl, artifacts, stemCount = 4 }: ResultsPanelProps) {
+export function ResultsPanel({
+  toolType,
+  filePreviewUrl,
+  artifacts,
+  jobId,
+  recoveryState,
+  qualityFlags,
+  stemCount = 4,
+}: ResultsPanelProps) {
   const hasContent = filePreviewUrl || artifacts.length > 0;
   const hasArtifacts = artifacts.length > 0;
+  const [feedbackState, setFeedbackState] = useState<"idle" | "saving" | "saved" | "error">("idle");
+  const [feedbackReason, setFeedbackReason] = useState<string>("quality_gap");
+
+  async function submitFeedback(usable: boolean) {
+    if (!jobId) return;
+    try {
+      setFeedbackState("saving");
+      const response = await fetch(`/api/jobs/${jobId}/quality`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          usable,
+          reason: usable ? "usable_output" : feedbackReason,
+          toolType,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Unable to save feedback");
+      }
+      setFeedbackState("saved");
+    } catch {
+      setFeedbackState("error");
+    }
+  }
 
   return (
     <section
@@ -566,8 +605,75 @@ export function ResultsPanel({ toolType, filePreviewUrl, artifacts, stemCount = 
                     Processing complete — {artifacts.length} artifact{artifacts.length !== 1 ? "s" : ""} ready
                   </p>
                 </div>
+                {recoveryState === "degraded_fallback" || qualityFlags.includes("fallback_passthrough_output") ? (
+                  <div className="mt-2 border p-3" style={{ borderColor: "var(--destructive)" }}>
+                    <p className="font-mono text-[11px] font-bold uppercase tracking-[0.1em]" style={{ color: "var(--destructive)" }}>
+                      Fallback output detected
+                    </p>
+                    <p className="mt-1 text-xs" style={{ color: "var(--muted-foreground)" }}>
+                      This run used degraded fallback behavior. Use smart rerun presets for better quality.
+                    </p>
+                  </div>
+                ) : null}
               </motion.div>
             )}
+
+            {hasArtifacts && jobId ? (
+              <div className="mb-5 border p-4" style={{ borderColor: "var(--muted)" }}>
+                <p className="font-mono text-[11px] font-bold uppercase tracking-[0.14em]">Output quality check</p>
+                <p className="mt-1 text-xs" style={{ color: "var(--muted-foreground)" }}>
+                  Was this output usable on first pass?
+                </p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <Button
+                    onClick={() => void submitFeedback(true)}
+                    disabled={feedbackState === "saving" || feedbackState === "saved"}
+                    className="brutal-button-primary px-3 py-2 text-[11px]"
+                  >
+                    Yes, usable
+                  </Button>
+                  <Button
+                    onClick={() => void submitFeedback(false)}
+                    disabled={feedbackState === "saving" || feedbackState === "saved"}
+                    variant="outline"
+                    className="brutal-button-ghost px-3 py-2 text-[11px]"
+                  >
+                    Needs rerun
+                  </Button>
+                </div>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {[
+                    { id: "quality_gap", label: "Quality gap" },
+                    { id: "wrong_split", label: "Wrong split/analysis" },
+                    { id: "artifact_issue", label: "Artifact missing/bad" },
+                    { id: "latency_too_high", label: "Took too long" },
+                  ].map((reason) => (
+                    <button
+                      key={reason.id}
+                      type="button"
+                      onClick={() => setFeedbackReason(reason.id)}
+                      className="border px-2 py-1 font-mono text-[10px] uppercase tracking-[0.08em]"
+                      style={{
+                        borderColor: feedbackReason === reason.id ? "var(--accent)" : "var(--muted)",
+                        color: feedbackReason === reason.id ? "var(--accent)" : "var(--muted-foreground)",
+                      }}
+                    >
+                      {reason.label}
+                    </button>
+                  ))}
+                </div>
+                {feedbackState === "saved" ? (
+                  <p className="mt-2 font-mono text-[11px]" style={{ color: "var(--accent)" }}>
+                    Feedback saved.
+                  </p>
+                ) : null}
+                {feedbackState === "error" ? (
+                  <p className="mt-2 font-mono text-[11px]" style={{ color: "var(--destructive)" }}>
+                    Could not save feedback.
+                  </p>
+                ) : null}
+              </div>
+            ) : null}
 
             {/* Tool-specific results */}
             {hasArtifacts && toolType === "stem_isolation" && (

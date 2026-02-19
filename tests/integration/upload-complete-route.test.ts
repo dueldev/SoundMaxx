@@ -26,8 +26,8 @@ vi.mock("@/lib/store", () => ({
 
 async function loadPutRoute() {
   vi.resetModules();
-  const module = await import("@/app/api/upload/complete/[assetId]/route");
-  return module.PUT;
+  const routeModule = await import("@/app/api/upload/complete/[assetId]/route");
+  return routeModule.PUT;
 }
 
 describe("PUT /api/upload/complete/[assetId]", () => {

@@ -28,6 +28,20 @@ uvicorn worker.app.main:app --host 0.0.0.0 --port 8000
 - `OUTPUT_ROOT` (optional): Output file directory. Default `worker/data/outputs`.
 - `TMP_ROOT` (optional): Temp processing directory. Default `worker/data/tmp`.
 - `DATASET_ROOT` (optional): Consented dataset directory. Default `worker/data/consented`.
+- `DATASET_RAW_RETENTION_DAYS` (optional): Raw sample retention window. Default `90`.
+- `DATASET_DERIVED_RETENTION_DAYS` (optional): Derived metadata retention window. Default `365`.
+- `DATASET_SESSION_SALT` (optional): Salt used for session fingerprint hashing.
+- `MODEL_ARTIFACT_ROOT` (optional): Lightweight model recommendation artifacts directory.
+
+## Autonomous Lightweight Training
+
+Run the autonomous lightweight recommendation trainer directly:
+
+```bash
+python -m worker.app.training_orchestrator
+```
+
+This reads recent manifest rows, computes CPU-friendly recommendation artifacts, and writes versioned model JSON outputs.
 - `STEM_MODEL_ROFORMER_NAME` (optional): BS-RoFormer model filename.
 - `STEM_MODEL_DEMUCS_NAME` (optional): Demucs model filename.
 - `MASTERING_ENGINE` (optional): `matchering_2_0` (default) or `sonicmaster`.

@@ -10,7 +10,8 @@ export type ProviderSubmitInput = {
     webhookSecret: string;
   };
   dataset: {
-    captureConsent: boolean;
+    captureMode: "implied_use";
+    policyVersion: string;
   };
 };
 

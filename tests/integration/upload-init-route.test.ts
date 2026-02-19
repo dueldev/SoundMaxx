@@ -30,11 +30,11 @@ vi.mock("@vercel/blob/client", () => ({
 
 async function loadPostRoute() {
   vi.resetModules();
-  const module = await import("@/app/api/upload/init/route");
-  return module.POST;
+  const routeModule = await import("@/app/api/upload/init/route");
+  return routeModule.POST;
 }
 
-function buildRequest() {
+function buildRequest(policyVersion = "2026-02-19") {
   return new NextRequest("https://soundmaxx.example/api/upload/init", {
     method: "POST",
     headers: {
@@ -46,7 +46,8 @@ function buildRequest() {
       sizeBytes: 29 * 1024 * 1024,
       durationSec: 180,
       rightsConfirmed: true,
-      trainingConsent: false,
+      ageConfirmed: true,
+      policyVersion,
     }),
   });
 }
@@ -105,5 +106,22 @@ describe("POST /api/upload/init", () => {
 
     expect(response.status).toBe(500);
     expect(body.error).toBe("Unable to initialize direct upload token");
+  });
+
+  it("accepts client policy version when env policy contains trailing whitespace", async () => {
+    const originalPolicyVersion = process.env.POLICY_VERSION;
+    process.env.POLICY_VERSION = "2026-02-19\n";
+
+    try {
+      const POST = await loadPostRoute();
+      const response = await POST(buildRequest("2026-02-19"));
+      expect(response.status).toBe(200);
+    } finally {
+      if (originalPolicyVersion === undefined) {
+        delete process.env.POLICY_VERSION;
+      } else {
+        process.env.POLICY_VERSION = originalPolicyVersion;
+      }
+    }
   });
 });

@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import { Chakra_Petch, IBM_Plex_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
+import { AdProvider } from "@/components/ads/ad-provider";
 import { Header } from "@/components/ui/header-3";
-import { env } from "@/lib/config";
+import { env, featureFlags, monetizationConfig } from "@/lib/config";
 import {
   BRAND_NAME,
   DEFAULT_SITE_DESCRIPTION,
@@ -101,19 +102,21 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${chakraPetch.variable} ${ibmPlexMono.variable} bg-background text-foreground antialiased`}>
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
-        />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
-        />
-        <Header />
-        <main id="main-content" className="pb-16">
-          {children}
-        </main>
-        <Analytics />
+        <AdProvider enabled={featureFlags.adsense} clientId={monetizationConfig.adsenseClientId}>
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+          />
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
+          />
+          <Header />
+          <main id="main-content" className="pb-16">
+            {children}
+          </main>
+          <Analytics />
+        </AdProvider>
       </body>
     </html>
   );

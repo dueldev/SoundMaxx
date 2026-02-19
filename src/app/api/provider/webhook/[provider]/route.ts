@@ -1,9 +1,13 @@
 import path from "node:path";
 import { nanoid } from "nanoid";
 import { NextRequest, NextResponse } from "next/server";
+import { sql } from "drizzle-orm";
 import { z } from "zod";
-import { env, limits } from "@/lib/config";
+import { env, featureFlags, limits, policyConfig } from "@/lib/config";
 import { uploadBlob } from "@/lib/blob";
+import { getDb } from "@/lib/db/client";
+import { analyticsDailyAggregates, trainingSamples } from "@/lib/db/schema";
+import { sha256 } from "@/lib/hash";
 import { jsonError } from "@/lib/http";
 import { materializeWebhookOutputAsArtifacts } from "@/lib/providers/output";
 import { dequeueJob } from "@/lib/redis";
@@ -66,6 +70,15 @@ function mimeFromExt(ext: string) {
   return "application/octet-stream";
 }
 
+function appendQualityFlags(existing: string[], ...incoming: string[]) {
+  const next = new Set(existing);
+  for (const flag of incoming) {
+    if (!flag) continue;
+    next.add(flag);
+  }
+  return [...next];
+}
+
 async function materializeProvidedArtifacts(jobId: string, artifacts: Array<{ blobUrl: string; format: string }>) {
   const out = [] as Array<{ blobKey: string; blobUrl: string; format: string; sizeBytes: number }>;
 
@@ -87,6 +100,98 @@ async function materializeProvidedArtifacts(jobId: string, artifacts: Array<{ bl
   }
 
   return out;
+}
+
+async function persistTrainingAndAggregates(args: {
+  job: Awaited<ReturnType<typeof store.getJobByExternalId>>;
+  artifacts: Array<{ blobUrl: string; format: string; sizeBytes: number }>;
+  provider: string;
+}) {
+  if (!featureFlags.trainingDataPipeline || !args.job) {
+    return;
+  }
+
+  const job = args.job;
+  const asset = await store.getSessionAsset(job.assetId, job.sessionId);
+  if (!asset) return;
+
+  const now = new Date();
+  const rawExpiresAt = new Date(now.getTime() + 90 * 24 * 60 * 60 * 1000);
+  const derivedExpiresAt = new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000);
+  const paramsJson = (() => {
+    try {
+      return JSON.parse(job.paramsJson) as Record<string, unknown>;
+    } catch {
+      return {};
+    }
+  })();
+  const totalSizeBytes = args.artifacts.reduce((sum, artifact) => sum + artifact.sizeBytes, 0);
+  const avgSizeBytes = args.artifacts.length > 0 ? Math.floor(totalSizeBytes / args.artifacts.length) : 0;
+
+  try {
+    await getDb().insert(trainingSamples).values({
+      id: nanoid(18),
+      sampleId: nanoid(21),
+      toolType: job.toolType,
+      captureMode: "implied_use",
+      policyVersion: asset.policyVersion || policyConfig.version,
+      sessionFingerprint: sha256(`session:${job.sessionId}`),
+      inputHash: asset.blobUrl ? sha256(asset.blobUrl) : null,
+      outputHashes: args.artifacts.map((artifact) => sha256(`${artifact.blobUrl}:${artifact.sizeBytes}:${artifact.format}`)),
+      paramsJson,
+      outcomeJson: {
+        provider: args.provider,
+        status: "succeeded",
+        artifactCount: args.artifacts.length,
+      },
+      featureJson: {
+        outputCount: args.artifacts.length,
+        totalArtifactBytes: totalSizeBytes,
+        avgArtifactBytes: avgSizeBytes,
+      },
+      sourceDurationSec: asset.durationSec,
+      status: "captured",
+      capturedAt: now,
+      expiresAt: rawExpiresAt,
+      derivedExpiresAt,
+      createdAt: now,
+    });
+  } catch (error) {
+    console.error("Failed to persist training sample row", error);
+  }
+
+  try {
+    const dayUtc = now.toISOString().slice(0, 10);
+    await getDb()
+      .insert(analyticsDailyAggregates)
+      .values({
+        dayUtc,
+        metricKey: "jobs_succeeded",
+        dimension: "tool_type",
+        dimensionValue: job.toolType,
+        eventsCount: 1,
+        valueNum: totalSizeBytes,
+        payloadJson: {
+          provider: args.provider,
+        },
+        createdAt: now,
+      })
+      .onConflictDoUpdate({
+        target: [
+          analyticsDailyAggregates.dayUtc,
+          analyticsDailyAggregates.metricKey,
+          analyticsDailyAggregates.dimension,
+          analyticsDailyAggregates.dimensionValue,
+        ],
+        set: {
+          eventsCount: sql`${analyticsDailyAggregates.eventsCount} + 1`,
+          valueNum: sql`coalesce(${analyticsDailyAggregates.valueNum}, 0) + ${totalSizeBytes}`,
+          createdAt: now,
+        },
+      });
+  } catch (error) {
+    console.error("Failed to persist analytics aggregate row", error);
+  }
 }
 
 export async function POST(request: NextRequest, context: { params: Promise<{ provider: string }> }) {
@@ -133,6 +238,7 @@ export async function POST(request: NextRequest, context: { params: Promise<{ pr
         status: "running",
         progressPct: 35,
         etaSec: job.etaSec ?? 120,
+        recoveryState: job.attemptCount > 1 ? "retrying" : "none",
       });
       return NextResponse.json({ ok: true, status: "running" });
     }
@@ -143,6 +249,8 @@ export async function POST(request: NextRequest, context: { params: Promise<{ pr
         status: "failed",
         progressPct: 100,
         errorCode: parsed.data.error?.slice(0, 120) ?? "provider_failed",
+        recoveryState: job.attemptCount > 1 ? "failed_after_retry" : "none",
+        qualityFlags: appendQualityFlags(job.qualityFlags, "provider_failure"),
         finishedAt: new Date().toISOString(),
       });
       await dequeueJob(job.id);
@@ -168,7 +276,17 @@ export async function POST(request: NextRequest, context: { params: Promise<{ pr
       status: "succeeded",
       progressPct: 100,
       etaSec: 0,
+      recoveryState: "none",
       finishedAt: new Date().toISOString(),
+    });
+    await persistTrainingAndAggregates({
+      job,
+      artifacts: createdArtifacts.map((artifact) => ({
+        blobUrl: artifact.blobUrl,
+        format: artifact.format,
+        sizeBytes: artifact.sizeBytes,
+      })),
+      provider,
     });
     await dequeueJob(job.id);
 
@@ -195,6 +313,7 @@ export async function POST(request: NextRequest, context: { params: Promise<{ pr
       status: "running",
       progressPct: parsed.data.progressPct ?? 20,
       etaSec: job.etaSec ?? 120,
+      recoveryState: job.attemptCount > 1 ? "retrying" : "none",
     });
     return NextResponse.json({ ok: true, status: "running" });
   }
@@ -205,6 +324,8 @@ export async function POST(request: NextRequest, context: { params: Promise<{ pr
       status: "failed",
       progressPct: parsed.data.progressPct ?? 100,
       errorCode: parsed.data.errorCode?.slice(0, 120) ?? "provider_failed",
+      recoveryState: job.attemptCount > 1 ? "failed_after_retry" : "none",
+      qualityFlags: appendQualityFlags(job.qualityFlags, "provider_failure"),
       finishedAt: new Date().toISOString(),
     });
     await dequeueJob(job.id);
@@ -233,12 +354,31 @@ export async function POST(request: NextRequest, context: { params: Promise<{ pr
     })),
   );
 
+  const incomingQualityFlags = parsed.data.qualityFlags ?? [];
+  if ((parsed.data.model ?? "").startsWith("fallback_")) {
+    incomingQualityFlags.push("fallback_passthrough_output");
+  }
+  const qualityFlags = appendQualityFlags(job.qualityFlags, ...incomingQualityFlags);
+  const degradedFallback = qualityFlags.includes("fallback_passthrough_output");
+
   await store.updateJob({
     jobId: job.id,
     status: "succeeded",
     progressPct: parsed.data.progressPct ?? 100,
     etaSec: 0,
+    model: parsed.data.model,
+    recoveryState: degradedFallback ? "degraded_fallback" : "none",
+    qualityFlags,
     finishedAt: new Date().toISOString(),
+  });
+  await persistTrainingAndAggregates({
+    job,
+    artifacts: createdArtifacts.map((artifact) => ({
+      blobUrl: artifact.blobUrl,
+      format: artifact.format,
+      sizeBytes: artifact.sizeBytes,
+    })),
+    provider,
   });
 
   await dequeueJob(job.id);

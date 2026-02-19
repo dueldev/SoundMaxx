@@ -1,12 +1,15 @@
 import { nanoid } from "nanoid";
 import { NextRequest, NextResponse } from "next/server";
 import { generateClientTokenFromReadWriteToken } from "@vercel/blob/client";
+import { eq } from "drizzle-orm";
 import { buildShortLivedSessionToken } from "@/lib/session";
 import { jsonError, noStoreHeaders } from "@/lib/http";
 import { resolveRequestContext, withSessionCookie } from "@/lib/request-context";
 import { canUpload } from "@/lib/quota/check";
-import { allowedMimeTypes, limits } from "@/lib/config";
+import { allowedMimeTypes, env, featureFlags, limits, policyConfig } from "@/lib/config";
 import { uploadInitSchema } from "@/lib/validators";
+import { getDb } from "@/lib/db/client";
+import { sessions } from "@/lib/db/schema";
 import { store } from "@/lib/store";
 import { hoursFromNow, normalizeDurationSec } from "@/lib/utils";
 import type { UploadInitResponse } from "@/types/api";
@@ -47,6 +50,12 @@ export async function POST(request: NextRequest) {
       return jsonError(400, "Validation failed", parsed.error.flatten());
     }
 
+    if (featureFlags.impliedDataUse && parsed.data.policyVersion !== policyConfig.version) {
+      return jsonError(409, "Policy version mismatch. Please refresh and accept the latest policy.", {
+        requiredPolicyVersion: policyConfig.version,
+      });
+    }
+
     const quota = await canUpload(context.sessionId, parsed.data.sizeBytes);
     if (!quota.allowed) {
       return jsonError(429, quota.reason ?? "Upload quota exceeded", quota.usage);
@@ -60,10 +69,28 @@ export async function POST(request: NextRequest) {
       id: assetId,
       sessionId: context.sessionId,
       blobKey,
-      trainingConsent: parsed.data.trainingConsent,
+      trainingConsent: true,
+      policyVersion: parsed.data.policyVersion,
+      ageConfirmed: parsed.data.ageConfirmed,
+      rightsConfirmed: parsed.data.rightsConfirmed,
+      trainingCaptureMode: "implied_use",
       durationSec: normalizeDurationSec(parsed.data.durationSec),
       expiresAt,
     });
+
+    if (env.DATABASE_URL) {
+      try {
+        await getDb()
+          .update(sessions)
+          .set({
+            policyVersion: parsed.data.policyVersion,
+            policySeenAt: new Date(),
+          })
+          .where(eq(sessions.id, context.sessionId));
+      } catch (error) {
+        console.error("Failed to persist session policy acceptance", error);
+      }
+    }
 
     let clientUploadToken: string;
     try {

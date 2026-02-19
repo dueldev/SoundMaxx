@@ -3,6 +3,8 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { CheckIcon } from "lucide-react";
+import { AdSlot } from "@/components/ads/ad-slot";
+import { SponsorSlot } from "@/components/ads/sponsor-slot";
 import { TOOL_CONFIGS } from "@/lib/tool-config";
 import type { WorkflowPhase } from "@/components/studio/types";
 import { cn } from "@/lib/utils";
@@ -167,6 +169,11 @@ export function StudioPageShell({
 
         <div className="mt-5">
           {resultsPanel}
+        </div>
+
+        <div className="mt-5 space-y-4">
+          <AdSlot slotId="2002001" label="Advertisement" />
+          <SponsorSlot placement="tool_inline" />
         </div>
 
         <footer

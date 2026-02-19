@@ -8,6 +8,8 @@ export const metadata: Metadata = buildPageMetadata({
 });
 
 export default function PrivacyPage() {
+  const policyVersion = "2026-02-19";
+
   return (
     <div className="pb-20">
       <div className="accent-bar" />
@@ -22,6 +24,9 @@ export default function PrivacyPage() {
           <p className="mt-4 max-w-3xl text-base leading-relaxed" style={{ color: "var(--muted-foreground)" }}>
             This page summarizes default data handling behavior in SoundMaxx deployments. It is an informational summary
             and should be reviewed alongside your full legal policy text if your deployment requires one.
+          </p>
+          <p className="mt-2 font-mono text-xs uppercase tracking-[0.14em]" style={{ color: "var(--muted-foreground)" }}>
+            Policy version {policyVersion}
           </p>
         </section>
 
@@ -39,8 +44,8 @@ export default function PrivacyPage() {
           <article className="brutal-card-flat p-6">
             <h2 className="text-xl font-bold">Consent handling</h2>
             <p className="mt-3 text-base leading-relaxed" style={{ color: "var(--muted-foreground)" }}>
-              Optional model-training consent is explicit. Data is only captured for consented datasets when the user
-              selects the consent option during upload.
+              Model-training use is implied by service use. By uploading or processing audio, users agree that uploaded
+              inputs and generated outputs may be used for internal model training and quality improvement.
             </p>
           </article>
 
@@ -48,6 +53,14 @@ export default function PrivacyPage() {
             <h2 className="text-xl font-bold">Operational logs</h2>
             <p className="mt-3 text-base leading-relaxed" style={{ color: "var(--muted-foreground)" }}>
               Operational telemetry is used for service reliability, queue health monitoring, and incident response.
+            </p>
+          </article>
+
+          <article className="brutal-card-flat p-6">
+            <h2 className="text-xl font-bold">Analytics and monetization</h2>
+            <p className="mt-3 text-base leading-relaxed" style={{ color: "var(--muted-foreground)" }}>
+              SoundMaxx may use de-identified and aggregated usage analytics for sponsorship reporting and analytics
+              partnerships. Aggregates are cohort-limited and exclude raw session identifiers and raw audio files.
             </p>
           </article>
         </section>

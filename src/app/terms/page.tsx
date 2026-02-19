@@ -8,6 +8,8 @@ export const metadata: Metadata = buildPageMetadata({
 });
 
 export default function TermsPage() {
+  const policyVersion = "2026-02-19";
+
   return (
     <div className="pb-20">
       <div className="accent-bar" />
@@ -22,6 +24,9 @@ export default function TermsPage() {
           <p className="mt-4 max-w-3xl text-base leading-relaxed" style={{ color: "var(--muted-foreground)" }}>
             This page provides a concise terms summary for SoundMaxx usage. It does not replace formal legal terms where
             required by your deployment.
+          </p>
+          <p className="mt-2 font-mono text-xs uppercase tracking-[0.14em]" style={{ color: "var(--muted-foreground)" }}>
+            Terms version {policyVersion}
           </p>
         </section>
 
@@ -46,6 +51,21 @@ export default function TermsPage() {
             <h2 className="text-xl font-bold">Availability and updates</h2>
             <p className="mt-3 text-base leading-relaxed" style={{ color: "var(--muted-foreground)" }}>
               Platform behavior, tools, and processing backends may change as the service is maintained and improved.
+            </p>
+          </article>
+
+          <article className="brutal-card-flat p-6">
+            <h2 className="text-xl font-bold">Data use and training</h2>
+            <p className="mt-3 text-base leading-relaxed" style={{ color: "var(--muted-foreground)" }}>
+              By using SoundMaxx, users agree that uploaded audio and generated outputs may be used for internal model
+              training, quality tuning, and de-identified aggregate analytics reporting.
+            </p>
+          </article>
+
+          <article className="brutal-card-flat p-6">
+            <h2 className="text-xl font-bold">Age requirement</h2>
+            <p className="mt-3 text-base leading-relaxed" style={{ color: "var(--muted-foreground)" }}>
+              SoundMaxx is intended for users 18 years and older.
             </p>
           </article>
         </section>

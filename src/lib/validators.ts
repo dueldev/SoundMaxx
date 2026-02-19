@@ -8,7 +8,9 @@ const baseUploadSchema = z.object({
   sizeBytes: z.number().int().positive(),
   durationSec: z.number().positive(),
   rightsConfirmed: z.boolean(),
-  trainingConsent: z.boolean().default(false),
+  ageConfirmed: z.boolean(),
+  policyVersion: z.string().min(1).max(64),
+  trainingConsent: z.boolean().optional(), // legacy field accepted and ignored
 });
 
 export const uploadInitSchema = baseUploadSchema.superRefine((input, ctx) => {
@@ -41,6 +43,14 @@ export const uploadInitSchema = baseUploadSchema.superRefine((input, ctx) => {
       code: z.ZodIssueCode.custom,
       message: "You must confirm rights ownership or permission",
       path: ["rightsConfirmed"],
+    });
+  }
+
+  if (!input.ageConfirmed) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "You must confirm you are 18+ to use this service",
+      path: ["ageConfirmed"],
     });
   }
 });
@@ -101,6 +111,8 @@ export const providerWebhookSchema = z.object({
   status: z.union([z.literal("succeeded"), z.literal("failed"), z.literal("running")]),
   progressPct: z.number().min(0).max(100).optional(),
   errorCode: z.string().max(120).optional(),
+  model: z.string().max(120).optional(),
+  qualityFlags: z.array(z.string().min(1).max(64)).optional(),
   artifacts: z
     .array(
       z.object({

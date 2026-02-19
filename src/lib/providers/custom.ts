@@ -35,7 +35,8 @@ export const customWorkerAdapter: InferenceProviderAdapter = {
           webhookSecret: input.callback.webhookSecret,
         },
         dataset: {
-          captureConsent: input.dataset.captureConsent,
+          captureMode: input.dataset.captureMode,
+          policyVersion: input.dataset.policyVersion,
           sourceSessionId: input.sourceAsset.sessionId,
         },
       }),

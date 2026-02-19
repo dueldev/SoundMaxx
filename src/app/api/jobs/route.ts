@@ -92,6 +92,10 @@ export async function POST(request: NextRequest) {
     progressPct: 5,
     etaSec: 180,
     paramsJson: JSON.stringify(parsed.data.params),
+    recoveryState: "none",
+    attemptCount: 1,
+    qualityFlags: [],
+    lastRecoveryAt: null,
   });
 
   await queueJob(jobId);
@@ -109,7 +113,8 @@ export async function POST(request: NextRequest) {
         webhookSecret: hookSecret,
       },
       dataset: {
-        captureConsent: asset.trainingConsent,
+        captureMode: "implied_use",
+        policyVersion: asset.policyVersion,
       },
     });
 
@@ -129,6 +134,8 @@ export async function POST(request: NextRequest) {
       progressPct: submitResult.progressPct,
       etaSec: submitResult.etaSec,
       errorCode: submitResult.errorCode ?? null,
+      recoveryState: "none",
+      qualityFlags: [],
       finishedAt: normalizedStatus === "succeeded" || normalizedStatus === "failed" ? new Date().toISOString() : null,
     });
 
@@ -138,6 +145,9 @@ export async function POST(request: NextRequest) {
       {
         jobId,
         status: normalizedStatus,
+        recoveryState: "none",
+        attemptCount: 1,
+        qualityFlags: [],
       },
       {
         headers: noStoreHeaders(),
@@ -151,6 +161,7 @@ export async function POST(request: NextRequest) {
       status: "failed",
       progressPct: 100,
       errorCode: error instanceof Error ? error.message.slice(0, 120) : "job_submission_failed",
+      recoveryState: "none",
       finishedAt: new Date().toISOString(),
     });
     await dequeueJob(jobId);

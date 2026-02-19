@@ -2,6 +2,7 @@ import type {
   ArtifactRecord,
   AssetRecord,
   JobRecord,
+  JobRecoveryState,
   JobStatus,
   OpsSummary,
   QuotaUsageRecord,
@@ -14,6 +15,10 @@ export type CreateSessionInput = {
   id: string;
   ipHash: string;
   userAgentHash: string;
+  policyVersion?: string;
+  policySeenAt?: string | null;
+  adPersonalizationOptIn?: boolean;
+  doNotSellOrShare?: boolean;
 };
 
 export type CreateAssetInput = {
@@ -21,6 +26,10 @@ export type CreateAssetInput = {
   sessionId: string;
   blobKey: string;
   trainingConsent: boolean;
+  policyVersion: string;
+  ageConfirmed: boolean;
+  rightsConfirmed: boolean;
+  trainingCaptureMode: "implied_use";
   durationSec: number;
   expiresAt: string;
 };
@@ -44,15 +53,24 @@ export type CreateJobInput = {
   etaSec: number | null;
   paramsJson: string;
   externalJobId?: string | null;
+  recoveryState?: JobRecoveryState;
+  attemptCount?: number;
+  qualityFlags?: string[];
+  lastRecoveryAt?: string | null;
 };
 
 export type UpdateJobInput = {
   jobId: string;
+  model?: string;
   status?: JobStatus;
   progressPct?: number;
   etaSec?: number | null;
   errorCode?: string | null;
   externalJobId?: string | null;
+  recoveryState?: JobRecoveryState;
+  attemptCount?: number;
+  qualityFlags?: string[];
+  lastRecoveryAt?: string | null;
   finishedAt?: string | null;
 };
 

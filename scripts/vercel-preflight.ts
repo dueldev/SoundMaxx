@@ -3,6 +3,7 @@ import { execSync } from "node:child_process";
 const requiredVars = [
   "APP_BASE_URL",
   "SESSION_SECRET",
+  "POLICY_VERSION",
   "INFERENCE_PROVIDER",
   "INFERENCE_WEBHOOK_SECRET",
   "BLOB_READ_WRITE_TOKEN",
@@ -12,6 +13,12 @@ const requiredVars = [
   "WORKER_API_KEY",
   "CRON_SECRET",
   "OPS_SECRET",
+  "OPS_DASHBOARD_PASSWORD",
+  "FEATURE_IMPLIED_DATA_USE",
+  "FEATURE_ADSENSE",
+  "FEATURE_TRAINING_DATA_PIPELINE",
+  "FEATURE_AUTONOMOUS_TRAINING",
+  "FEATURE_ANALYTICS_EXPORT",
 ];
 
 function run(command: string) {
@@ -44,6 +51,16 @@ function main() {
 
   const envNames = new Set(extractEnvNames(envRaw));
   const missing = requiredVars.filter((name) => !envNames.has(name));
+
+  const hasAutonomousTraining = envNames.has("FEATURE_AUTONOMOUS_TRAINING");
+  if (hasAutonomousTraining && !envNames.has("TRAINING_CRON_SECRET") && !envNames.has("CRON_SECRET")) {
+    missing.push("TRAINING_CRON_SECRET");
+  }
+
+  const hasAnalyticsExport = envNames.has("FEATURE_ANALYTICS_EXPORT");
+  if (hasAnalyticsExport && !envNames.has("ANALYTICS_EXPORT_API_KEY")) {
+    missing.push("ANALYTICS_EXPORT_API_KEY");
+  }
 
   const report = {
     deploymentTarget,

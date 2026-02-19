@@ -9,7 +9,8 @@ describe("uploadInitSchema", () => {
       sizeBytes: 1024,
       durationSec: 180,
       rightsConfirmed: true,
-      trainingConsent: true,
+      ageConfirmed: true,
+      policyVersion: "2026-02-19",
     });
 
     expect(parsed.success).toBe(true);
@@ -22,7 +23,22 @@ describe("uploadInitSchema", () => {
       sizeBytes: 1024,
       durationSec: 120,
       rightsConfirmed: false,
-      trainingConsent: false,
+      ageConfirmed: true,
+      policyVersion: "2026-02-19",
+    });
+
+    expect(parsed.success).toBe(false);
+  });
+
+  it("rejects payload when age confirmation is missing", () => {
+    const parsed = uploadInitSchema.safeParse({
+      filename: "track.wav",
+      mimeType: "audio/wav",
+      sizeBytes: 1024,
+      durationSec: 120,
+      rightsConfirmed: true,
+      ageConfirmed: false,
+      policyVersion: "2026-02-19",
     });
 
     expect(parsed.success).toBe(false);

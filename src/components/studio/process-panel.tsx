@@ -4,20 +4,33 @@ import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { CheckIcon, LoaderIcon, PlayIcon, ZapIcon } from "lucide-react";
 import { MASTERING_PRESETS, type MasteringPreset, type ToolType } from "@/types/domain";
-import type { JobState } from "@/components/studio/types";
+import type { JobState, RecoveryState } from "@/components/studio/types";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+
+type SmartRerunPreset = {
+  id: string;
+  label: string;
+  description: string;
+};
 
 type ProcessPanelProps = {
   toolType: ToolType;
   toolLabel: string;
   toolDescription: string;
   jobState: JobState;
+  recoveryState: RecoveryState;
+  attemptCount: number;
+  qualityFlags: string[];
   jobProgress: number;
   jobEtaSec: number | null;
   jobError: string | null;
   canRunTool: boolean;
   onRunTool: () => void;
+  smartRerunPresets: SmartRerunPreset[];
+  onApplySmartRerun: (presetId: string) => void;
+  hasRecentRunRecall: boolean;
+  onUseRecentRunRecall: () => void;
   stems: 2 | 4;
   masteringPreset: MasteringPreset;
   masteringIntensity: number;
@@ -64,6 +77,46 @@ function stateTagClass(state: JobState) {
   if (state === "failed") return "tag tag-error";
   if (state === "queued" || state === "running") return "tag tag-warn";
   return "tag";
+}
+
+function trustRibbon(recoveryState: RecoveryState, qualityFlags: string[], attemptCount: number, jobState: JobState) {
+  if (recoveryState === "retrying") {
+    return {
+      label: "Recovering",
+      tone: "tag tag-warn",
+      message: `Automatic retry in progress (attempt ${attemptCount}).`,
+    };
+  }
+
+  if (recoveryState === "degraded_fallback" || qualityFlags.includes("fallback_passthrough_output")) {
+    return {
+      label: "Fallback Output",
+      tone: "tag tag-error",
+      message: "Output may be degraded. Use a smart rerun preset for better first-pass quality.",
+    };
+  }
+
+  if (recoveryState === "failed_after_retry") {
+    return {
+      label: "Failed After Retry",
+      tone: "tag tag-error",
+      message: "Automatic retry was attempted and failed. Try a guided rerun preset.",
+    };
+  }
+
+  if (jobState === "failed") {
+    return {
+      label: "Failed",
+      tone: "tag tag-error",
+      message: "This run failed. Apply a guided rerun preset before retrying.",
+    };
+  }
+
+  return {
+    label: "Healthy",
+    tone: "tag tag-ok",
+    message: "Pipeline is healthy for this run.",
+  };
 }
 
 function ControlLabel({ htmlFor, label }: { htmlFor: string; label: string }) {
@@ -139,11 +192,18 @@ export function ProcessPanel({
   toolLabel,
   toolDescription,
   jobState,
+  recoveryState,
+  attemptCount,
+  qualityFlags,
   jobProgress,
   jobEtaSec,
   jobError,
   canRunTool,
   onRunTool,
+  smartRerunPresets,
+  onApplySmartRerun,
+  hasRecentRunRecall,
+  onUseRecentRunRecall,
   stems,
   masteringPreset,
   masteringIntensity,
@@ -161,6 +221,7 @@ export function ProcessPanel({
   const clampedProgress = Math.max(0, Math.min(100, jobProgress));
   const activeStageIndex = getStageFromState(jobState);
   const statusMessage = getStatusMessage(jobState, toolLabel, clampedProgress, jobEtaSec);
+  const trust = trustRibbon(recoveryState, qualityFlags, attemptCount, jobState);
 
   const [elapsed, setElapsed] = useState(0);
   const startTimeRef = useRef<number | null>(null);
@@ -168,7 +229,6 @@ export function ProcessPanel({
   useEffect(() => {
     if (!isWorking) {
       startTimeRef.current = null;
-      setElapsed(0);
       return;
     }
 
@@ -214,6 +274,32 @@ export function ProcessPanel({
           {toolDescription}
         </p>
       </div>
+
+      <div className="mb-4 border p-3" style={{ borderColor: "var(--muted)" }}>
+        <div className="flex items-center justify-between gap-2">
+          <p className="font-mono text-[11px] font-bold uppercase tracking-[0.14em]">Runtime Trust</p>
+          <span className={trust.tone}>{trust.label}</span>
+        </div>
+        <p className="mt-2 text-xs" style={{ color: "var(--muted-foreground)" }}>
+          {trust.message}
+        </p>
+        <p className="mt-2 font-mono text-[11px]" style={{ color: "var(--muted-foreground)" }}>
+          Attempt {attemptCount} · Flags {qualityFlags.length > 0 ? qualityFlags.join(", ") : "none"}
+        </p>
+      </div>
+
+      {hasRecentRunRecall ? (
+        <div className="mb-4">
+          <Button
+            onClick={onUseRecentRunRecall}
+            variant="outline"
+            className="brutal-button-ghost w-full justify-center py-3 text-[11px]"
+            style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}
+          >
+            Use Recent Run Settings
+          </Button>
+        </div>
+      ) : null}
 
       {/* Controls */}
       <div className="flex flex-col gap-5 flex-1">
@@ -320,6 +406,25 @@ export function ProcessPanel({
 
       {/* Run button */}
       <div className="mt-6">
+        {smartRerunPresets.length > 0 && (jobState === "failed" || recoveryState === "degraded_fallback" || jobState === "succeeded") ? (
+          <div className="mb-3 grid gap-2">
+            {smartRerunPresets.map((preset) => (
+              <button
+                key={preset.id}
+                type="button"
+                onClick={() => onApplySmartRerun(preset.id)}
+                className="w-full border px-3 py-2 text-left transition-colors hover:bg-[var(--muted)]"
+                style={{ borderColor: "var(--muted)" }}
+              >
+                <p className="font-mono text-[11px] font-bold uppercase tracking-[0.1em]">{preset.label}</p>
+                <p className="mt-1 text-xs" style={{ color: "var(--muted-foreground)" }}>
+                  {preset.description}
+                </p>
+              </button>
+            ))}
+          </div>
+        ) : null}
+
         <AnimatePresence mode="wait">
           {isWorking ? (
             <motion.div

@@ -78,3 +78,22 @@ The UI must work for:
   - desktop `/`, `/tools/stem-isolation`, `/ops`
   - mobile `/`, `/tools/stem-isolation`, `/ops`
   - dark theme parity samples for the same routes
+
+## Reliability + Recovery Delta
+- Job execution trust states are first-class and explicit in tool UI:
+  - `Healthy`
+  - `Recovering`
+  - `Fallback Output`
+  - `Failed After Retry`
+- Process surfaces must show:
+  - current recovery state
+  - retry attempt count
+  - quality flags (or `none`)
+- Rerun UX must include:
+  - one-click smart rerun presets
+  - recent-run recall (`Use Recent Run Settings`)
+  - post-result quality feedback (`usable` vs `needs rerun` with reason)
+- Ops must present:
+  - split rerun diagnostics (`same tool+asset`, `cross-tool chain`, `post-failure retry`)
+  - confidence labels for trend interpretation in low-volume windows
+  - direct operator remediation action to trigger stale-job recovery sweeps

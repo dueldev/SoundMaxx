@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import postgres from "postgres";
 
@@ -14,13 +14,20 @@ const sql = postgres(databaseUrl, {
 });
 
 async function run() {
-  const filePath = path.resolve(process.cwd(), "drizzle/0000_initial.sql");
-  const migration = readFileSync(filePath, "utf8");
+  const migrationsDir = path.resolve(process.cwd(), "drizzle");
+  const migrationFiles = readdirSync(migrationsDir)
+    .filter((filename) => filename.endsWith(".sql"))
+    .sort((a, b) => a.localeCompare(b));
 
-  await sql.unsafe(migration);
+  for (const filename of migrationFiles) {
+    const filePath = path.join(migrationsDir, filename);
+    const migration = readFileSync(filePath, "utf8");
+
+    await sql.unsafe(migration);
+    console.log("Applied migration:", filePath);
+  }
+
   await sql.end({ timeout: 2 });
-
-  console.log("Applied migration:", filePath);
 }
 
 run().catch(async (error) => {

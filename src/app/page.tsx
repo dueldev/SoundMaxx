@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { ArrowRightIcon, ArrowDownIcon, ZapIcon, LayoutGridIcon, SlidersHorizontalIcon } from "lucide-react";
+import { AdSlot } from "@/components/ads/ad-slot";
+import { SponsorSlot } from "@/components/ads/sponsor-slot";
 import { TOOL_CONFIGS } from "@/lib/tool-config";
 
 const readinessByTool: Record<string, number> = {
@@ -133,6 +135,13 @@ export default function Home() {
               </div>
             ))}
           </div>
+        </div>
+      </div>
+
+      <div className="smx-shell pt-8">
+        <SponsorSlot placement="home_top" />
+        <div className="mt-4">
+          <AdSlot slotId="1001001" label="Advertisement" />
         </div>
       </div>
 
@@ -367,6 +376,13 @@ export default function Home() {
             ))}
           </div>
         </section>
+
+        <div className="py-6">
+          <AdSlot slotId="1001002" label="Advertisement" />
+          <div className="mt-4">
+            <SponsorSlot placement="home_bottom" />
+          </div>
+        </div>
 
       </div>
 

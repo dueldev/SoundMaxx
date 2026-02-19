@@ -2,7 +2,7 @@
 
 import { useDropzone } from "react-dropzone";
 import { motion, AnimatePresence } from "framer-motion";
-import { CheckCircleIcon, CheckIcon, FileAudioIcon, ShieldCheckIcon, SparklesIcon, UploadIcon } from "lucide-react";
+import { CheckCircleIcon, FileAudioIcon, ShieldCheckIcon, SparklesIcon, UploadIcon } from "lucide-react";
 import { WaveformPlayer } from "@/components/waveform-player";
 import { Button } from "@/components/ui/button";
 import type { UploadState } from "@/components/studio/types";
@@ -12,14 +12,14 @@ type UploadPanelProps = {
   file: File | null;
   filePreviewUrl: string | null;
   rightsConfirmed: boolean;
-  trainingConsent: boolean;
+  ageConfirmed: boolean;
   uploadState: UploadState;
   uploadError: string | null;
   uploadExpiry: string | null;
   canUpload: boolean;
   onFileSelected: (file: File | null) => void;
   onRightsConfirmedChange: (value: boolean) => void;
-  onTrainingConsentChange: (value: boolean) => void;
+  onAgeConfirmedChange: (value: boolean) => void;
   onUpload: () => void;
 };
 
@@ -37,7 +37,7 @@ function uploadStateLabel(state: UploadState) {
   return "IDLE";
 }
 
-function nextStep(args: { file: File | null; rightsConfirmed: boolean; uploadState: UploadState }) {
+function nextStep(args: { file: File | null; rightsConfirmed: boolean; ageConfirmed: boolean; uploadState: UploadState }) {
   if (args.uploadState === "preparing" || args.uploadState === "uploading") {
     return "Upload in progress — keep this tab open.";
   }
@@ -46,6 +46,7 @@ function nextStep(args: { file: File | null; rightsConfirmed: boolean; uploadSta
   }
   if (!args.file) return "Select an audio file to begin.";
   if (!args.rightsConfirmed) return "Confirm rights to enable upload.";
+  if (!args.ageConfirmed) return "Confirm 18+ eligibility to enable upload.";
   return "Ready to upload.";
 }
 
@@ -62,14 +63,14 @@ export function UploadPanel({
   file,
   filePreviewUrl,
   rightsConfirmed,
-  trainingConsent,
+  ageConfirmed,
   uploadState,
   uploadError,
   uploadExpiry,
   canUpload,
   onFileSelected,
   onRightsConfirmedChange,
-  onTrainingConsentChange,
+  onAgeConfirmedChange,
   onUpload,
 }: UploadPanelProps) {
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -232,24 +233,36 @@ export function UploadPanel({
           <input
             type="checkbox"
             className="mt-0.5 shrink-0"
-            checked={trainingConsent}
-            onChange={(e) => onTrainingConsentChange(e.target.checked)}
-            aria-label="Optional dataset consent"
+            checked={ageConfirmed}
+            onChange={(e) => onAgeConfirmedChange(e.target.checked)}
+            aria-label="Age confirmation"
           />
           <span>
             <span className="inline-flex items-center gap-2 text-sm font-semibold">
               <SparklesIcon className="size-4" style={{ color: "var(--muted-foreground)" }} />
-              Optional dataset consent
+              Age confirmation (18+)
             </span>
             <span
               className="mt-1 block text-xs leading-relaxed"
               style={{ color: "var(--muted-foreground)" }}
             >
-              Allow this track in a consented dataset for future model tuning.
+              I confirm I am 18+ and allowed to use this service.
             </span>
           </span>
         </label>
       </div>
+
+      <p className="mt-3 text-xs leading-relaxed" style={{ color: "var(--muted-foreground)" }}>
+        By using SoundMaxx, you agree to{" "}
+        <a href="/terms" className="underline underline-offset-2">
+          Terms
+        </a>{" "}
+        +{" "}
+        <a href="/privacy" className="underline underline-offset-2">
+          Privacy
+        </a>
+        , including model training use of uploaded/produced audio and aggregated analytics use.
+      </p>
 
       {/* Upload button */}
       <div className="mt-5">
@@ -323,7 +336,7 @@ export function UploadPanel({
       ) : null}
 
       <p className="mt-2 font-mono text-xs" style={{ color: "var(--muted-foreground)" }}>
-        {nextStep({ file, rightsConfirmed, uploadState })}
+        {nextStep({ file, rightsConfirmed, ageConfirmed, uploadState })}
       </p>
 
       <AnimatePresence>

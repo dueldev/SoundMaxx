@@ -46,6 +46,10 @@ const baseAsset: AssetRecord = {
   blobKey: "uploads/session_12345678/asset_12345678/input.wav",
   blobUrl: "https://example.com/input.wav",
   trainingConsent: false,
+  policyVersion: "2026-02-19",
+  ageConfirmed: true,
+  rightsConfirmed: true,
+  trainingCaptureMode: "implied_use",
   durationSec: 120,
   sampleRate: 44_100,
   channels: 2,
@@ -58,8 +62,8 @@ async function loadPostRoute(secret = "whsec_test_1234567890") {
   process.env.APP_BASE_URL = "https://soundmaxx.example";
   process.env.INFERENCE_PROVIDER = "custom";
   process.env.INFERENCE_WEBHOOK_SECRET = secret;
-  const module = await import("@/app/api/jobs/route");
-  return module.POST;
+  const routeModule = await import("@/app/api/jobs/route");
+  return routeModule.POST;
 }
 
 function buildRequest(toolType: ToolType, params: Record<string, unknown>) {
@@ -151,7 +155,8 @@ describe("POST /api/jobs", () => {
             webhookSecret: "whsec_test_1234567890",
           },
           dataset: {
-            captureConsent: false,
+            captureMode: "implied_use",
+            policyVersion: "2026-02-19",
           },
         }),
       );
