@@ -96,6 +96,23 @@ npm run test:e2e
 npm run test:seo
 ```
 
+## Live Tool Benchmarking
+
+Run a repeated production-grade tool benchmark with strict output-contract checks:
+
+```bash
+npm run test:benchmark:live
+```
+
+Custom run:
+
+```bash
+npx tsx scripts/tool-benchmark.ts --base-url https://soundmaxx.vercel.app --iterations 3
+```
+
+Benchmark research references and dataset-standard evaluation notes:
+- `docs/tool-optimization-benchmarking.md`
+
 ## Preview Verification Workflow
 
 1. Start the app: `npm run dev`

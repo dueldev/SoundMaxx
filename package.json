@@ -19,6 +19,7 @@
     "worker:qa": "python3 -m worker.qa_harness --fixtures worker/fixtures",
     "vercel:preflight": "tsx scripts/vercel-preflight.ts",
     "test:live:prod": "tsx scripts/live-functional-audit.ts --base-url https://soundmaxx.vercel.app",
+    "test:benchmark:live": "tsx scripts/tool-benchmark.ts --base-url https://soundmaxx.vercel.app --iterations 3",
     "test:seo": "tsx scripts/seo-smoke.ts --base-url https://www.soundmaxx.net --canonical-base-url https://www.soundmaxx.net --expect-indexable true"
   },
   "dependencies": {

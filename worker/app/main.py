@@ -5,6 +5,7 @@ import hashlib
 import json
 import os
 import shutil
+import threading
 import uuid
 from pathlib import Path
 from typing import Any
@@ -25,10 +26,26 @@ TMP_ROOT = Path(os.getenv("TMP_ROOT", "worker/data/tmp")).resolve()
 SOURCE_CACHE_ROOT = Path(os.getenv("SOURCE_CACHE_ROOT", str(TMP_ROOT / "source-cache"))).resolve()
 PUBLIC_BASE_URL = os.getenv("WORKER_PUBLIC_BASE_URL", "http://localhost:8000").rstrip("/")
 AUDIO_SUFFIXES = {".wav", ".mp3", ".flac", ".ogg", ".aac", ".m4a", ".aif", ".aiff"}
+SOURCE_CACHE_PRUNE_LOCK = threading.Lock()
 
 OUTPUT_ROOT.mkdir(parents=True, exist_ok=True)
 TMP_ROOT.mkdir(parents=True, exist_ok=True)
 SOURCE_CACHE_ROOT.mkdir(parents=True, exist_ok=True)
+
+
+def env_int(name: str, fallback: int) -> int:
+    raw = os.getenv(name)
+    if raw is None:
+        return fallback
+    try:
+        parsed = int(raw)
+    except ValueError:
+        return fallback
+    return parsed if parsed >= 0 else fallback
+
+
+SOURCE_CACHE_MAX_BYTES = env_int("SOURCE_CACHE_MAX_BYTES", 2_147_483_648)
+SOURCE_CACHE_MAX_FILES = env_int("SOURCE_CACHE_MAX_FILES", 300)
 
 app = FastAPI(title="SoundMaxx Worker", version="1.0.0")
 app.mount("/outputs", StaticFiles(directory=str(OUTPUT_ROOT)), name="outputs")
@@ -93,7 +110,44 @@ def stage_source_audio(source_url: str, target_path: Path) -> None:
         raise RuntimeError("Downloaded source audio is empty")
 
     os.replace(temp_path, cached_path)
+    prune_source_cache()
     link_or_copy(cached_path, target_path)
+
+
+def prune_source_cache() -> None:
+    if SOURCE_CACHE_MAX_BYTES <= 0 and SOURCE_CACHE_MAX_FILES <= 0:
+        return
+
+    with SOURCE_CACHE_PRUNE_LOCK:
+        files = []
+        total_bytes = 0
+
+        for entry in SOURCE_CACHE_ROOT.iterdir():
+            if not entry.is_file():
+                continue
+            if ".tmp-" in entry.name:
+                continue
+            try:
+                stat = entry.stat()
+            except OSError:
+                continue
+            total_bytes += stat.st_size
+            files.append((entry, stat.st_mtime, stat.st_size))
+
+        files.sort(key=lambda item: item[1])  # Oldest first.
+        count = len(files)
+
+        while files and (
+            (SOURCE_CACHE_MAX_FILES > 0 and count > SOURCE_CACHE_MAX_FILES)
+            or (SOURCE_CACHE_MAX_BYTES > 0 and total_bytes > SOURCE_CACHE_MAX_BYTES)
+        ):
+            path, _, size = files.pop(0)
+            try:
+                path.unlink(missing_ok=True)
+            except OSError:
+                continue
+            count -= 1
+            total_bytes -= size
 
 
 def post_callback(job: JobRequest, payload: dict[str, Any]) -> None:

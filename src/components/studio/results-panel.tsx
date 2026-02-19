@@ -37,10 +37,135 @@ function isAudioFormat(format: string) {
 
 const STEM_LABELS_4 = ["Vocals", "Drums", "Bass", "Other"] as const;
 const STEM_LABELS_2 = ["Vocals", "Accompaniment"] as const;
+type StemKind = "vocals" | "drums" | "bass" | "other" | "accompaniment";
+type StemSlot = {
+  kind: StemKind;
+  label: string;
+  artifact: ArtifactView | null;
+};
+
+function pauseOtherAudioInGroup(current: HTMLAudioElement) {
+  const group = current.dataset.previewGroup;
+  if (!group) return;
+
+  const players = document.querySelectorAll<HTMLAudioElement>(`audio[data-preview-group="${group}"]`);
+  for (const player of players) {
+    if (player === current) continue;
+    if (!player.paused) {
+      player.pause();
+    }
+  }
+}
+
+function PreviewAudio({
+  src,
+  group,
+  className = "w-full",
+}: {
+  src: string;
+  group: string;
+  className?: string;
+}) {
+  return (
+    <audio
+      controls
+      className={className}
+      src={src}
+      data-preview-group={group}
+      onPlay={(event) => pauseOtherAudioInGroup(event.currentTarget)}
+    />
+  );
+}
 
 function stemLabel(index: number, stemCount: 2 | 4): string {
   if (stemCount === 2) return STEM_LABELS_2[index] ?? `Stem ${index + 1}`;
   return STEM_LABELS_4[index] ?? `Stem ${index + 1}`;
+}
+
+function artifactText(artifact: ArtifactView) {
+  return `${artifact.blobKey} ${artifact.downloadUrl}`.toLowerCase();
+}
+
+function inferStemKind(artifact: ArtifactView, stemCount: 2 | 4): StemKind | null {
+  const text = artifactText(artifact);
+  if (/(vocal|vox|voice)/.test(text)) return "vocals";
+
+  if (stemCount === 4) {
+    if (/(drum|percussion|kick|snare|beat)/.test(text)) return "drums";
+    if (/(bass|sub|low)/.test(text)) return "bass";
+    if (/(other|instrumental|accompaniment|music|inst)/.test(text)) return "other";
+    return null;
+  }
+
+  if (/(accompaniment|instrumental|other|music|inst|minus_vocals|no_vocals)/.test(text)) {
+    return "accompaniment";
+  }
+  return null;
+}
+
+function stemLabelFromKind(kind: StemKind | null, index: number, stemCount: 2 | 4) {
+  if (kind === "vocals") return "Vocals";
+  if (kind === "drums") return "Drums";
+  if (kind === "bass") return "Bass";
+  if (kind === "other") return "Other";
+  if (kind === "accompaniment") return "Accompaniment";
+  return stemLabel(index, stemCount);
+}
+
+function expectedStemKinds(stemCount: 2 | 4): StemKind[] {
+  return stemCount === 4 ? ["vocals", "drums", "bass", "other"] : ["vocals", "accompaniment"];
+}
+
+function stemSlots(artifacts: ArtifactView[], stemCount: 2 | 4): StemSlot[] {
+  const audioArtifacts = artifacts.filter((artifact) => isAudioFormat(artifact.format));
+  const expected = expectedStemKinds(stemCount);
+
+  const selectedByKind = new Map<StemKind, ArtifactView>();
+  const usedIds = new Set<string>();
+
+  for (const kind of expected) {
+    const match = audioArtifacts.find((artifact) => {
+      if (usedIds.has(artifact.id)) return false;
+      return inferStemKind(artifact, stemCount) === kind;
+    });
+    if (match) {
+      selectedByKind.set(kind, match);
+      usedIds.add(match.id);
+    }
+  }
+
+  for (const artifact of audioArtifacts) {
+    if (usedIds.has(artifact.id)) continue;
+    const emptyKind = expected.find((kind) => !selectedByKind.has(kind));
+    if (!emptyKind) break;
+    selectedByKind.set(emptyKind, artifact);
+    usedIds.add(artifact.id);
+  }
+
+  return expected.map((kind, index) => {
+    const artifact = selectedByKind.get(kind) ?? null;
+    if (!artifact) {
+      return {
+        kind,
+        label: stemLabelFromKind(kind, index, stemCount),
+        artifact: null,
+      };
+    }
+    return {
+      kind,
+      label: stemLabelFromKind(kind, index, stemCount),
+      artifact,
+    };
+  });
+}
+
+function extraStemAudioArtifacts(artifacts: ArtifactView[], slots: StemSlot[]) {
+  const usedIds = new Set(
+    slots.map((slot) => slot.artifact?.id).filter((id): id is string => Boolean(id)),
+  );
+  const audioArtifacts = artifacts.filter((artifact) => isAudioFormat(artifact.format));
+
+  return audioArtifacts.filter((artifact) => !usedIds.has(artifact.id));
 }
 
 function toolResultsTitle(toolType: ToolType): string {
@@ -114,7 +239,9 @@ function StemIsolationResults({
   filePreviewUrl: string | null;
   stemCount: 2 | 4;
 }) {
-  const audioArtifacts = artifacts.filter((a) => isAudioFormat(a.format));
+  const slots = stemSlots(artifacts, stemCount);
+  const additionalAudio = extraStemAudioArtifacts(artifacts, slots);
+  const missingCount = slots.filter((slot) => !slot.artifact).length;
 
   return (
     <div className="flex flex-col gap-5">
@@ -127,24 +254,37 @@ function StemIsolationResults({
           >
             Original Mix
           </p>
-          <audio controls className="w-full" src={filePreviewUrl} />
+          <PreviewAudio src={filePreviewUrl} group="stem-isolation-preview" />
         </div>
       )}
 
+      {missingCount > 0 ? (
+        <div className="border p-3" style={{ borderColor: "var(--destructive)" }}>
+          <p className="font-mono text-[11px] font-bold uppercase tracking-[0.1em]" style={{ color: "var(--destructive)" }}>
+            Missing stem output
+          </p>
+          <p className="mt-1 text-xs" style={{ color: "var(--muted-foreground)" }}>
+            Expected {stemCount} stems but received {stemCount - missingCount}. Rerun this job for complete isolation output.
+          </p>
+        </div>
+      ) : null}
+
       {/* Individual stems */}
-      <div className={cn("grid gap-4", audioArtifacts.length > 2 ? "md:grid-cols-2" : "md:grid-cols-2")}>
-        {audioArtifacts.map((artifact, i) => {
-          const expired = isExpired(artifact.expiresAt);
-          const label = stemLabel(i, stemCount);
+      <div className={cn("grid gap-4", slots.length > 2 ? "md:grid-cols-2" : "md:grid-cols-2")}>
+        {slots.map((slot, i) => {
+          const artifact = slot.artifact;
+          const label = slot.label;
+          const expired = artifact ? isExpired(artifact.expiresAt) : false;
+          const fileName = artifact ? `${label.toLowerCase().replace(/\s+/g, "-")}.${artifact.format}` : `${label.toLowerCase()}.wav`;
 
           return (
             <motion.div
-              key={artifact.id}
+              key={`${slot.kind}-${artifact?.id ?? "missing"}`}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: i * 0.1, ease: [0.16, 1, 0.3, 1] as const }}
               className="brutal-card-flat p-4"
-              style={!expired ? { borderColor: "var(--accent)" } : undefined}
+              style={artifact && !expired ? { borderColor: "var(--accent)" } : undefined}
             >
               <div className="mb-3 flex items-center justify-between">
                 <p
@@ -153,29 +293,37 @@ function StemIsolationResults({
                 >
                   {label}
                 </p>
-                <span className="font-mono text-[10px] uppercase" style={{ color: "var(--muted-foreground)" }}>
-                  {artifact.format.toUpperCase()}
-                </span>
+                {artifact ? (
+                  <span className="font-mono text-[10px] uppercase" style={{ color: "var(--muted-foreground)" }}>
+                    {artifact.format.toUpperCase()}
+                  </span>
+                ) : null}
               </div>
-              {!expired ? (
+              {artifact && !expired ? (
                 <>
-                  <audio controls className="w-full mb-2" src={artifact.downloadUrl} />
+                  <PreviewAudio src={artifact.downloadUrl} group="stem-isolation-preview" className="w-full mb-2" />
                   <div className="flex gap-2">
                     <Button asChild size="sm" variant="outline" className="brutal-button-ghost px-2.5 py-1.5 text-[10px]">
-                      <a href={artifact.downloadUrl} download={`${label.toLowerCase()}.${artifact.format}`}>
+                      <a href={artifact.downloadUrl} download={fileName}>
                         <DownloadIcon className="size-3" />
                         Download
                       </a>
                     </Button>
                   </div>
                 </>
-              ) : (
+              ) : artifact ? (
                 <p className="text-xs font-mono" style={{ color: "var(--destructive)" }}>[EXPIRED]</p>
+              ) : (
+                <p className="text-xs font-mono" style={{ color: "var(--destructive)" }}>[MISSING]</p>
               )}
             </motion.div>
           );
         })}
       </div>
+
+      {additionalAudio.map((artifact) => (
+        <ArtifactDownloadRow key={artifact.id} artifact={artifact} label={`Additional stem audio (${artifact.format.toUpperCase()})`} />
+      ))}
 
       {/* Non-audio artifacts (zip bundle, etc.) */}
       {artifacts.filter((a) => !isAudioFormat(a.format)).map((artifact) => (
@@ -198,7 +346,7 @@ function MasteringResults({
 }) {
   const audioArtifacts = artifacts.filter((a) => isAudioFormat(a.format));
   const jsonArtifact = artifacts.find((a) => a.format === "json");
-  const mainOutput = audioArtifacts[0];
+  const mainOutput = audioArtifacts.find((artifact) => /master/i.test(artifact.blobKey)) ?? audioArtifacts[0];
 
   return (
     <div className="flex flex-col gap-5">
@@ -212,7 +360,7 @@ function MasteringResults({
             A / Original
           </p>
           {filePreviewUrl ? (
-            <audio controls className="w-full" src={filePreviewUrl} />
+            <PreviewAudio src={filePreviewUrl} group="mastering-ab-preview" />
           ) : (
             <p className="text-xs" style={{ color: "var(--muted-foreground)" }}>No source audio available.</p>
           )}
@@ -230,7 +378,7 @@ function MasteringResults({
             B / Mastered
           </p>
           {mainOutput && !isExpired(mainOutput.expiresAt) ? (
-            <audio controls className="w-full" src={mainOutput.downloadUrl} />
+            <PreviewAudio src={mainOutput.downloadUrl} group="mastering-ab-preview" />
           ) : (
             <p className="text-xs" style={{ color: "var(--muted-foreground)" }}>Processing output will appear here.</p>
           )}
@@ -245,7 +393,7 @@ function MasteringResults({
         {artifacts.map((artifact) => {
           let label: string;
           if (isAudioFormat(artifact.format)) {
-            label = "Mastered audio";
+            label = artifact.id === mainOutput?.id ? "Mastered audio (processed)" : "Additional audio output";
           } else if (artifact.format === "json") {
             label = "Mastering report (JSON)";
           } else {
@@ -375,7 +523,7 @@ function AnalysisResults({
           >
             Analyzed Track
           </p>
-          <audio controls className="w-full" src={filePreviewUrl} />
+          <PreviewAudio src={filePreviewUrl} group={`analysis-${title.toLowerCase().replace(/\s+/g, "-")}`} />
         </div>
       )}
 
@@ -389,7 +537,7 @@ function AnalysisResults({
             Audio Output {i + 1}
           </p>
           {!isExpired(artifact.expiresAt) ? (
-            <audio controls className="w-full" src={artifact.downloadUrl} />
+            <PreviewAudio src={artifact.downloadUrl} group={`analysis-${title.toLowerCase().replace(/\s+/g, "-")}`} />
           ) : (
             <p className="text-xs font-mono" style={{ color: "var(--destructive)" }}>[EXPIRED]</p>
           )}
@@ -432,7 +580,7 @@ function MidiResults({
           >
             Source Audio
           </p>
-          <audio controls className="w-full" src={filePreviewUrl} />
+          <PreviewAudio src={filePreviewUrl} group="midi-source-preview" />
         </div>
       )}
 
@@ -702,7 +850,7 @@ export function ResultsPanel({
                 <p className="mb-3 font-mono text-[11px] font-bold uppercase tracking-[0.16em]" style={{ color: "var(--muted-foreground)" }}>
                   Source Audio
                 </p>
-                <audio controls className="w-full" src={filePreviewUrl} />
+                <PreviewAudio src={filePreviewUrl} group="tool-fallback-preview" />
               </div>
             )}
           </motion.div>

@@ -6,6 +6,7 @@ import multiprocessing
 import os
 import shutil
 import subprocess
+import sys
 import threading
 import zipfile
 from queue import Empty
@@ -19,6 +20,7 @@ import soundfile as sf
 THREAD_LOCAL = threading.local()
 _BASIC_PITCH_MODEL: Any | None = None
 _BASIC_PITCH_MODEL_LOCK = threading.Lock()
+_MULTIPROCESSING_CONTEXT: Any | None = None
 
 
 def download_source_audio(source_url: str, target_path: Path) -> None:
@@ -93,6 +95,19 @@ def write_audio_copy(source: Path, target: Path) -> Path:
     audio, sample_rate = read_audio_2d(source)
     sf.write(str(target), audio, sample_rate, subtype="PCM_24")
     return target
+
+
+def copy_or_convert_audio(source: Path, target: Path) -> Path:
+    target.parent.mkdir(parents=True, exist_ok=True)
+    if source.resolve() == target.resolve():
+        return source
+
+    # Fast path for WAV stems: preserve model output bytes instead of decode/re-encode.
+    if source.suffix.lower() == ".wav":
+        shutil.copy2(source, target)
+        return target
+
+    return write_audio_copy(source, target)
 
 
 def first_matching_path(paths: list[Path], keywords: tuple[str, ...]) -> Path | None:
@@ -179,7 +194,7 @@ def synthesize_four_stems_from_accompaniment(
 ) -> dict[str, Path]:
     vocals_target = output_dir / f"{input_file.stem}-vocals.wav"
     if vocals_source.resolve() != vocals_target.resolve():
-        write_audio_copy(vocals_source, vocals_target)
+        copy_or_convert_audio(vocals_source, vocals_target)
 
     accompaniment_audio, sample_rate = read_audio_2d(accompaniment_source)
     if accompaniment_audio.size == 0:
@@ -298,7 +313,7 @@ def canonicalize_stem_outputs(input_file: Path, output_dir: Path, produced: list
             source = mapped[stem_name]
             target = output_dir / f"{input_file.stem}-{stem_name}.wav"
             if source.resolve() != target.resolve():
-                write_audio_copy(source, target)
+                copy_or_convert_audio(source, target)
             ordered.append(target)
         return ordered
 
@@ -311,12 +326,12 @@ def canonicalize_stem_outputs(input_file: Path, output_dir: Path, produced: list
 
     vocals_target = output_dir / f"{input_file.stem}-vocals.wav"
     if vocals_source.resolve() != vocals_target.resolve():
-        write_audio_copy(vocals_source, vocals_target)
+        copy_or_convert_audio(vocals_source, vocals_target)
 
     accompaniment_target = output_dir / f"{input_file.stem}-accompaniment.wav"
     if accompaniment_source is not None:
         if accompaniment_source.resolve() != accompaniment_target.resolve():
-            write_audio_copy(accompaniment_source, accompaniment_target)
+            copy_or_convert_audio(accompaniment_source, accompaniment_target)
     else:
         if not remaining:
             raise RuntimeError("2-stem isolation failed to build accompaniment output")
@@ -738,6 +753,35 @@ def _run_processing_worker(
         )
 
 
+def resolve_multiprocessing_context():
+    global _MULTIPROCESSING_CONTEXT
+    context = _MULTIPROCESSING_CONTEXT
+    if context is not None:
+        return context
+
+    configured = os.getenv("WORKER_MP_START_METHOD", "").strip().lower()
+    default_method = "fork" if sys.platform == "linux" and "fork" in multiprocessing.get_all_start_methods() else "spawn"
+    preferred = configured or default_method
+
+    methods = [preferred, "spawn", "forkserver", "fork"]
+    seen: set[str] = set()
+
+    for method in methods:
+        if not method or method in seen:
+            continue
+        seen.add(method)
+        try:
+            context = multiprocessing.get_context(method)
+            _MULTIPROCESSING_CONTEXT = context
+            return context
+        except ValueError:
+            continue
+
+    context = multiprocessing.get_context()
+    _MULTIPROCESSING_CONTEXT = context
+    return context
+
+
 def run_processing_with_hard_timeout(
     tool_type: str,
     input_file: Path,
@@ -745,7 +789,7 @@ def run_processing_with_hard_timeout(
     params: dict[str, Any],
     timeout_sec: int,
 ) -> tuple[str, list[Path]]:
-    ctx = multiprocessing.get_context("spawn")
+    ctx = resolve_multiprocessing_context()
     output: multiprocessing.queues.Queue = ctx.Queue(maxsize=1)
     process = ctx.Process(
         target=_run_processing_worker,

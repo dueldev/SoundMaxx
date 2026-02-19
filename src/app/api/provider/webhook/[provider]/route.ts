@@ -17,6 +17,7 @@ import { providerWebhookSchema } from "@/lib/validators";
 import { hoursFromNow } from "@/lib/utils";
 
 export const runtime = "nodejs";
+const DEFAULT_ARTIFACT_IO_CONCURRENCY = 4;
 
 const replicateWebhookSchema = z.object({
   id: z.string(),
@@ -70,6 +71,12 @@ function mimeFromExt(ext: string) {
   return "application/octet-stream";
 }
 
+function sanitizeArtifactFilename(raw: string) {
+  const base = path.basename(raw || "").replace(/[^a-zA-Z0-9._-]/g, "_");
+  if (!base) return "";
+  return base.slice(0, 180);
+}
+
 function appendQualityFlags(existing: string[], ...incoming: string[]) {
   const next = new Set(existing);
   for (const flag of incoming) {
@@ -79,24 +86,83 @@ function appendQualityFlags(existing: string[], ...incoming: string[]) {
   return [...next];
 }
 
-async function materializeProvidedArtifacts(jobId: string, artifacts: Array<{ blobUrl: string; format: string }>) {
-  const out = [] as Array<{ blobKey: string; blobUrl: string; format: string; sizeBytes: number }>;
+function envInt(name: string, fallback: number) {
+  const raw = process.env[name];
+  if (!raw) return fallback;
+  const parsed = Number(raw);
+  if (!Number.isFinite(parsed) || parsed <= 0) return fallback;
+  return Math.floor(parsed);
+}
 
-  for (let index = 0; index < artifacts.length; index += 1) {
-    const item = artifacts[index]!;
-    const response = await fetch(item.blobUrl);
-    if (!response.ok) continue;
+async function mapWithConcurrency<T, R>(
+  items: T[],
+  limit: number,
+  task: (item: T, index: number) => Promise<R>,
+) {
+  if (items.length === 0) return [] as R[];
+  const bounded = Math.max(1, Math.min(limit, items.length));
+  const out = new Array<R>(items.length);
+  let cursor = 0;
+
+  async function worker() {
+    for (;;) {
+      const current = cursor;
+      cursor += 1;
+      if (current >= items.length) return;
+      out[current] = await task(items[current] as T, current);
+    }
+  }
+
+  await Promise.all(Array.from({ length: bounded }, () => worker()));
+  return out;
+}
+
+async function materializeProvidedArtifacts(jobId: string, artifacts: Array<{ blobUrl: string; blobKey: string; format: string }>) {
+  const out = [] as Array<{ blobKey: string; blobUrl: string; format: string; sizeBytes: number }>;
+  const usedNames = new Set<string>();
+
+  const candidates = artifacts.map((item, index) => {
+    const ext = (item.format || extFromUrl(item.blobUrl)).replace(/^\./, "").toLowerCase();
+    const fallbackName = `output-${index + 1}.${ext || "bin"}`;
+    const preferredName = sanitizeArtifactFilename(item.blobKey) || fallbackName;
+    const parsed = path.parse(preferredName);
+    const baseName = parsed.name || `output-${index + 1}`;
+    const suffix = (parsed.ext || `.${ext || "bin"}`).replace(/^\./, "").toLowerCase();
+
+    let filename = `${baseName}.${suffix}`;
+    let dedupe = 2;
+    while (usedNames.has(filename)) {
+      filename = `${baseName}-${dedupe}.${suffix}`;
+      dedupe += 1;
+    }
+    usedNames.add(filename);
+
+    return {
+      blobUrl: item.blobUrl,
+      ext: ext || "bin",
+      blobKey: `artifacts/${jobId}/${filename}`,
+    };
+  });
+
+  const concurrency = envInt("ARTIFACT_IO_CONCURRENCY", DEFAULT_ARTIFACT_IO_CONCURRENCY);
+  const uploaded = await mapWithConcurrency(candidates, concurrency, async (candidate) => {
+    const response = await fetch(candidate.blobUrl);
+    if (!response.ok) return null;
 
     const buffer = Buffer.from(await response.arrayBuffer());
-    const ext = item.format || extFromUrl(item.blobUrl);
-    const blobKey = `artifacts/${jobId}/provided-${index + 1}.${ext}`;
-    const uploaded = await uploadBlob(blobKey, buffer, mimeFromExt(ext));
-    out.push({
-      blobKey,
-      blobUrl: uploaded.downloadUrl,
-      format: ext,
-      sizeBytes: uploaded.size,
-    });
+    const uploadedBlob = await uploadBlob(candidate.blobKey, buffer, mimeFromExt(candidate.ext));
+    return {
+      blobKey: candidate.blobKey,
+      blobUrl: uploadedBlob.downloadUrl,
+      format: candidate.ext,
+      sizeBytes: uploadedBlob.size,
+    };
+  });
+
+  for (const item of uploaded) {
+    if (item) {
+      out.push(item);
+    }
   }
 
   return out;
@@ -337,6 +403,7 @@ export async function POST(request: NextRequest, context: { params: Promise<{ pr
     job.id,
     providedArtifacts.map((artifact) => ({
       blobUrl: artifact.blobUrl,
+      blobKey: artifact.blobKey,
       format: artifact.format,
     })),
   );
