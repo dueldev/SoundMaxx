@@ -299,10 +299,11 @@ export async function POST(request: NextRequest, context: { params: Promise<{ pr
     }
 
     if (mappedStatus === "running") {
+      const progressPct = Math.max(5, Math.min(95, job.progressPct || 5));
       await store.updateJob({
         jobId: job.id,
         status: "running",
-        progressPct: 35,
+        progressPct,
         etaSec: job.etaSec ?? 120,
         recoveryState: job.attemptCount > 1 ? "retrying" : "none",
       });
@@ -374,11 +375,12 @@ export async function POST(request: NextRequest, context: { params: Promise<{ pr
   }
 
   if (parsed.data.status === "running") {
+    const progressPct = typeof parsed.data.progressPct === "number" ? parsed.data.progressPct : Math.max(5, Math.min(95, job.progressPct || 5));
     await store.updateJob({
       jobId: job.id,
       status: "running",
-      progressPct: parsed.data.progressPct ?? 20,
-      etaSec: job.etaSec ?? 120,
+      progressPct,
+      etaSec: parsed.data.etaSec ?? job.etaSec ?? null,
       recoveryState: job.attemptCount > 1 ? "retrying" : "none",
     });
     return NextResponse.json({ ok: true, status: "running" });

@@ -145,6 +145,8 @@ export async function POST(request: NextRequest) {
       {
         jobId,
         status: normalizedStatus,
+        progressPct: submitResult.progressPct,
+        etaSec: submitResult.etaSec,
         recoveryState: "none",
         attemptCount: 1,
         qualityFlags: [],

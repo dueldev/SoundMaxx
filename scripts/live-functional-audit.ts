@@ -98,6 +98,9 @@ type CliOptions = {
   toolTimeoutSec: number;
   outputFile?: string;
   tools: ToolType[];
+  stemCount: 2 | 4;
+  masteringIntensity: number;
+  midiSensitivity: number;
 };
 
 class HttpClient {
@@ -180,7 +183,7 @@ class HttpClient {
 function usage() {
   return [
     "Usage:",
-    "  tsx scripts/live-functional-audit.ts --base-url <url> [--ops-secret <secret>] [--tool-timeout-sec <seconds>] [--output-file <path>] [--tools <tool_a,tool_b>]",
+    "  tsx scripts/live-functional-audit.ts --base-url <url> [--ops-secret <secret>] [--tool-timeout-sec <seconds>] [--output-file <path>] [--tools <tool_a,tool_b>] [--stem-count 2|4] [--mastering-intensity 0-100] [--midi-sensitivity 0-1]",
     "",
     "Flags:",
     "  --base-url          Required. Base URL for SoundMaxx app (for example https://soundmaxx.vercel.app)",
@@ -189,6 +192,9 @@ function usage() {
     "  --output-file       Optional. JSON report output path (default output/live-validation/live-validation-<timestamp>.json)",
     "  --tools             Optional. Comma-separated tool filter.",
     "                      Allowed: stem_isolation, mastering, key_bpm, loudness_report, midi_extract",
+    "  --stem-count        Optional. stem_isolation stems value (default 4). Allowed: 2, 4.",
+    "  --mastering-intensity Optional. mastering intensity value (default 60). Allowed: 0-100.",
+    "  --midi-sensitivity  Optional. midi_extract sensitivity value (default 0.5). Allowed: 0-1.",
   ].join("\n");
 }
 
@@ -199,6 +205,9 @@ function parseCliArgs(argv: string[]): CliOptions {
     toolTimeoutSec: 900,
     outputFile: undefined,
     tools: ["stem_isolation", "mastering", "key_bpm", "loudness_report", "midi_extract"],
+    stemCount: 4,
+    masteringIntensity: 60,
+    midiSensitivity: 0.5,
   };
 
   for (let index = 0; index < argv.length; index += 1) {
@@ -211,7 +220,17 @@ function parseCliArgs(argv: string[]): CliOptions {
     }
 
     const next = argv[index + 1];
-    if ((arg === "--base-url" || arg === "--ops-secret" || arg === "--tool-timeout-sec" || arg === "--output-file" || arg === "--tools") && !next) {
+    if (
+      (arg === "--base-url" ||
+        arg === "--ops-secret" ||
+        arg === "--tool-timeout-sec" ||
+        arg === "--output-file" ||
+        arg === "--tools" ||
+        arg === "--stem-count" ||
+        arg === "--mastering-intensity" ||
+        arg === "--midi-sensitivity") &&
+      !next
+    ) {
       throw new Error(`Missing value for ${arg}`);
     }
 
@@ -249,6 +268,36 @@ function parseCliArgs(argv: string[]): CliOptions {
         throw new Error("Invalid --tools list");
       }
       options.tools = selected;
+      index += 1;
+      continue;
+    }
+
+    if (arg === "--stem-count") {
+      const parsed = Number(next);
+      if (parsed !== 2 && parsed !== 4) {
+        throw new Error("Invalid --stem-count. Allowed: 2 or 4.");
+      }
+      options.stemCount = parsed;
+      index += 1;
+      continue;
+    }
+
+    if (arg === "--mastering-intensity") {
+      const parsed = Number(next);
+      if (!Number.isFinite(parsed) || parsed < 0 || parsed > 100) {
+        throw new Error("Invalid --mastering-intensity. Use a number between 0 and 100.");
+      }
+      options.masteringIntensity = Math.round(parsed);
+      index += 1;
+      continue;
+    }
+
+    if (arg === "--midi-sensitivity") {
+      const parsed = Number(next);
+      if (!Number.isFinite(parsed) || parsed < 0 || parsed > 1) {
+        throw new Error("Invalid --midi-sensitivity. Use a number between 0 and 1.");
+      }
+      options.midiSensitivity = parsed;
       index += 1;
       continue;
     }
@@ -395,18 +444,19 @@ function blobKeyText(artifact: MaterializedArtifact) {
   return path.basename(artifact.blobKey).toLowerCase();
 }
 
-function validateStemIsolationArtifacts(artifacts: MaterializedArtifact[]) {
+function validateStemIsolationArtifacts(artifacts: MaterializedArtifact[], stemCount: 2 | 4) {
   const audioArtifacts = artifacts.filter((artifact) => artifact.format.toLowerCase() === "wav");
   const zipArtifacts = artifacts.filter((artifact) => artifact.format.toLowerCase() === "zip");
+  const expectedAudioCount = stemCount;
 
-  if (audioArtifacts.length !== 4) {
-    throw new Error(`stem_isolation expected 4 stem audio outputs, received ${audioArtifacts.length}`);
+  if (audioArtifacts.length !== expectedAudioCount) {
+    throw new Error(`stem_isolation expected ${expectedAudioCount} stem audio outputs, received ${audioArtifacts.length}`);
   }
   if (zipArtifacts.length !== 1) {
     throw new Error(`stem_isolation expected 1 zip bundle, received ${zipArtifacts.length}`);
   }
 
-  const expectedStems = ["vocals", "drums", "bass", "other"] as const;
+  const expectedStems = stemCount === 2 ? (["vocals", "accompaniment"] as const) : (["vocals", "drums", "bass", "other"] as const);
   for (const stem of expectedStems) {
     const found = audioArtifacts.some((artifact) => blobKeyText(artifact).includes(stem));
     if (!found) {
@@ -505,9 +555,14 @@ function validateMidiArtifacts(artifacts: MaterializedArtifact[]) {
   }
 }
 
-function validateToolArtifacts(toolType: ToolType, artifacts: MaterializedArtifact[], sourceHash: string) {
+function validateToolArtifacts(
+  toolType: ToolType,
+  artifacts: MaterializedArtifact[],
+  sourceHash: string,
+  options: { stemCount: 2 | 4 },
+) {
   if (toolType === "stem_isolation") {
-    validateStemIsolationArtifacts(artifacts);
+    validateStemIsolationArtifacts(artifacts, options.stemCount);
     return;
   }
   if (toolType === "mastering") {
@@ -580,11 +635,11 @@ async function run() {
   };
 
   const toolDefaults = new Map<ToolType, Record<string, unknown>>([
-    ["stem_isolation", { stems: 4 }],
-    ["mastering", { preset: "streaming_clean", intensity: 60 }],
+    ["stem_isolation", { stems: options.stemCount }],
+    ["mastering", { preset: "streaming_clean", intensity: options.masteringIntensity }],
     ["key_bpm", { includeChordHints: true }],
     ["loudness_report", { targetLufs: -14 }],
-    ["midi_extract", { sensitivity: 0.5 }],
+    ["midi_extract", { sensitivity: options.midiSensitivity }],
   ]);
   const tools: Array<{ toolType: ToolType; params: Record<string, unknown> }> = options.tools.map((toolType) => ({
     toolType,
@@ -764,7 +819,9 @@ async function run() {
         });
       }
 
-      validateToolArtifacts(tool.toolType, materializedArtifacts, sourceHash);
+      validateToolArtifacts(tool.toolType, materializedArtifacts, sourceHash, {
+        stemCount: options.stemCount,
+      });
 
       report.toolResults.push({
         toolType: tool.toolType,

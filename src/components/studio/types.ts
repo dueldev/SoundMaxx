@@ -5,6 +5,7 @@ export type WorkflowPhase = "upload" | "configure" | "process" | "export";
 
 export type ArtifactView = {
   id: string;
+  blobKey: string;
   downloadUrl: string;
   expiresAt: string;
   format: string;

@@ -14,6 +14,7 @@ type UploadPanelProps = {
   rightsConfirmed: boolean;
   ageConfirmed: boolean;
   uploadState: UploadState;
+  uploadProgressPct: number;
   uploadError: string | null;
   uploadExpiry: string | null;
   canUpload: boolean;
@@ -65,6 +66,7 @@ export function UploadPanel({
   rightsConfirmed,
   ageConfirmed,
   uploadState,
+  uploadProgressPct,
   uploadError,
   uploadExpiry,
   canUpload,
@@ -80,6 +82,9 @@ export function UploadPanel({
   });
 
   const busy = isBusy(uploadState);
+  const clampedUploadPct = Math.max(0, Math.min(100, uploadProgressPct));
+  const progressCircumference = 2 * Math.PI * 20;
+  const progressOffset = progressCircumference * (1 - clampedUploadPct / 100);
 
   return (
     <section className="brutal-card p-5 md:p-6">
@@ -135,21 +140,36 @@ export function UploadPanel({
                     stroke="var(--muted)"
                     strokeWidth="3"
                   />
-                  <circle
-                    cx="24" cy="24" r="20"
-                    fill="none"
-                    stroke="var(--accent)"
-                    strokeWidth="3"
-                    strokeLinecap="square"
-                    strokeDasharray={`${2 * Math.PI * 20}`}
-                    strokeDashoffset={`${2 * Math.PI * 20 * 0.25}`}
-                    className="animate-spin origin-center"
-                    style={{ animationDuration: "1.5s" }}
-                  />
+                  {uploadState === "preparing" ? (
+                    <circle
+                      cx="24" cy="24" r="20"
+                      fill="none"
+                      stroke="var(--accent)"
+                      strokeWidth="3"
+                      strokeLinecap="square"
+                      strokeDasharray={progressCircumference}
+                      strokeDashoffset={progressCircumference * 0.25}
+                      className="animate-spin origin-center"
+                      style={{ animationDuration: "1.5s" }}
+                    />
+                  ) : (
+                    <circle
+                      cx="24"
+                      cy="24"
+                      r="20"
+                      fill="none"
+                      stroke="var(--accent)"
+                      strokeWidth="3"
+                      strokeLinecap="square"
+                      strokeDasharray={progressCircumference}
+                      strokeDashoffset={progressOffset}
+                      style={{ transition: "stroke-dashoffset 180ms linear" }}
+                    />
+                  )}
                 </svg>
               </div>
               <p className="font-mono text-xs font-bold uppercase tracking-wider" style={{ color: "var(--accent)" }}>
-                {uploadState === "preparing" ? "Preparing upload..." : "Uploading audio..."}
+                {uploadState === "preparing" ? "Preparing upload..." : `Uploading audio... ${Math.round(clampedUploadPct)}%`}
               </p>
               <span className="processing-dot" /><span className="processing-dot" /><span className="processing-dot" />
             </motion.div>
@@ -194,7 +214,7 @@ export function UploadPanel({
             transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
             className="mt-4 overflow-hidden"
           >
-            <WaveformPlayer src={filePreviewUrl} />
+            <WaveformPlayer src={filePreviewUrl} group="upload-preview-waveform" />
           </motion.div>
         )}
       </AnimatePresence>

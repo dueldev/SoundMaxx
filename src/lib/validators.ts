@@ -110,6 +110,7 @@ export const providerWebhookSchema = z.object({
   externalJobId: z.string().min(8),
   status: z.union([z.literal("succeeded"), z.literal("failed"), z.literal("running")]),
   progressPct: z.number().min(0).max(100).optional(),
+  etaSec: z.number().int().nonnegative().nullable().optional(),
   errorCode: z.string().max(120).optional(),
   model: z.string().max(120).optional(),
   qualityFlags: z.array(z.string().min(1).max(64)).optional(),

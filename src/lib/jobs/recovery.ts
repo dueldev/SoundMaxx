@@ -1,17 +1,23 @@
-import path from "node:path";
-import { nanoid } from "nanoid";
 import { eq, or } from "drizzle-orm";
-import { env, limits } from "@/lib/config";
+import { env } from "@/lib/config";
 import { getDb } from "@/lib/db/client";
 import { jobs } from "@/lib/db/schema";
 import { getProviderAdapterByName } from "@/lib/providers/registry";
 import { dequeueJob, queueJob } from "@/lib/redis";
 import { store } from "@/lib/store";
-import { hoursFromNow } from "@/lib/utils";
 import type { JobRecord, JobRecoveryState, JobStatus, ToolType } from "@/types/domain";
 
-const QUEUED_STALE_MS = 5 * 60 * 1000;
-const RUNNING_STALE_MS = 15 * 60 * 1000;
+function envInt(name: string, fallback: number) {
+  const raw = process.env[name];
+  if (!raw) return fallback;
+  const parsed = Number(raw);
+  if (!Number.isFinite(parsed) || parsed <= 0) return fallback;
+  return Math.floor(parsed);
+}
+
+const QUEUED_STALE_MS = envInt("JOB_QUEUED_STALE_TIMEOUT_SEC", 5 * 60) * 1000;
+const RUNNING_STALE_MS = envInt("JOB_RUNNING_STALE_TIMEOUT_SEC", 15 * 60) * 1000;
+const CUSTOM_STEM_STALE_MS = envInt("CUSTOM_STEM_STALE_TIMEOUT_SEC", 4 * 60) * 1000;
 const MAX_ATTEMPTS = 2;
 
 function normalizeJobStatus(status: "queued" | "running" | "succeeded" | "failed"): JobStatus {
@@ -57,40 +63,27 @@ function toDate(value: string | null) {
   return parsed;
 }
 
-function staleAgeThresholdMs(status: JobStatus) {
-  if (status === "queued") return QUEUED_STALE_MS;
-  if (status === "running") return RUNNING_STALE_MS;
+function staleAgeThresholdMs(job: JobRecord) {
+  if (job.status === "queued") return QUEUED_STALE_MS;
+  if (job.status === "running") {
+    if (job.provider === "custom" && job.toolType === "stem_isolation") {
+      return CUSTOM_STEM_STALE_MS;
+    }
+    return RUNNING_STALE_MS;
+  }
   return Number.POSITIVE_INFINITY;
 }
 
 function isStale(job: JobRecord, now = new Date()) {
   if (job.status !== "queued" && job.status !== "running") return false;
 
-  const threshold = staleAgeThresholdMs(job.status);
+  const threshold = staleAgeThresholdMs(job);
   if (!Number.isFinite(threshold)) return false;
 
   const reference = toDate(job.lastRecoveryAt) ?? toDate(job.createdAt);
   if (!reference) return false;
 
   return now.getTime() - reference.getTime() >= threshold;
-}
-
-function parseStemCount(paramsJson: string) {
-  try {
-    const parsed = JSON.parse(paramsJson) as { stems?: unknown };
-    return Number(parsed.stems) >= 4 ? 4 : 2;
-  } catch {
-    return 4;
-  }
-}
-
-function inferFormat(blobUrl: string) {
-  try {
-    const ext = path.extname(new URL(blobUrl).pathname).replace(".", "").toLowerCase();
-    return ext || "wav";
-  } catch {
-    return "wav";
-  }
 }
 
 function parseParams(paramsJson: string) {
@@ -138,45 +131,6 @@ async function markFailedAfterRetry(job: JobRecord, reason: string) {
   });
   await dequeueJob(job.id);
   return failed ?? job;
-}
-
-async function completeStemFallback(job: JobRecord) {
-  const existingArtifacts = await store.listArtifactsForJob(job.id);
-  if (existingArtifacts.length === 0) {
-    const asset = await store.getSessionAsset(job.assetId, job.sessionId);
-    if (!asset?.blobUrl) {
-      return markFailedAfterRetry(job, "stale_job_missing_asset");
-    }
-
-    const stems = parseStemCount(job.paramsJson);
-    const format = inferFormat(asset.blobUrl);
-    const artifactCount = stems >= 4 ? 4 : 2;
-    await store.createArtifacts(
-      Array.from({ length: artifactCount }, (_, index) => ({
-        id: nanoid(18),
-        jobId: job.id,
-        sessionId: job.sessionId,
-        blobKey: `artifacts/${job.id}/fallback-stem-${index + 1}.${format}`,
-        blobUrl: asset.blobUrl!,
-        format,
-        sizeBytes: 0,
-        expiresAt: hoursFromNow(limits.retentionHours),
-      })),
-    );
-  }
-
-  const succeeded = await store.updateJob({
-    jobId: job.id,
-    status: "succeeded",
-    progressPct: 100,
-    etaSec: 0,
-    recoveryState: "degraded_fallback",
-    qualityFlags: appendQualityFlags(job.qualityFlags, "fallback_passthrough_output", "stale_recovered_with_fallback"),
-    errorCode: null,
-    finishedAt: new Date().toISOString(),
-  });
-  await dequeueJob(job.id);
-  return succeeded ?? job;
 }
 
 async function retryJob(job: JobRecord, options?: { callbackBaseUrl?: string }) {
@@ -262,11 +216,6 @@ export async function recoverStaleJob(job: JobRecord, options?: { callbackBaseUr
     return { action: "retried" as const, job: recovered };
   }
 
-  if (job.provider === "custom" && job.toolType === "stem_isolation") {
-    const fallback = await completeStemFallback(job);
-    return { action: "fallback" as const, job: fallback };
-  }
-
   const failed = await markFailedAfterRetry(job, "stale_job_failed_after_retry");
   return { action: "failed" as const, job: failed };
 }
@@ -288,7 +237,6 @@ export async function recoverStaleJobs(options?: { callbackBaseUrl?: string }) {
   for (const job of staleJobs) {
     const result = await recoverStaleJob(job, options);
     if (result.action === "retried") summary.retried += 1;
-    if (result.action === "fallback") summary.fallback += 1;
     if (result.action === "failed") summary.failed += 1;
   }
 

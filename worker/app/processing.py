@@ -386,10 +386,14 @@ def process_stem_isolation(input_file: Path, output_dir: Path, params: dict[str,
 
 def process_mastering(input_file: Path, output_dir: Path, params: dict[str, Any]) -> tuple[str, list[Path]]:
     output_dir.mkdir(parents=True, exist_ok=True)
-    requested_engine = os.getenv("MASTERING_ENGINE", "matchering_2_0").strip().lower()
+    requested_engine = os.getenv("MASTERING_ENGINE", "adaptive_dsp_mastering").strip().lower()
 
-    candidate_engines: list[str] = ["sonicmaster", "matchering_2_0"] if requested_engine == "sonicmaster" else ["matchering_2_0", "sonicmaster"]
-    candidate_engines.append("adaptive_dsp_mastering")
+    if requested_engine == "sonicmaster":
+        candidate_engines: list[str] = ["sonicmaster", "adaptive_dsp_mastering", "matchering_2_0"]
+    elif requested_engine == "matchering_2_0":
+        candidate_engines = ["matchering_2_0", "adaptive_dsp_mastering", "sonicmaster"]
+    else:
+        candidate_engines = ["adaptive_dsp_mastering", "matchering_2_0", "sonicmaster"]
 
     errors: list[str] = []
     for engine in candidate_engines:

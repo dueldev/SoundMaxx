@@ -93,25 +93,20 @@ describe("GET /api/jobs/[jobId]", () => {
     mocks.dequeueJob.mockResolvedValue(undefined);
   });
 
-  it("auto-completes stale custom stem jobs with fallback artifacts", async () => {
+  it("fails stale jobs after max retry instead of generating fallback stems", async () => {
     mocks.store.getSessionJob.mockResolvedValue({
       ...baseJob,
       attemptCount: 2,
     });
-    mocks.store.listArtifactsForJob.mockResolvedValueOnce([]).mockResolvedValueOnce(fallbackArtifacts);
-    mocks.store.getSessionAsset.mockResolvedValue({
-      id: baseJob.assetId,
-      sessionId: baseJob.sessionId,
-      blobUrl: "https://example.com/source.wav",
-    });
-    mocks.store.createArtifacts.mockResolvedValue(fallbackArtifacts);
+    mocks.store.listArtifactsForJob.mockResolvedValue([]);
     mocks.store.updateJob.mockResolvedValue({
       ...baseJob,
-      status: "succeeded",
+      status: "failed",
       progressPct: 100,
       etaSec: 0,
-      recoveryState: "degraded_fallback",
-      qualityFlags: ["fallback_passthrough_output"],
+      recoveryState: "failed_after_retry",
+      qualityFlags: ["stale_failed_after_retry"],
+      errorCode: "stale_job_failed_after_retry",
       finishedAt: now.toISOString(),
     });
 
@@ -121,9 +116,9 @@ describe("GET /api/jobs/[jobId]", () => {
     const body = await response.json();
 
     expect(response.status).toBe(200);
-    expect(body.status).toBe("succeeded");
-    expect(body.artifactIds).toEqual(["artifact_1", "artifact_2"]);
-    expect(mocks.store.createArtifacts).toHaveBeenCalledTimes(1);
+    expect(body.status).toBe("failed");
+    expect(body.artifactIds).toEqual([]);
+    expect(mocks.store.createArtifacts).not.toHaveBeenCalled();
     expect(mocks.dequeueJob).toHaveBeenCalledWith(baseJob.id);
   });
 

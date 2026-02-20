@@ -5,7 +5,7 @@ This service runs the open-source audio pipelines used by SoundMaxx and sends si
 ## Models and Engines
 
 - Stem isolation: `audio-separator` with BS-RoFormer / Demucs model files.
-- Mastering: Matchering 2.0.
+- Mastering: adaptive DSP mastering (default), with Matchering 2.0 and SonicMaster as fallbacks.
 - Key/BPM: Essentia.
 - Loudness report: pyloudnorm.
 - MIDI extraction: Spotify Basic Pitch.
@@ -44,7 +44,8 @@ python -m worker.app.training_orchestrator
 This reads recent manifest rows, computes CPU-friendly recommendation artifacts, and writes versioned model JSON outputs.
 - `STEM_MODEL_ROFORMER_NAME` (optional): BS-RoFormer model filename.
 - `STEM_MODEL_DEMUCS_NAME` (optional): Demucs model filename.
-- `MASTERING_ENGINE` (optional): `matchering_2_0` (default) or `sonicmaster`.
+- `MASTERING_ENGINE` (optional): `adaptive_dsp_mastering` (default), `matchering_2_0`, or `sonicmaster`.
+- `MASTERING_TIMEOUT_SEC` (optional): hard timeout for mastering worker process before adaptive fallback (default `90`).
 - `SONICMASTER_SCRIPT_PATH` (required when `MASTERING_ENGINE=sonicmaster`): path to SonicMaster inference script.
 
 ## Callback Contract

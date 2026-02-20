@@ -1,4 +1,4 @@
-import { and, desc, eq, gte, lte, or, sql } from "drizzle-orm";
+import { and, asc, desc, eq, gte, lte, or, sql } from "drizzle-orm";
 import type {
   ArtifactRecord,
   AssetRecord,
@@ -336,6 +336,7 @@ export class DbStore implements SoundmaxxStore {
     const db = getDb();
     const rows = await db.query.artifacts.findMany({
       where: eq(artifacts.jobId, jobId),
+      orderBy: [asc(artifacts.createdAt), asc(artifacts.id)],
     });
     return rows.map(mapArtifact);
   }

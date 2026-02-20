@@ -18,7 +18,13 @@ from fastapi.staticfiles import StaticFiles
 
 from .dataset import capture_training_sample
 from .models import ArtifactPayload, JobRequest, WorkerJobStatus
-from .processing import build_stem_timeout_fallback, download_source_audio, run_processing, run_processing_with_hard_timeout
+from .processing import (
+    build_stem_timeout_fallback,
+    download_source_audio,
+    process_mastering_adaptive,
+    run_processing,
+    run_processing_with_hard_timeout,
+)
 from .security import assert_bearer_token, sign_payload
 
 OUTPUT_ROOT = Path(os.getenv("OUTPUT_ROOT", "worker/data/outputs")).resolve()
@@ -57,7 +63,7 @@ def initial_model(tool_type: str) -> str:
     if tool_type == "stem_isolation":
         return os.getenv("STEM_MODEL_ROFORMER_NAME", "UVR-MDX-NET-Inst_HQ_5.onnx")
     if tool_type == "mastering":
-        return "matchering_2_0"
+        return os.getenv("MASTERING_ENGINE", "adaptive_dsp_mastering").strip().lower() or "adaptive_dsp_mastering"
     if tool_type == "key_bpm":
         return "essentia"
     if tool_type == "loudness_report":
@@ -165,19 +171,35 @@ def post_callback(job: JobRequest, payload: dict[str, Any]) -> None:
     )
 
 
-async def execute_job(job: JobRequest, external_job_id: str) -> None:
-    status = job_statuses[external_job_id]
+async def publish_running_update(
+    job: JobRequest,
+    status: WorkerJobStatus,
+    external_job_id: str,
+    progress_pct: int,
+    eta_sec: int | None = None,
+) -> None:
     status.status = "running"
-    status.progressPct = 20
+    status.progressPct = max(0, min(100, int(progress_pct)))
+    if eta_sec is not None:
+        status.etaSec = max(0, int(eta_sec))
+
+    payload: dict[str, Any] = {
+        "externalJobId": external_job_id,
+        "status": "running",
+        "progressPct": status.progressPct,
+    }
+    if status.etaSec is not None:
+        payload["etaSec"] = status.etaSec
 
     try:
-        await asyncio.to_thread(post_callback, job, {
-            "externalJobId": external_job_id,
-            "status": "running",
-            "progressPct": 20,
-        })
+        await asyncio.to_thread(post_callback, job, payload)
     except Exception:
         pass
+
+
+async def execute_job(job: JobRequest, external_job_id: str) -> None:
+    status = job_statuses[external_job_id]
+    await publish_running_update(job, status, external_job_id, progress_pct=20, eta_sec=180)
 
     workspace = TMP_ROOT / external_job_id
     output_dir = OUTPUT_ROOT / external_job_id
@@ -192,7 +214,7 @@ async def execute_job(job: JobRequest, external_job_id: str) -> None:
 
     try:
         await asyncio.to_thread(stage_source_audio, source_url, input_path)
-        status.progressPct = 40
+        await publish_running_update(job, status, external_job_id, progress_pct=40, eta_sec=120)
 
         if job.toolType == "stem_isolation":
             timeout_sec = max(int(os.getenv("STEM_ISOLATION_TIMEOUT_SEC", "120")), 30)
@@ -212,6 +234,24 @@ async def execute_job(job: JobRequest, external_job_id: str) -> None:
                     output_dir,
                     int(job.params.get("stems", 4)),
                 )
+        elif job.toolType == "mastering":
+            timeout_sec = max(int(os.getenv("MASTERING_TIMEOUT_SEC", "90")), 30)
+            try:
+                model_name, produced_files = await asyncio.to_thread(
+                    run_processing_with_hard_timeout,
+                    job.toolType,
+                    input_path,
+                    output_dir,
+                    job.params,
+                    timeout_sec,
+                )
+            except TimeoutError:
+                model_name, produced_files = await asyncio.to_thread(
+                    process_mastering_adaptive,
+                    input_path,
+                    output_dir,
+                    job.params,
+                )
         else:
             model_name, produced_files = await asyncio.to_thread(
                 run_processing,
@@ -220,6 +260,8 @@ async def execute_job(job: JobRequest, external_job_id: str) -> None:
                 output_dir,
                 job.params,
             )
+
+        await publish_running_update(job, status, external_job_id, progress_pct=85, eta_sec=15)
 
         artifacts = []
         for file in produced_files:

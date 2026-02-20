@@ -36,6 +36,8 @@ export type CreateJobRequest = {
 export type CreateJobResponse = {
   jobId: string;
   status: JobStatus;
+  progressPct: number;
+  etaSec: number | null;
   recoveryState: JobRecoveryState;
   attemptCount: number;
   qualityFlags: string[];
@@ -54,6 +56,7 @@ export type JobStatusResponse = {
 };
 
 export type ArtifactResponse = {
+  blobKey: string;
   downloadUrl: string;
   expiresAt: string;
   format: string;
@@ -83,6 +86,7 @@ export type ProviderWebhookPayload = {
   externalJobId: string;
   status: "succeeded" | "failed";
   progressPct?: number;
+  etaSec?: number | null;
   errorCode?: string;
   model?: string;
   qualityFlags?: string[];

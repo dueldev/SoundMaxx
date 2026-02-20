@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { ProcessPanel } from "@/components/studio/process-panel";
 import { ResultsPanel } from "@/components/studio/results-panel";
 import { StudioPageShell } from "@/components/studio/studio-page-shell";
@@ -123,6 +123,7 @@ export function ToolStudioPage({ toolConfig }: { toolConfig: ToolConfig }) {
   const [rightsConfirmed, setRightsConfirmed] = useState(false);
   const [ageConfirmed, setAgeConfirmed] = useState(false);
   const [uploadState, setUploadState] = useState<UploadState>("idle");
+  const [uploadProgressPct, setUploadProgressPct] = useState(0);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [assetId, setAssetId] = useState<string | null>(null);
   const [uploadExpiry, setUploadExpiry] = useState<string | null>(null);
@@ -253,6 +254,7 @@ export function ToolStudioPage({ toolConfig }: { toolConfig: ToolConfig }) {
     setFile(picked);
     setAssetId(null);
     setUploadState("idle");
+    setUploadProgressPct(0);
     setUploadError(null);
     setJobState("idle");
     setJobId(null);
@@ -264,7 +266,6 @@ export function ToolStudioPage({ toolConfig }: { toolConfig: ToolConfig }) {
     setRecoveryState("none");
     setAttemptCount(1);
     setQualityFlags([]);
-    prevJobStateRef.current = "idle";
   }
 
   async function handleUpload() {
@@ -272,6 +273,7 @@ export function ToolStudioPage({ toolConfig }: { toolConfig: ToolConfig }) {
 
     try {
       setUploadState("preparing");
+      setUploadProgressPct(0);
       setUploadError(null);
       const durationSec = await readAudioDuration(file);
 
@@ -330,7 +332,13 @@ export function ToolStudioPage({ toolConfig }: { toolConfig: ToolConfig }) {
         token: initBody.clientUploadToken,
         contentType: file.type || "application/octet-stream",
         multipart: true,
+        onUploadProgress: (event) => {
+          if (typeof event.percentage !== "number" || !Number.isFinite(event.percentage)) return;
+          const normalized = Math.max(0, Math.min(100, Math.round(event.percentage)));
+          setUploadProgressPct(normalized);
+        },
       });
+      setUploadProgressPct(100);
 
       const completeResponse = await fetch(`/api/upload/complete/${initBody.assetId}`, {
         method: "PUT",
@@ -353,67 +361,69 @@ export function ToolStudioPage({ toolConfig }: { toolConfig: ToolConfig }) {
       setUploadState("uploaded");
     } catch (error) {
       setUploadState("failed");
+      setUploadProgressPct(0);
       setUploadError(error instanceof Error ? error.message : "Upload failed");
     }
   }
 
-  async function handleCreateJob(controlOverrides?: Partial<typeof currentControls>) {
-    if (!assetId) return;
+  const handleCreateJob = useCallback(
+    async (controlOverrides?: Partial<typeof currentControls>) => {
+      if (!assetId) return;
 
-    try {
-      prevJobStateRef.current = "queued";
-      setJobState("queued");
-      setRecoveryState("none");
-      setAttemptCount(1);
-      setQualityFlags([]);
-      setJobError(null);
-      setJobProgress(5);
-      setArtifacts([]);
+      try {
+        setJobState("queued");
+        setRecoveryState("none");
+        setAttemptCount(1);
+        setQualityFlags([]);
+        setJobError(null);
+        setJobProgress(0);
+        setJobEtaSec(null);
+        setArtifacts([]);
 
-      const response = await fetch("/api/jobs", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          assetId,
-          toolType: toolConfig.toolType,
-          params: toolParams({
+        const response = await fetch("/api/jobs", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            assetId,
             toolType: toolConfig.toolType,
-            ...currentControls,
-            ...controlOverrides,
+            params: toolParams({
+              toolType: toolConfig.toolType,
+              ...currentControls,
+              ...controlOverrides,
+            }),
           }),
-        }),
-      });
+        });
 
-      const payload = await parseJsonResponse<{
-        jobId?: string;
-        status?: JobState;
-        recoveryState?: RecoveryState;
-        attemptCount?: number;
-        qualityFlags?: string[];
-        error?: string;
-      }>(response);
-      if (!response.ok || !payload?.jobId || !payload.status) {
-        throw new Error(payload?.error ?? "Unable to create job");
+        const payload = await parseJsonResponse<{
+          jobId?: string;
+          status?: JobState;
+          progressPct?: number;
+          etaSec?: number | null;
+          recoveryState?: RecoveryState;
+          attemptCount?: number;
+          qualityFlags?: string[];
+          error?: string;
+        }>(response);
+        if (!response.ok || !payload?.jobId || !payload.status) {
+          throw new Error(payload?.error ?? "Unable to create job");
+        }
+
+        setJobId(payload.jobId);
+        setJobState(payload.status);
+        setJobProgress(typeof payload.progressPct === "number" ? payload.progressPct : payload.status === "queued" ? 5 : 0);
+        setJobEtaSec(typeof payload.etaSec === "number" ? payload.etaSec : null);
+        setRecoveryState(payload.recoveryState ?? "none");
+        setAttemptCount(payload.attemptCount ?? 1);
+        setQualityFlags(payload.qualityFlags ?? []);
+      } catch (error) {
+        setJobState("failed");
+        setJobError(error instanceof Error ? error.message : "Unable to submit job");
       }
-
-      setJobId(payload.jobId);
-      setJobState(payload.status);
-      setRecoveryState(payload.recoveryState ?? "none");
-      setAttemptCount(payload.attemptCount ?? 1);
-      setQualityFlags(payload.qualityFlags ?? []);
-      if (payload.status === "succeeded") {
-        setJobProgress(100);
-      }
-    } catch (error) {
-      setJobState("failed");
-      setJobError(error instanceof Error ? error.message : "Unable to submit job");
-    }
-  }
-
-  const prevJobStateRef = useRef<JobState>("idle");
-  const bridgeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    },
+    [assetId, currentControls, toolConfig.toolType],
+  );
 
   const fetchArtifacts = useCallback(async (artifactIds: string[]) => {
     const ids = artifactIds ?? [];
@@ -421,17 +431,19 @@ export function ToolStudioPage({ toolConfig }: { toolConfig: ToolConfig }) {
       ids.map(async (id) => {
         const artifactResponse = await fetch(`/api/artifacts/${id}`, { cache: "no-store" });
         const artifactPayload = await parseJsonResponse<{
+          blobKey?: string;
           downloadUrl?: string;
           expiresAt?: string;
           format?: string;
         }>(artifactResponse);
 
-        if (!artifactResponse.ok || !artifactPayload?.downloadUrl || !artifactPayload.expiresAt) {
+        if (!artifactResponse.ok || !artifactPayload?.blobKey || !artifactPayload.downloadUrl || !artifactPayload.expiresAt) {
           throw new Error(`Could not retrieve artifact ${id}`);
         }
 
         return {
           id,
+          blobKey: artifactPayload.blobKey,
           downloadUrl: artifactPayload.downloadUrl,
           expiresAt: artifactPayload.expiresAt,
           format: artifactPayload.format ?? "bin",
@@ -485,7 +497,6 @@ export function ToolStudioPage({ toolConfig }: { toolConfig: ToolConfig }) {
 
         if (!response.ok || !payload?.status) {
           shouldPoll = false;
-          prevJobStateRef.current = "failed";
           setJobState("failed");
           setRecoveryState(payload?.recoveryState ?? "none");
           setAttemptCount(payload?.attemptCount ?? 1);
@@ -495,11 +506,9 @@ export function ToolStudioPage({ toolConfig }: { toolConfig: ToolConfig }) {
         }
 
         const backendStatus = payload.status;
-        const wasQueued = prevJobStateRef.current === "queued";
 
         if (backendStatus === "failed") {
           shouldPoll = false;
-          prevJobStateRef.current = "failed";
           setJobState("failed");
           setJobProgress(payload.progressPct ?? 0);
           setRecoveryState(payload.recoveryState ?? "none");
@@ -511,44 +520,19 @@ export function ToolStudioPage({ toolConfig }: { toolConfig: ToolConfig }) {
 
         if (backendStatus === "succeeded") {
           shouldPoll = false;
-
-          if (wasQueued) {
-            prevJobStateRef.current = "running";
-            setJobState("running");
-            setJobProgress(50);
-            setJobEtaSec(null);
-
-            bridgeTimerRef.current = setTimeout(async () => {
-              if (cancelled) return;
-              prevJobStateRef.current = "succeeded";
-              setJobState("succeeded");
-              setJobProgress(100);
-              setRecoveryState(payload.recoveryState ?? "none");
-              setAttemptCount(payload.attemptCount ?? 1);
-              setQualityFlags(payload.qualityFlags ?? []);
-              try {
-                await fetchArtifacts(payload.artifactIds ?? []);
-              } catch (error) {
-                setJobError(error instanceof Error ? error.message : "Failed to load artifacts");
-              }
-            }, 1200);
-          } else {
-            prevJobStateRef.current = "succeeded";
-            setJobState("succeeded");
-            setJobProgress(100);
-            setRecoveryState(payload.recoveryState ?? "none");
-            setAttemptCount(payload.attemptCount ?? 1);
-            setQualityFlags(payload.qualityFlags ?? []);
-            try {
-              await fetchArtifacts(payload.artifactIds ?? []);
-            } catch (error) {
-              setJobError(error instanceof Error ? error.message : "Failed to load artifacts");
-            }
+          setJobState("succeeded");
+          setJobProgress(payload.progressPct ?? 100);
+          setRecoveryState(payload.recoveryState ?? "none");
+          setAttemptCount(payload.attemptCount ?? 1);
+          setQualityFlags(payload.qualityFlags ?? []);
+          try {
+            await fetchArtifacts(payload.artifactIds ?? []);
+          } catch (error) {
+            setJobError(error instanceof Error ? error.message : "Failed to load artifacts");
           }
           return;
         }
 
-        prevJobStateRef.current = backendStatus;
         setJobState(backendStatus);
         setJobProgress(payload.progressPct ?? 0);
         setJobEtaSec(payload.etaSec ?? null);
@@ -562,7 +546,6 @@ export function ToolStudioPage({ toolConfig }: { toolConfig: ToolConfig }) {
         }
 
         shouldPoll = false;
-        prevJobStateRef.current = "failed";
         setJobState("failed");
         setRecoveryState("none");
         setJobError("Polling failed");
@@ -581,7 +564,6 @@ export function ToolStudioPage({ toolConfig }: { toolConfig: ToolConfig }) {
       shouldPoll = false;
       clearPollTimer();
       pollAbort?.abort();
-      if (bridgeTimerRef.current) clearTimeout(bridgeTimerRef.current);
     };
   }, [jobId, jobState, fetchArtifacts]);
 
@@ -614,9 +596,18 @@ export function ToolStudioPage({ toolConfig }: { toolConfig: ToolConfig }) {
     return [{ id: "keybpm_default", label: "Default analysis", description: "Retry with default chord hint behavior." }];
   }, [toolConfig.toolType]);
 
+  type ControlOverrides = Partial<{
+    stems: 2 | 4;
+    masteringPreset: MasteringPreset;
+    masteringIntensity: number;
+    includeChordHints: boolean;
+    targetLufs: number;
+    midiSensitivity: number;
+  }>;
+
   const handleApplySmartRerun = useCallback(
     (presetId: string) => {
-      let overrides: Partial<typeof currentControls> = {};
+      let overrides: ControlOverrides = {};
 
       if (presetId === "stem_fast_retry") {
         overrides = { stems: 2 };
@@ -647,7 +638,7 @@ export function ToolStudioPage({ toolConfig }: { toolConfig: ToolConfig }) {
 
       void handleCreateJob(overrides);
     },
-    [currentControls, handleCreateJob],
+    [handleCreateJob],
   );
 
   const workflowPhase = deriveWorkflowPhase(uploadState, jobState, artifacts.length > 0);
@@ -666,6 +657,7 @@ export function ToolStudioPage({ toolConfig }: { toolConfig: ToolConfig }) {
           rightsConfirmed={rightsConfirmed}
           ageConfirmed={ageConfirmed}
           uploadState={uploadState}
+          uploadProgressPct={uploadProgressPct}
           uploadError={uploadError}
           uploadExpiry={uploadExpiry}
           canUpload={canUpload}

@@ -25,6 +25,7 @@ export async function GET(request: NextRequest, context: { params: Promise<{ art
 
   const response = NextResponse.json<ArtifactResponse>(
     {
+      blobKey: artifact.blobKey,
       downloadUrl: artifact.blobUrl,
       expiresAt: artifact.expiresAt,
       format: artifact.format,

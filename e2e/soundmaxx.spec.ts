@@ -3,12 +3,14 @@ import { expect, test } from "@playwright/test";
 test("home page renders redesigned sections and actions", async ({ page }) => {
   await page.goto("/");
   const main = page.getByRole("main");
+  const openStudioLinks = main.getByRole("link", { name: /^Open Studio$/ });
 
-  await expect(main.getByRole("heading", { level: 1, name: /Release-ready audio\.\s*Zero hidden states\./i })).toBeVisible();
-  await expect(main.getByRole("heading", { level: 2, name: /Built for speed and trust\./i })).toBeVisible();
-  await expect(main.getByRole("heading", { level: 2, name: /Pick a workflow\.\s*Start processing\./i })).toBeVisible();
-  await expect(main.getByRole("link", { name: /^Open Studio$/ })).toBeVisible();
-  await expect(main.getByRole("link", { name: /^View Ops$/ })).toBeVisible();
+  await expect(main.getByRole("heading", { level: 1, name: /Professional Audio Tools\.\s*All Signal\.\s*No Noise\./i })).toBeVisible();
+  await expect(main.getByRole("heading", { level: 2, name: /Why SoundMaxx/i })).toBeVisible();
+  await expect(main.getByRole("heading", { level: 2, name: /The Tools/i })).toBeVisible();
+  await expect(openStudioLinks.first()).toBeVisible();
+  await expect(openStudioLinks).toHaveCount(2);
+  await expect(main.getByRole("link", { name: /^Explore Tools$/ })).toBeVisible();
 });
 
 test("desktop header exposes tools navigation", async ({ page }) => {
@@ -25,11 +27,13 @@ test("desktop header exposes tools navigation", async ({ page }) => {
 test("mobile navigation exposes route set", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/");
+  const mobileToggle = page.getByRole("button", { name: /^Toggle menu$/i });
 
-  await page.getByRole("button", { name: /toggle menu/i }).click();
+  await mobileToggle.click();
+  await expect(mobileToggle).toHaveAttribute("aria-expanded", "true");
   await expect(page.getByRole("link", { name: /^Home$/ })).toBeVisible();
-  await expect(page.getByRole("link", { name: /^Ops$/ })).toBeVisible();
-  await expect(page.getByRole("link", { name: /Stem Isolation/i })).toBeVisible();
+  await expect(page.getByRole("link", { name: /^Privacy Preferences$/ })).toBeVisible();
+  await expect(page.getByRole("link", { name: /^01 Stem Isolation$/ })).toBeVisible();
 });
 
 test("tool pages render dedicated controls", async ({ page }) => {

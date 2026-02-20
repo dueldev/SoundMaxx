@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import type { ArtifactView } from "@/components/studio/types";
 import type { RecoveryState } from "@/components/studio/types";
+import { WaveformPlayer } from "@/components/waveform-player";
 import type { ToolType } from "@/types/domain";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -254,7 +255,13 @@ function StemIsolationResults({
           >
             Original Mix
           </p>
-          <PreviewAudio src={filePreviewUrl} group="stem-isolation-preview" />
+          <WaveformPlayer
+            src={filePreviewUrl}
+            group="stem-isolation-waveform-preview"
+            buttonLabelPlay="Play Preview"
+            buttonLabelPause="Pause"
+            height={64}
+          />
         </div>
       )}
 
@@ -301,7 +308,14 @@ function StemIsolationResults({
               </div>
               {artifact && !expired ? (
                 <>
-                  <PreviewAudio src={artifact.downloadUrl} group="stem-isolation-preview" className="w-full mb-2" />
+                  <WaveformPlayer
+                    src={artifact.downloadUrl}
+                    group="stem-isolation-waveform-preview"
+                    buttonLabelPlay={`Play ${label}`}
+                    buttonLabelPause="Pause"
+                    height={64}
+                    className="mb-2"
+                  />
                   <div className="flex gap-2">
                     <Button asChild size="sm" variant="outline" className="brutal-button-ghost px-2.5 py-1.5 text-[10px]">
                       <a href={artifact.downloadUrl} download={fileName}>
@@ -360,7 +374,13 @@ function MasteringResults({
             A / Original
           </p>
           {filePreviewUrl ? (
-            <PreviewAudio src={filePreviewUrl} group="mastering-ab-preview" />
+            <WaveformPlayer
+              src={filePreviewUrl}
+              group="mastering-ab-waveform-preview"
+              buttonLabelPlay="Play Original"
+              buttonLabelPause="Pause"
+              height={64}
+            />
           ) : (
             <p className="text-xs" style={{ color: "var(--muted-foreground)" }}>No source audio available.</p>
           )}
@@ -378,7 +398,13 @@ function MasteringResults({
             B / Mastered
           </p>
           {mainOutput && !isExpired(mainOutput.expiresAt) ? (
-            <PreviewAudio src={mainOutput.downloadUrl} group="mastering-ab-preview" />
+            <WaveformPlayer
+              src={mainOutput.downloadUrl}
+              group="mastering-ab-waveform-preview"
+              buttonLabelPlay="Play Mastered"
+              buttonLabelPause="Pause"
+              height={64}
+            />
           ) : (
             <p className="text-xs" style={{ color: "var(--muted-foreground)" }}>Processing output will appear here.</p>
           )}
