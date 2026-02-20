@@ -505,6 +505,15 @@ def midi_thresholds_from_sensitivity(value: float) -> tuple[float, float]:
     return onset_threshold, frame_threshold
 
 
+def midi_notes_json_max_events() -> int:
+    raw = os.getenv("MIDI_NOTES_JSON_MAX_EVENTS", "1024").strip()
+    try:
+        parsed = int(raw)
+    except ValueError:
+        return 1024
+    return max(0, parsed)
+
+
 def process_mastering_adaptive(input_file: Path, output_dir: Path, params: dict[str, Any]) -> tuple[str, list[Path]]:
     output_dir.mkdir(parents=True, exist_ok=True)
     mastered_path = output_dir / f"{input_file.stem}-mastered.wav"
@@ -689,11 +698,15 @@ def process_midi_extract(input_file: Path, output_dir: Path, params: dict[str, A
         raise RuntimeError("MIDI extractor returned unsupported MIDI object")
 
     notes_path = output_dir / "notes.json"
+    max_events = midi_notes_json_max_events()
+    included_events = note_events[:max_events] if max_events > 0 else []
     notes_payload = {
         "sensitivity": sensitivity,
         "onsetThreshold": onset_threshold,
         "frameThreshold": frame_threshold,
         "noteCount": len(note_events),
+        "noteEventsIncluded": len(included_events),
+        "noteEventsTruncated": len(note_events) > len(included_events),
         "noteEvents": [
             {
                 "start": float(event[0]),
@@ -701,7 +714,7 @@ def process_midi_extract(input_file: Path, output_dir: Path, params: dict[str, A
                 "pitch": int(event[2]),
                 "confidence": float(event[3]),
             }
-            for event in note_events
+            for event in included_events
         ],
     }
     notes_path.write_text(json.dumps(notes_payload, indent=2), encoding="utf-8")

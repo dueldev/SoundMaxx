@@ -1,4 +1,5 @@
 import { mkdir, writeFile } from "node:fs/promises";
+import { createHash } from "node:crypto";
 import path from "node:path";
 import process from "node:process";
 import { put as putBlob } from "@vercel/blob/client";
@@ -30,6 +31,8 @@ type JobStatusResponse = {
 };
 
 type ArtifactResponse = {
+  blobKey: string;
+  format: string;
   downloadUrl: string;
   expiresAt: string;
 };
@@ -52,9 +55,13 @@ type ToolAuditResult = {
   artifactCount: number;
   artifacts: Array<{
     artifactId: string;
+    blobKey: string;
+    format: string;
     downloadUrl: string;
     expiresAt: string;
     downloadCheckStatus: number;
+    sizeBytes: number;
+    sha256: string;
   }>;
 };
 
@@ -90,6 +97,7 @@ type CliOptions = {
   opsSecret?: string;
   toolTimeoutSec: number;
   outputFile?: string;
+  tools: ToolType[];
 };
 
 class HttpClient {
@@ -172,13 +180,15 @@ class HttpClient {
 function usage() {
   return [
     "Usage:",
-    "  tsx scripts/live-functional-audit.ts --base-url <url> [--ops-secret <secret>] [--tool-timeout-sec <seconds>] [--output-file <path>]",
+    "  tsx scripts/live-functional-audit.ts --base-url <url> [--ops-secret <secret>] [--tool-timeout-sec <seconds>] [--output-file <path>] [--tools <tool_a,tool_b>]",
     "",
     "Flags:",
     "  --base-url          Required. Base URL for SoundMaxx app (for example https://soundmaxx.vercel.app)",
     "  --ops-secret        Optional. Ops API bearer secret (falls back to OPS_SECRET env var)",
     "  --tool-timeout-sec  Optional. Per-tool timeout in seconds (default 900)",
     "  --output-file       Optional. JSON report output path (default output/live-validation/live-validation-<timestamp>.json)",
+    "  --tools             Optional. Comma-separated tool filter.",
+    "                      Allowed: stem_isolation, mastering, key_bpm, loudness_report, midi_extract",
   ].join("\n");
 }
 
@@ -188,6 +198,7 @@ function parseCliArgs(argv: string[]): CliOptions {
     opsSecret: process.env.OPS_SECRET,
     toolTimeoutSec: 900,
     outputFile: undefined,
+    tools: ["stem_isolation", "mastering", "key_bpm", "loudness_report", "midi_extract"],
   };
 
   for (let index = 0; index < argv.length; index += 1) {
@@ -200,7 +211,7 @@ function parseCliArgs(argv: string[]): CliOptions {
     }
 
     const next = argv[index + 1];
-    if ((arg === "--base-url" || arg === "--ops-secret" || arg === "--tool-timeout-sec" || arg === "--output-file") && !next) {
+    if ((arg === "--base-url" || arg === "--ops-secret" || arg === "--tool-timeout-sec" || arg === "--output-file" || arg === "--tools") && !next) {
       throw new Error(`Missing value for ${arg}`);
     }
 
@@ -228,6 +239,19 @@ function parseCliArgs(argv: string[]): CliOptions {
       index += 1;
       continue;
     }
+    if (arg === "--tools") {
+      const selected = String(next)
+        .split(",")
+        .map((value) => value.trim())
+        .filter((value): value is ToolType => TOOL_TYPES.includes(value as ToolType));
+
+      if (selected.length === 0) {
+        throw new Error("Invalid --tools list");
+      }
+      options.tools = selected;
+      index += 1;
+      continue;
+    }
 
     throw new Error(`Unknown argument: ${arg}`);
   }
@@ -239,8 +263,10 @@ function parseCliArgs(argv: string[]): CliOptions {
   return options;
 }
 
-function createSineWavBuffer(durationSec = 2, sampleRate = 44_100, frequencyHz = 440) {
-  const channels = 1;
+const TOOL_TYPES: ToolType[] = ["stem_isolation", "mastering", "key_bpm", "loudness_report", "midi_extract"];
+
+function createSineWavBuffer(durationSec = 6, sampleRate = 44_100, frequencyHz = 440) {
+  const channels = 2;
   const bitsPerSample = 16;
   const sampleCount = Math.floor(durationSec * sampleRate);
   const dataSize = sampleCount * channels * (bitsPerSample / 8);
@@ -276,11 +302,32 @@ function createSineWavBuffer(durationSec = 2, sampleRate = 44_100, frequencyHz =
   buffer.writeUInt32LE(dataSize, offset);
   offset += 4;
 
+  const bpm = 120;
+  const beatSec = 60 / bpm;
   for (let i = 0; i < sampleCount; i += 1) {
     const t = i / sampleRate;
-    const sample = Math.sin(2 * Math.PI * frequencyHz * t);
-    const amplitude = Math.max(-1, Math.min(1, sample * 0.4));
-    buffer.writeInt16LE(Math.round(amplitude * 32_767), offset);
+    const beatPos = (t % beatSec) / beatSec;
+    const measurePos = (t % (beatSec * 4)) / beatSec;
+
+    const kickEnv = Math.exp(-7 * beatPos);
+    const kick = Math.sin(2 * Math.PI * 60 * t) * kickEnv * 0.65;
+
+    const snareBeat = Math.floor(measurePos + 1e-6);
+    const snareGate = snareBeat === 1 || snareBeat === 3 ? Math.exp(-14 * (measurePos - snareBeat)) : 0;
+    const noise = (Math.sin(2 * Math.PI * 3450 * t) + Math.sin(2 * Math.PI * 5120 * t)) * 0.5;
+    const snare = noise * Math.max(0, snareGate) * 0.35;
+
+    const bass = Math.sin(2 * Math.PI * 110 * t) * 0.32;
+    const lead = Math.sin(2 * Math.PI * frequencyHz * t + 0.3 * Math.sin(2 * Math.PI * 5 * t)) * 0.28;
+    const pad = Math.sin(2 * Math.PI * 660 * t) * 0.16;
+
+    const mono = kick + snare + bass + lead + pad;
+    const left = Math.max(-1, Math.min(1, mono + Math.sin(2 * Math.PI * 0.17 * t) * 0.03));
+    const right = Math.max(-1, Math.min(1, mono - Math.sin(2 * Math.PI * 0.17 * t) * 0.03));
+
+    buffer.writeInt16LE(Math.round(left * 32_767), offset);
+    offset += 2;
+    buffer.writeInt16LE(Math.round(right * 32_767), offset);
     offset += 2;
   }
 
@@ -316,6 +363,166 @@ function assertJsonBody<T>(response: Response, json: T | null, context: string):
     throw new Error(`${context} failed (${response.status})`);
   }
   return json;
+}
+
+type MaterializedArtifact = {
+  artifactId: string;
+  blobKey: string;
+  format: string;
+  downloadUrl: string;
+  expiresAt: string;
+  downloadCheckStatus: number;
+  sizeBytes: number;
+  sha256: string;
+  payload: Buffer;
+  parsedJson: Record<string, unknown> | null;
+};
+
+function sha256Hex(payload: Buffer) {
+  return createHash("sha256").update(payload).digest("hex");
+}
+
+function parseJsonPayload(payload: Buffer) {
+  try {
+    const parsed = JSON.parse(payload.toString("utf8")) as unknown;
+    return parsed && typeof parsed === "object" ? (parsed as Record<string, unknown>) : null;
+  } catch {
+    return null;
+  }
+}
+
+function blobKeyText(artifact: MaterializedArtifact) {
+  return path.basename(artifact.blobKey).toLowerCase();
+}
+
+function validateStemIsolationArtifacts(artifacts: MaterializedArtifact[]) {
+  const audioArtifacts = artifacts.filter((artifact) => artifact.format.toLowerCase() === "wav");
+  const zipArtifacts = artifacts.filter((artifact) => artifact.format.toLowerCase() === "zip");
+
+  if (audioArtifacts.length !== 4) {
+    throw new Error(`stem_isolation expected 4 stem audio outputs, received ${audioArtifacts.length}`);
+  }
+  if (zipArtifacts.length !== 1) {
+    throw new Error(`stem_isolation expected 1 zip bundle, received ${zipArtifacts.length}`);
+  }
+
+  const expectedStems = ["vocals", "drums", "bass", "other"] as const;
+  for (const stem of expectedStems) {
+    const found = audioArtifacts.some((artifact) => blobKeyText(artifact).includes(stem));
+    if (!found) {
+      throw new Error(`stem_isolation missing required '${stem}' stem output`);
+    }
+  }
+
+  const uniqueHashes = new Set(audioArtifacts.map((artifact) => artifact.sha256));
+  if (uniqueHashes.size < 2) {
+    throw new Error("stem_isolation outputs appear identical; expected isolated stem-specific audio");
+  }
+}
+
+function validateMasteringArtifacts(artifacts: MaterializedArtifact[], sourceHash: string) {
+  const audioArtifacts = artifacts.filter((artifact) => artifact.format.toLowerCase() === "wav");
+  const reportArtifact = artifacts.find((artifact) => artifact.format.toLowerCase() === "json");
+
+  if (audioArtifacts.length === 0) {
+    throw new Error("mastering expected at least one mastered audio artifact");
+  }
+  if (!reportArtifact || !reportArtifact.parsedJson) {
+    throw new Error("mastering expected a JSON mastering report");
+  }
+
+  const mastered = audioArtifacts.find((artifact) => /master/i.test(blobKeyText(artifact))) ?? audioArtifacts[0];
+  if (!mastered) {
+    throw new Error("mastering could not identify mastered output artifact");
+  }
+  if (mastered.sha256 === sourceHash) {
+    throw new Error("mastering output is byte-identical to the source audio");
+  }
+
+  const engine = reportArtifact.parsedJson.engine;
+  if (typeof engine !== "string" || engine.trim().length === 0) {
+    throw new Error("mastering report missing engine metadata");
+  }
+  if (engine === "fallback_passthrough") {
+    throw new Error("mastering report indicates passthrough fallback instead of mastering");
+  }
+}
+
+function validateKeyBpmArtifacts(artifacts: MaterializedArtifact[]) {
+  if (artifacts.length !== 1) {
+    throw new Error(`key_bpm expected exactly 1 artifact, received ${artifacts.length}`);
+  }
+
+  const artifact = artifacts[0]!;
+  if (artifact.format.toLowerCase() !== "json" || !artifact.parsedJson) {
+    throw new Error("key_bpm expected a JSON artifact");
+  }
+
+  const key = artifact.parsedJson.key;
+  const bpm = artifact.parsedJson.bpm;
+  if (typeof key !== "string" || key.trim().length === 0) {
+    throw new Error("key_bpm JSON missing key value");
+  }
+  if (typeof bpm !== "number" || !Number.isFinite(bpm) || bpm <= 0) {
+    throw new Error("key_bpm JSON missing valid BPM value");
+  }
+}
+
+function validateLoudnessArtifacts(artifacts: MaterializedArtifact[]) {
+  if (artifacts.length !== 1) {
+    throw new Error(`loudness_report expected exactly 1 artifact, received ${artifacts.length}`);
+  }
+
+  const artifact = artifacts[0]!;
+  if (artifact.format.toLowerCase() !== "json" || !artifact.parsedJson) {
+    throw new Error("loudness_report expected a JSON artifact");
+  }
+
+  const required = ["integratedLufs", "truePeakDbtp", "dynamicRange"] as const;
+  for (const key of required) {
+    const value = artifact.parsedJson[key];
+    if (typeof value !== "number" || !Number.isFinite(value)) {
+      throw new Error(`loudness_report JSON missing numeric '${key}'`);
+    }
+  }
+}
+
+function validateMidiArtifacts(artifacts: MaterializedArtifact[]) {
+  const midiArtifacts = artifacts.filter((artifact) => {
+    const format = artifact.format.toLowerCase();
+    return format === "mid" || format === "midi";
+  });
+
+  if (midiArtifacts.length === 0) {
+    throw new Error("midi_extract expected at least one MIDI artifact");
+  }
+
+  for (const midiArtifact of midiArtifacts) {
+    const header = midiArtifact.payload.subarray(0, 4).toString("ascii");
+    if (header !== "MThd") {
+      throw new Error(`midi_extract artifact '${midiArtifact.blobKey}' is not a valid MIDI file`);
+    }
+  }
+}
+
+function validateToolArtifacts(toolType: ToolType, artifacts: MaterializedArtifact[], sourceHash: string) {
+  if (toolType === "stem_isolation") {
+    validateStemIsolationArtifacts(artifacts);
+    return;
+  }
+  if (toolType === "mastering") {
+    validateMasteringArtifacts(artifacts, sourceHash);
+    return;
+  }
+  if (toolType === "key_bpm") {
+    validateKeyBpmArtifacts(artifacts);
+    return;
+  }
+  if (toolType === "loudness_report") {
+    validateLoudnessArtifacts(artifacts);
+    return;
+  }
+  validateMidiArtifacts(artifacts);
 }
 
 async function checkWorkerHealth(baseUrl: string, report: AuditReport) {
@@ -356,6 +563,7 @@ async function run() {
   const outputFile = options.outputFile ? path.resolve(process.cwd(), options.outputFile) : defaultOutputFile();
   const client = new HttpClient(options.baseUrl);
   const tone = createSineWavBuffer(2, 44_100, 440);
+  const sourceHash = sha256Hex(tone.buffer);
 
   const report: AuditReport = {
     startedAt: new Date().toISOString(),
@@ -371,28 +579,17 @@ async function run() {
     success: false,
   };
 
-  const tools: Array<{ toolType: ToolType; params: Record<string, unknown> }> = [
-    {
-      toolType: "stem_isolation",
-      params: { stems: 2 },
-    },
-    {
-      toolType: "mastering",
-      params: { preset: "streaming_clean", intensity: 60 },
-    },
-    {
-      toolType: "key_bpm",
-      params: { includeChordHints: true },
-    },
-    {
-      toolType: "loudness_report",
-      params: { targetLufs: -14 },
-    },
-    {
-      toolType: "midi_extract",
-      params: { sensitivity: 0.5 },
-    },
-  ];
+  const toolDefaults = new Map<ToolType, Record<string, unknown>>([
+    ["stem_isolation", { stems: 4 }],
+    ["mastering", { preset: "streaming_clean", intensity: 60 }],
+    ["key_bpm", { includeChordHints: true }],
+    ["loudness_report", { targetLufs: -14 }],
+    ["midi_extract", { sensitivity: 0.5 }],
+  ]);
+  const tools: Array<{ toolType: ToolType; params: Record<string, unknown> }> = options.tools.map((toolType) => ({
+    toolType,
+    params: toolDefaults.get(toolType) ?? {},
+  }));
 
   try {
     const initPayload = {
@@ -518,6 +715,7 @@ async function run() {
       }
 
       const artifacts: ToolAuditResult["artifacts"] = [];
+      const materializedArtifacts: MaterializedArtifact[] = [];
       for (const artifactId of current.artifactIds) {
         const artifactResponse = await client.requestJson<ArtifactResponse | { error?: string }>(`/api/artifacts/${artifactId}`, {
           method: "GET",
@@ -526,20 +724,47 @@ async function run() {
         if (!("downloadUrl" in artifact) || !artifact.downloadUrl) {
           throw new Error(`artifact ${artifactId} missing downloadUrl`);
         }
+        if (!("blobKey" in artifact) || !artifact.blobKey) {
+          throw new Error(`artifact ${artifactId} missing blobKey`);
+        }
+        if (!("format" in artifact) || !artifact.format) {
+          throw new Error(`artifact ${artifactId} missing format`);
+        }
 
         const downloadCheck = await fetch(artifact.downloadUrl, { method: "GET" });
         if (!downloadCheck.ok) {
           throw new Error(`artifact download failed (${artifactId}) status=${downloadCheck.status}`);
         }
-        await downloadCheck.body?.cancel();
+        const payload = Buffer.from(await downloadCheck.arrayBuffer());
+        const parsedJson = artifact.format.toLowerCase() === "json" ? parseJsonPayload(payload) : null;
+        const checksum = sha256Hex(payload);
 
-        artifacts.push({
+        materializedArtifacts.push({
           artifactId,
+          blobKey: artifact.blobKey,
+          format: artifact.format,
           downloadUrl: artifact.downloadUrl,
           expiresAt: artifact.expiresAt,
           downloadCheckStatus: downloadCheck.status,
+          sizeBytes: payload.byteLength,
+          sha256: checksum,
+          payload,
+          parsedJson,
+        });
+
+        artifacts.push({
+          artifactId,
+          blobKey: artifact.blobKey,
+          format: artifact.format,
+          downloadUrl: artifact.downloadUrl,
+          expiresAt: artifact.expiresAt,
+          downloadCheckStatus: downloadCheck.status,
+          sizeBytes: payload.byteLength,
+          sha256: checksum,
         });
       }
+
+      validateToolArtifacts(tool.toolType, materializedArtifacts, sourceHash);
 
       report.toolResults.push({
         toolType: tool.toolType,
