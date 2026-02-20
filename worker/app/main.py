@@ -294,6 +294,10 @@ async def create_job(job: JobRequest, authorization: str | None = Header(default
         raise HTTPException(status_code=401, detail=str(exc)) from exc
 
     external_job_id = job.jobId
+    existing = job_statuses.get(external_job_id)
+    if existing:
+        return existing
+
     status = WorkerJobStatus(
         externalJobId=external_job_id,
         status="queued",
